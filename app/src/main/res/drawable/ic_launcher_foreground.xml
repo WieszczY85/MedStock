@@ -13,16 +13,21 @@
     <path
         android:fillColor="#D32F2F"
         android:pathData="M48,38h12v10h10v12h-10v10h-12v-10h-10v-12h10z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M71.2,65.3l5.2,-5.2a4.8,4.8 0,1 1,6.8 6.8L78,72.1a4.8,4.8 0,1 1,-6.8 -6.8z" />
-    <path
-        android:fillColor="#4CAF50"
-        android:pathData="M74.2,68.3l5.2,-5.2a2,2 0,0 1,2.8 2.8L77,71.1a2,2 0,1 1,-2.8 -2.8z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M30.6,40.8l5.2,-5.2a4.8,4.8 0,1 1,6.8 6.8l-5.2,5.2a4.8,4.8 0,1 1,-6.8 -6.8z" />
-    <path
-        android:fillColor="#FFB300"
-        android:pathData="M33.6,43.8l5.2,-5.2a2,2 0,1 1,2.8 2.8l-5.2,5.2a2,2 0,1 1,-2.8 -2.8z" />
+    <!-- Jedna kapsułka, obrócona jako całość -->
+    <group
+        android:pivotX="70"
+        android:pivotY="61"
+        android:rotation="-45">
+
+        <!-- Brązowa połowa kapsułki -->
+        <path
+            android:fillColor="#9EEF98"
+            android:pathData="M50,58H64V74H50C45.6,74 42,70.4 42,66C42,61.6 45.6,58 50,58Z" />
+
+        <!-- Zielona połowa kapsułki -->
+        <path
+            android:fillColor="#0B7D8F"
+            android:pathData="M64,58H78C82.4,58 86,61.6 86,66C86,70.4 82.4,74 78,74H64Z" />
+
+    </group>
 </vector>
