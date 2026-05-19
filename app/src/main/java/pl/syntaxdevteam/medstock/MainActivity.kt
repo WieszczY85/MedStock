@@ -65,9 +65,9 @@ class MainActivity : AppCompatActivity() {
     private fun navigateTopLevel(navController: NavController, destinationId: Int) {
         navController.navigate(destinationId, null, navOptions {
             launchSingleTop = true
-            restoreState = true
+            restoreState = false
             popUpTo(navController.graph.startDestinationId) {
-                saveState = true
+                saveState = false
             }
         })
     }
