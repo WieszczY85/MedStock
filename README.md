@@ -9,3 +9,6 @@ Aplikacja nie ma doradzać medycznie ani samodzielnie ustalać dawkowania. Ma po
 * RA:
     - https://rejestry.ezdrowie.gov.pl/api/ra/filegenerator/getxls
     - https://rejestry.ezdrowie.gov.pl/api/ra/filegenerator/getcsv
+
+> Na przyszłość:
+> Następny krok dla rozwoju i18n to jawny language_preference (np. system|pl|en) i warunek w LocaleManager, który najpierw sprawdza preferencję usera, potem dopiero system.
