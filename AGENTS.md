@@ -108,3 +108,7 @@ If local.properties is missing in the Codex environment, create it dynamically:
 ```
 echo "sdk.dir=$ANDROID_HOME" > local.properties
 ```
+
+## i18n policy
+
+All newly added user-facing texts must be added to Android string resources (`res/values/strings.xml` and translated variants like `res/values-pl/strings.xml`) and referenced by `R.string.*`. Do not hardcode user-visible strings in Kotlin/Java/XML layouts (except app name when explicitly required).

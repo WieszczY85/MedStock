@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">MedStock</string>
+    <string name="brand_strip_logo_desc">Logo aplikacji MedStock</string>
+    <string name="brand_name_med">Med</string>
+    <string name="brand_name_stock">Stock</string>
+    <string name="navigation_drawer_open">Otwórz menu nawigacyjne</string>
+    <string name="navigation_drawer_close">Zamknij menu nawigacyjne</string>
+    <string name="nav_header_title">@string/app_name</string>
+    <string name="nav_header_subtitle">wieszczy85@gmail.com</string>
+    <string name="nav_header_desc">Nagłówek nawigacji</string>
+    <string name="action_settings">Ustawienia</string>
+
+    <string name="menu_transform">Lista</string>
+    <string name="menu_baza_nav">Baza</string>
+    <string name="menu_baza">Baza</string>
+    <string name="menu_alerty_nav">Alerty</string>
+    <string name="menu_alerty">Alerty</string>
+    <string name="menu_account">Konto</string>
+    <string name="menu_settings">Ustawienia</string>
+    <string name="menu_baza_leki">Katalog leków</string>
+    <string name="menu_baza_apteki">Katalog aptek</string>
+    <string name="menu_alerty_lista">Lista alertów</string>
+    <string name="menu_alerty_przypomnienia">Lista przypomnień</string>
+    <string name="menu_baza_apteki_screen">Katalog aptek</string>
+    <string name="menu_alerty_przypomnienia_screen">Lista przypomnień</string>
+    <string name="ui_preview_title">System UI: karty i CTA</string>
+    <string name="ui_preview_primary_card">Karta główna leku</string>
+    <string name="ui_preview_primary_desc">Najważniejsze informacje o dawce i harmonogramie.</string>
+    <string name="ui_preview_secondary_card">Karta pomocnicza</string>
+    <string name="ui_preview_secondary_desc">Dodatkowe notatki, interakcje i ostrzeżenia.</string>
+    <string name="ui_preview_alert_card">Karta alarmu</string>
+    <string name="ui_preview_alert_desc">Wysoki priorytet, wymaga natychmiastowej reakcji.</string>
+    <string name="cta_primary">Dodaj lek</string>
+    <string name="cta_support">Przypomnij później</string>
+    <string name="cta_danger">Pomiń dawkę</string>
+
+    <string name="fab_content_description">Przycisk uruchamiający akcję</string>
+    <string name="image_view_item_transform_content_description">Podgląd obrazu elementu listy</string>
+    <string name="snackbar_placeholder_action">Zastąp własną akcją</string>
+    <string name="common_action">Akcja</string>
+    <string name="transform_item_label">To jest element nr %1$d</string>
+</resources>

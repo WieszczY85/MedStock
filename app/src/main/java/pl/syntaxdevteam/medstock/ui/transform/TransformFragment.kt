@@ -42,7 +42,7 @@ class TransformFragment : Fragment() {
         val recyclerView = binding.recyclerviewTransform
         val adapter = TransformAdapter()
         recyclerView.adapter = adapter
-        transformViewModel.texts.observe(viewLifecycleOwner) {
+        transformViewModel.itemNumbers.observe(viewLifecycleOwner) {
             adapter.submitList(it)
         }
         return root
@@ -54,12 +54,12 @@ class TransformFragment : Fragment() {
     }
 
     class TransformAdapter :
-        ListAdapter<String, TransformViewHolder>(object : DiffUtil.ItemCallback<String>() {
+        ListAdapter<Int, TransformViewHolder>(object : DiffUtil.ItemCallback<Int>() {
 
-            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean =
+            override fun areItemsTheSame(oldItem: Int, newItem: Int): Boolean =
                 oldItem == newItem
 
-            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean =
+            override fun areContentsTheSame(oldItem: Int, newItem: Int): Boolean =
                 oldItem == newItem
         }) {
 
@@ -88,7 +88,7 @@ class TransformFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: TransformViewHolder, position: Int) {
-            holder.textView.text = getItem(position)
+            holder.textView.text = holder.itemView.context.getString(R.string.transform_item_label, getItem(position))
             holder.imageView.setImageDrawable(
                 ResourcesCompat.getDrawable(holder.imageView.resources, drawables[position], null)
             )
