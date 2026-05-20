@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/space_4"
+    android:paddingTop="@dimen/space_2"
+    android:paddingEnd="@dimen/space_4"
+    android:paddingBottom="@dimen/space_2">
+
+    <ImageView
+        android:id="@+id/image_brand_logo"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="@string/brand_strip_logo_desc"
+        android:src="@drawable/logo_medstock" />
+
+    <TextView
+        android:id="@+id/text_brand_med"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_2"
+        android:text="@string/brand_name_med"
+        android:textColor="@color/brand_med_red"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/text_brand_stock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/brand_name_stock"
+        android:textColor="@color/green_700"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+</LinearLayout>

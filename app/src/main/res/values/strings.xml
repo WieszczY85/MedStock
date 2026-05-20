@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">MedStock</string>
+    <string name="brand_strip_logo_desc">Logo aplikacji MedStock</string>
+    <string name="brand_name_med">Med</string>
+    <string name="brand_name_stock">Stock</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">@string/app_name</string>

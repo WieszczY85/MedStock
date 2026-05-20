@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.appBarMain.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         binding.appBarMain.fab?.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -46,6 +47,11 @@ class MainActivity : AppCompatActivity() {
             )
             setupActionBarWithNavController(navController, appBarConfiguration)
             it.setupWithNavController(navController)
+        }
+
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            binding.appBarMain.titleToolbar.title = destination.label ?: getString(R.string.app_name)
         }
 
         binding.appBarMain.contentMain.bottomNavView?.let {
