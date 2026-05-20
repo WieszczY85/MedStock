@@ -31,8 +31,8 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         binding.appBarMain.fab?.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
+            Snackbar.make(view, getString(R.string.snackbar_placeholder_action), Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.common_action), null)
                 .setAnchorView(R.id.fab).show()
         }
 

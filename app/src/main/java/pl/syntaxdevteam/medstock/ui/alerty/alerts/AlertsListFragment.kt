@@ -29,8 +29,8 @@ class AlertsListFragment : Fragment() {
         val root: View = binding.root
 
         val textView: TextView = binding.textAlertsList
-        alertsListViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        alertsListViewModel.textRes.observe(viewLifecycleOwner) {
+            textView.setText(it)
         }
         return root
     }

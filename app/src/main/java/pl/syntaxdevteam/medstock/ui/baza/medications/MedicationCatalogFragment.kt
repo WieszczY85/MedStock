@@ -29,8 +29,8 @@ class MedicationCatalogFragment : Fragment() {
         val root: View = binding.root
 
         val textView: TextView = binding.textMedicationCatalog
-        medicationCatalogViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        medicationCatalogViewModel.textRes.observe(viewLifecycleOwner) {
+            textView.setText(it)
         }
         return root
     }

@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">MedStock</string>
-    <string name="brand_strip_logo_desc">Logo aplikacji MedStock</string>
+    <string name="brand_strip_logo_desc">MedStock app logo</string>
     <string name="brand_name_med">Med</string>
     <string name="brand_name_stock">Stock</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -10,38 +10,33 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_transform">Lista</string>
-    <string name="menu_baza_nav">Baza</string>
-    <string name="menu_baza">Baza</string>
-    <string name="menu_alerty_nav">Alerty</string>
-    <string name="menu_alerty">Alerty</string>
-    <string name="menu_account">Konto</string>
-    <string name="menu_settings">Ustawienia</string>
-    <string name="menu_baza_leki">Katalog leków</string>
-    <string name="menu_baza_apteki">Katalog aptek</string>
-    <string name="menu_alerty_lista">Lista alertów</string>
-    <string name="menu_alerty_przypomnienia">Lista przypomnień</string>
-    <string name="menu_baza_apteki_screen">Katalog aptek</string>
-    <string name="menu_alerty_przypomnienia_screen">Lista przypomnień</string>
-    <string name="ui_preview_title">System UI: karty i CTA</string>
-    <string name="ui_preview_primary_card">Karta główna leku</string>
-    <string name="ui_preview_primary_desc">Najważniejsze informacje o dawce i harmonogramie.</string>
-    <string name="ui_preview_secondary_card">Karta pomocnicza</string>
-    <string name="ui_preview_secondary_desc">Dodatkowe notatki, interakcje i ostrzeżenia.</string>
-    <string name="ui_preview_alert_card">Karta alarmu</string>
-    <string name="ui_preview_alert_desc">Wysoki priorytet, wymaga natychmiastowej reakcji.</string>
-    <string name="cta_primary">Dodaj lek</string>
-    <string name="cta_support">Przypomnij później</string>
-    <string name="cta_danger">Pomiń dawkę</string>
+    <string name="menu_transform">List</string>
+    <string name="menu_baza_nav">Database</string>
+    <string name="menu_baza">Database</string>
+    <string name="menu_alerty_nav">Alerts</string>
+    <string name="menu_alerty">Alerts</string>
+    <string name="menu_account">Account</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_baza_leki">Medication catalog</string>
+    <string name="menu_baza_apteki">Pharmacy catalog</string>
+    <string name="menu_alerty_lista">Alerts list</string>
+    <string name="menu_alerty_przypomnienia">Reminders list</string>
+    <string name="menu_baza_apteki_screen">Pharmacy catalog</string>
+    <string name="menu_alerty_przypomnienia_screen">Reminders list</string>
+    <string name="ui_preview_title">UI system: cards and CTA</string>
+    <string name="ui_preview_primary_card">Main medication card</string>
+    <string name="ui_preview_primary_desc">The most important dosage and schedule information.</string>
+    <string name="ui_preview_secondary_card">Secondary card</string>
+    <string name="ui_preview_secondary_desc">Additional notes, interactions, and warnings.</string>
+    <string name="ui_preview_alert_card">Alert card</string>
+    <string name="ui_preview_alert_desc">High priority, requires immediate action.</string>
+    <string name="cta_primary">Add medication</string>
+    <string name="cta_support">Remind later</string>
+    <string name="cta_danger">Skip dose</string>
 
-    <string name="lorem_ipsum_title">Lorem Ipsum"</string>
-    <string name="lorem_ipsum">Lorem Ipsum is simply placeholder text of the printing and
-        typesetting industry. Lorem Ipsum has been the industry\'s standard placeholder text ever
-        since the 1500s, when an unknown printer took a galley of type and scrambled it to make a
-        type specimen book"
-    </string>
     <string name="fab_content_description">Represents a view to invoke an action</string>
-    <string name="image_view_item_transform_content_description">Represents an image view in the
-        item
-    </string>
+    <string name="image_view_item_transform_content_description">Represents an image view in the item</string>
+    <string name="snackbar_placeholder_action">Replace with your own action</string>
+    <string name="common_action">Action</string>
+    <string name="transform_item_label">This is item # %1$d</string>
 </resources>
