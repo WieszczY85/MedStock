@@ -16,8 +16,20 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
+            android:elevation="2dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:popupTheme="@style/Theme.MedStock.PopupOverlay">
+
+            <include layout="@layout/view_brand_strip" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/title_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimaryVariant"
-            app:popupTheme="@style/Theme.MedStock.PopupOverlay" />
+            app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -25,7 +37,6 @@
         android:id="@+id/content_main"
         layout="@layout/content_main" />
 
-    <!-- This CoordinatorLayout is to dodge the BottomNavigationView when the Snackbar is shown -->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
