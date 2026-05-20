@@ -1,4 +1,4 @@
-package pl.syntaxdevteam.medstock.ui.reflow
+package pl.syntaxdevteam.medstock.ui.baza
 
 import android.os.Bundle
 import android.view.LayoutInflater

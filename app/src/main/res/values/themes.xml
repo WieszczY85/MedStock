@@ -20,7 +20,9 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.MedStock.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.MedStock.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorControlNormal">@color/green_900</item>
+    </style>
 
     <style name="Theme.MedStock.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
