@@ -1,13 +1,13 @@
-package pl.syntaxdevteam.medstock.ui.reflow
+package pl.syntaxdevteam.medstock.ui.alerty.alerts
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class ReflowViewModel : ViewModel() {
+class AlertsListViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is reflow Fragment"
+        value = "Lista alertów"
     }
     val text: LiveData<String> = _text
 }

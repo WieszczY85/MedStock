@@ -11,10 +11,18 @@
     <string name="action_settings">Settings</string>
 
     <string name="menu_transform">Lista</string>
-    <string name="menu_reflow">Baza</string>
-    <string name="menu_slideshow">Alerty</string>
+    <string name="menu_baza_nav">Baza</string>
+    <string name="menu_baza">Baza</string>
+    <string name="menu_alerty_nav">Alerty</string>
+    <string name="menu_alerty">Alerty</string>
     <string name="menu_account">Konto</string>
-    <string name="menu_settings">Settings</string>
+    <string name="menu_settings">Ustawienia</string>
+    <string name="menu_baza_leki">Katalog leków</string>
+    <string name="menu_baza_apteki">Katalog aptek</string>
+    <string name="menu_alerty_lista">Lista alertów</string>
+    <string name="menu_alerty_przypomnienia">Lista przypomnień</string>
+    <string name="menu_baza_apteki_screen">Katalog aptek</string>
+    <string name="menu_alerty_przypomnienia_screen">Lista przypomnień</string>
     <string name="ui_preview_title">System UI: karty i CTA</string>
     <string name="ui_preview_primary_card">Karta główna leku</string>
     <string name="ui_preview_primary_desc">Najważniejsze informacje o dawce i harmonogramie.</string>

@@ -12,16 +12,29 @@
         tools:layout="@layout/fragment_transform" />
 
     <fragment
-        android:id="@+id/nav_reflow"
-        android:name="pl.syntaxdevteam.medstock.ui.reflow.ReflowFragment"
-        android:label="@string/menu_reflow"
-        tools:layout="@layout/fragment_reflow" />
+        android:id="@+id/nav_baza_leki_screen"
+        android:name="pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment"
+        android:label="@string/menu_baza"
+        tools:layout="@layout/fragment_medication_catalog" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="pl.syntaxdevteam.medstock.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_baza_apteki_screen"
+        android:name="pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment"
+        android:label="@string/menu_baza"
+        tools:layout="@layout/fragment_pharmacy_catalog" />
+
+    <fragment
+        android:id="@+id/nav_alerty_lista_screen"
+        android:name="pl.syntaxdevteam.medstock.ui.alerty.alerts.AlertsListFragment"
+        android:label="@string/menu_alerty"
+        tools:layout="@layout/fragment_alerts_list" />
+
+
+    <fragment
+        android:id="@+id/nav_alerty_przypomnienia_screen"
+        android:name="pl.syntaxdevteam.medstock.ui.alerty.reminders.RemindersListFragment"
+        android:label="@string/menu_alerty"
+        tools:layout="@layout/fragment_reminders_list" />
 
     <fragment
         android:id="@+id/nav_account"

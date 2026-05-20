@@ -1,13 +1,13 @@
-package pl.syntaxdevteam.medstock.ui.slideshow
+package pl.syntaxdevteam.medstock.ui.baza.medications
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class SlideshowViewModel : ViewModel() {
+class MedicationCatalogViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is slideshow Fragment"
+        value = "Katalog leków"
     }
     val text: LiveData<String> = _text
 }

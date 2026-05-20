@@ -1,4 +1,4 @@
-package pl.syntaxdevteam.medstock.ui.reflow
+package pl.syntaxdevteam.medstock.ui.baza.medications
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import pl.syntaxdevteam.medstock.databinding.FragmentReflowBinding
+import pl.syntaxdevteam.medstock.databinding.FragmentMedicationCatalogBinding
 
-class ReflowFragment : Fragment() {
+class MedicationCatalogFragment : Fragment() {
 
-    private var _binding: FragmentReflowBinding? = null
+    private var _binding: FragmentMedicationCatalogBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -22,14 +22,14 @@ class ReflowFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val reflowViewModel =
-            ViewModelProvider(this).get(ReflowViewModel::class.java)
+        val medicationCatalogViewModel =
+            ViewModelProvider(this).get(MedicationCatalogViewModel::class.java)
 
-        _binding = FragmentReflowBinding.inflate(inflater, container, false)
+        _binding = FragmentMedicationCatalogBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textReflow
-        reflowViewModel.text.observe(viewLifecycleOwner) {
+        val textView: TextView = binding.textMedicationCatalog
+        medicationCatalogViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root
