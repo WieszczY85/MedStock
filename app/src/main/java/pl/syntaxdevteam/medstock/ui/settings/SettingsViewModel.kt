@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 class SettingsViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "Ustawienia"
+        value = "This is settings Fragment"
     }
     val text: LiveData<String> = _text
 }

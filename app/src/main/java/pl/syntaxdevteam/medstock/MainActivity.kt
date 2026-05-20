@@ -3,9 +3,7 @@ package pl.syntaxdevteam.medstock
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.PopupMenu
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -53,33 +51,7 @@ class MainActivity : AppCompatActivity() {
 
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            val titleToolbar = binding.appBarMain.titleToolbar
-            when (destination.id) {
-                R.id.nav_reflow -> {
-                    titleToolbar.title = getString(R.string.menu_baza)
-                    titleToolbar.subtitle = getString(R.string.menu_baza_leki)
-                }
-
-                R.id.nav_baza_apteki_screen -> {
-                    titleToolbar.title = getString(R.string.menu_baza)
-                    titleToolbar.subtitle = getString(R.string.menu_baza_apteki)
-                }
-
-                R.id.nav_slideshow -> {
-                    titleToolbar.title = getString(R.string.menu_alerty)
-                    titleToolbar.subtitle = getString(R.string.menu_alerty_lista)
-                }
-
-                R.id.nav_alerty_przypomnienia_screen -> {
-                    titleToolbar.title = getString(R.string.menu_alerty)
-                    titleToolbar.subtitle = getString(R.string.menu_alerty_przypomnienia)
-                }
-
-                else -> {
-                    titleToolbar.title = destination.label ?: getString(R.string.app_name)
-                    titleToolbar.subtitle = null
-                }
-            }
+            binding.appBarMain.titleToolbar.title = destination.label ?: getString(R.string.app_name)
         }
 
         binding.appBarMain.contentMain.bottomNavView?.let {
@@ -90,39 +62,10 @@ class MainActivity : AppCompatActivity() {
             )
             setupActionBarWithNavController(navController, appBarConfiguration)
             it.setOnItemSelectedListener { item ->
-                when (item.itemId) {
-                    R.id.nav_reflow -> {
-                        showBottomSubMenu(it, R.menu.baza_submenu, navController)
-                        false
-                    }
-
-                    R.id.nav_slideshow -> {
-                        showBottomSubMenu(it, R.menu.alerty_submenu, navController)
-                        false
-                    }
-
-                    else -> {
-                        navigateTopLevel(navController, item.itemId)
-                        true
-                    }
-                }
+                navigateTopLevel(navController, item.itemId)
+                true
             }
         }
-    }
-
-    private fun showBottomSubMenu(anchor: View, menuRes: Int, navController: NavController) {
-        val popupMenu = PopupMenu(this, anchor)
-        popupMenu.menuInflater.inflate(menuRes, popupMenu.menu)
-        popupMenu.setOnMenuItemClickListener { selected ->
-            when (selected.itemId) {
-                R.id.nav_baza_leki -> navigateTopLevel(navController, R.id.nav_reflow)
-                R.id.nav_baza_apteki -> navigateTopLevel(navController, R.id.nav_baza_apteki_screen)
-                R.id.nav_alerty_lista -> navigateTopLevel(navController, R.id.nav_slideshow)
-                R.id.nav_alerty_przypomnienia -> navigateTopLevel(navController, R.id.nav_alerty_przypomnienia_screen)
-            }
-            true
-        }
-        popupMenu.show()
     }
 
     private fun navigateTopLevel(navController: NavController, destinationId: Int) {
