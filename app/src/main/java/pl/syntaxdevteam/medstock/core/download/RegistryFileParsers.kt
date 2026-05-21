@@ -38,7 +38,7 @@ class CsvRegistryFileParser : RegistryFileParser {
 
             BufferedReader(InputStreamReader(file.inputStream(), Charsets.UTF_8)).use { reader ->
                 reader.lineSequence().forEachIndexed { index, line ->
-                    val values = splitCsvLine(line)
+                    val values = splitCsvLine(line, delimiterFor(source))
                     if (index == 0) {
                         headers = values
                     } else {
@@ -53,7 +53,14 @@ class CsvRegistryFileParser : RegistryFileParser {
         }
     }
 
-    private fun splitCsvLine(line: String): List<String> {
+    private fun delimiterFor(source: RegistryFileSource): Char =
+        when (source) {
+            RegistryFileSource.RPL_CSV -> ';'
+            RegistryFileSource.RA_CSV -> '|'
+            else -> ','
+        }
+
+    private fun splitCsvLine(line: String, delimiter: Char): List<String> {
         val result = mutableListOf<String>()
         val current = StringBuilder()
         var inQuotes = false
@@ -63,15 +70,15 @@ class CsvRegistryFileParser : RegistryFileParser {
                 char == '"' -> {
                     inQuotes = !inQuotes
                 }
-                char == ',' && !inQuotes -> {
-                    result += current.toString().trim()
+                char == delimiter && !inQuotes -> {
+                    result += current.toString().trim().removePrefix("\uFEFF")
                     current.clear()
                 }
                 else -> current.append(char)
             }
         }
 
-        result += current.toString().trim()
+        result += current.toString().trim().removePrefix("\uFEFF")
         return result
     }
 }
