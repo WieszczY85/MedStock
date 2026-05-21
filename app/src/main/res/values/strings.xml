@@ -39,4 +39,14 @@
     <string name="snackbar_placeholder_action">Replace with your own action</string>
     <string name="common_action">Action</string>
     <string name="transform_item_label">This is item # %1$d</string>
+
+    <string name="preloader_status_init">Preparing startup synchronization…</string>
+    <string name="preloader_status_download">Downloading source: %1$s</string>
+    <string name="preloader_status_parse">Parsing file: %1$s</string>
+    <string name="preloader_status_save">Saving to database: %1$s </string>
+    <string name="preloader_status_done_source">Source completed: %1$s</string>
+    <string name="preloader_status_done_all">Startup synchronization completed.</string>
+    <string name="preloader_status_failed">Synchronization failed: %1$s</string>
+    <string name="common_unknown_error">unknown error</string>
+
 </resources>

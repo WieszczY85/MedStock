@@ -6,6 +6,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -16,7 +17,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import pl.syntaxdevteam.medstock.core.download.StartupIngestionRunner
 import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -82,6 +85,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
+        startPreloaderIngestion()
+
         binding.appBarMain.contentMain.bottomNavView?.let {
             appBarConfiguration = AppBarConfiguration(
                 setOf(
@@ -133,6 +139,26 @@ class MainActivity : AppCompatActivity() {
                 saveState = false
             }
         })
+    }
+
+
+    private fun startPreloaderIngestion() {
+        val preloader = binding.activityContainer.findViewById<View>(R.id.startup_preloader)
+        val progress = binding.activityContainer.findViewById<android.widget.ProgressBar>(R.id.preloader_progress)
+        val status = binding.activityContainer.findViewById<android.widget.TextView>(R.id.preloader_status)
+        preloader.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            runCatching {
+                StartupIngestionRunner(applicationContext).run().collect { state ->
+                    progress.progress = state.progressPercent
+                    status.text = state.message
+                }
+            }.onFailure {
+                status.text = getString(R.string.preloader_status_failed, it.message ?: getString(R.string.common_unknown_error))
+            }
+            preloader.visibility = View.GONE
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
