@@ -20,4 +20,6 @@ across the layout configurations
             android:layout_height="match_parent" />
 
     </androidx.drawerlayout.widget.DrawerLayout>
+
+    <include layout="@layout/view_startup_preloader" />
 </FrameLayout>

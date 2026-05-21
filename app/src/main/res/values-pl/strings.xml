@@ -39,4 +39,14 @@
     <string name="snackbar_placeholder_action">Zastąp własną akcją</string>
     <string name="common_action">Akcja</string>
     <string name="transform_item_label">To jest element nr %1$d</string>
+
+    <string name="preloader_status_init">Przygotowywanie synchronizacji startowej…</string>
+    <string name="preloader_status_download">Pobieranie źródła: %1$s</string>
+    <string name="preloader_status_parse">Parsowanie pliku: %1$s</string>
+    <string name="preloader_status_save">Zapis do bazy danych: %1$s </string>
+    <string name="preloader_status_done_source">Zakończono źródło: %1$s</string>
+    <string name="preloader_status_done_all">Synchronizacja startowa zakończona.</string>
+    <string name="preloader_status_failed">Synchronizacja nieudana: %1$s</string>
+    <string name="common_unknown_error">nieznany błąd</string>
+
 </resources>
