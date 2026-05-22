@@ -1,6 +1,7 @@
 package pl.syntaxdevteam.medstock.core.download
 
 import android.content.Context
+import android.util.Log
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -19,6 +20,7 @@ class TemporaryRegistryFileDownloader(
     private val maxFileAge: Duration = DEFAULT_MAX_FILE_AGE,
     private val maxStoredFiles: Int = DEFAULT_MAX_STORED_FILES
 ) {
+    private val tag = "RegistryDownloader"
 
     private val tempDirectory: File = File(context.cacheDir, TEMP_DIRECTORY_NAME).apply {
         if (!exists()) {
@@ -33,7 +35,9 @@ class TemporaryRegistryFileDownloader(
         val targetFile = File.createTempFile(source.filePrefix, source.fileSuffix, tempDirectory)
 
         try {
+            Log.d(tag, "Downloading ${source.name} from ${source.url} to ${targetFile.absolutePath}")
             downloadToFile(source.url, targetFile)
+            Log.d(tag, "Downloaded ${source.name}: ${targetFile.length()} bytes")
         } catch (exception: Exception) {
             targetFile.delete()
             throw RegistryFileDownloadException(

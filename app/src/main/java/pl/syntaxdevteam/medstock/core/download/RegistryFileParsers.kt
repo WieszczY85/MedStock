@@ -1,15 +1,27 @@
 package pl.syntaxdevteam.medstock.core.download
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.DataFormatter
+import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
+import org.apache.poi.xssf.eventusermodel.XSSFReader
+import org.apache.poi.xssf.model.StylesTable
+import org.apache.poi.xssf.usermodel.XSSFComment
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFRichTextString
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.io.BufferedWriter
+import java.io.OutputStreamWriter
+import org.xml.sax.InputSource
+import org.xml.sax.XMLReader
+import org.xml.sax.helpers.XMLReaderFactory
 
 class RegistryFileParsers(
     private val parsers: List<RegistryFileParser> = listOf(
@@ -139,7 +151,97 @@ class XlsxRegistryFileParser : RegistryFileParser {
     override fun supports(source: RegistryFileSource): Boolean = source == RegistryFileSource.RPL_XLSX
 
     override fun parse(source: RegistryFileSource, file: File): ParsedRegistryFile {
-        return parseWorkbook(source, file) { stream -> XSSFWorkbook(stream) }
+        return parseWorkbookStreaming(source, file)
+    }
+}
+
+private fun parseWorkbookStreaming(source: RegistryFileSource, file: File): ParsedRegistryFile {
+    return try {
+        val spoolFile = File.createTempFile("rpl_stream_", ".tsv")
+        val headers = mutableListOf<String>()
+
+        OPCPackage.open(file).use { pkg ->
+            val strings = ReadOnlySharedStringsTable(pkg)
+            val reader = XSSFReader(pkg)
+            val styles: StylesTable = reader.stylesTable
+            val formatter = DataFormatter()
+
+            BufferedWriter(OutputStreamWriter(spoolFile.outputStream(), Charsets.UTF_8)).use { writer ->
+                val sheetIterator = reader.sheetsData
+                if (!sheetIterator.hasNext()) {
+                    return ParsedRegistryFile(source, emptyList(), emptySequence())
+                }
+
+                sheetIterator.next().use { sheetInput ->
+                    val handler = StreamingSheetHandler(headers, writer)
+                    val xmlHandler = XSSFSheetXMLHandler(styles, null, strings, handler, formatter, false)
+                    val parser: XMLReader = XMLReaderFactory.createXMLReader()
+                    parser.contentHandler = xmlHandler
+                    parser.parse(InputSource(sheetInput))
+                }
+            }
+        }
+
+        val records = sequence {
+            BufferedReader(InputStreamReader(spoolFile.inputStream(), Charsets.UTF_8)).use { reader ->
+                reader.lineSequence().forEach { line ->
+                    val firstSep = line.indexOf('\t')
+                    if (firstSep <= 0) return@forEach
+                    val rowNo = line.substring(0, firstSep).toLongOrNull() ?: return@forEach
+                    val values = line.substring(firstSep + 1).split('\t')
+                    yield(RawRegistryRecord(source = source, rowNumber = rowNo, values = values))
+                }
+            }
+            spoolFile.delete()
+        }
+
+        ParsedRegistryFile(source = source, headers = headers, records = records)
+    } catch (exception: Exception) {
+        throw RegistryFileParsingException(source, "Nie udało się sparsować arkusza XLSX strumieniowo", exception)
+    }
+}
+
+private class StreamingSheetHandler(
+    private val headers: MutableList<String>,
+    private val writer: BufferedWriter
+) : XSSFSheetXMLHandler.SheetContentsHandler {
+    private var currentRowNum: Int = -1
+    private val currentRow = mutableMapOf<Int, String>()
+    private var maxCellIndex = -1
+
+    override fun startRow(rowNum: Int) {
+        currentRowNum = rowNum
+        currentRow.clear()
+        maxCellIndex = -1
+    }
+
+    override fun endRow(rowNum: Int) {
+        if (rowNum == 0) {
+            for (index in 0..maxCellIndex) headers += currentRow[index].orEmpty()
+            return
+        }
+        if (maxCellIndex < 0) return
+        val values = (0..maxCellIndex).joinToString("\t") { idx -> currentRow[idx].orEmpty().replace("\t", " ") }
+        writer.write("$rowNum\t$values")
+        writer.newLine()
+    }
+
+    override fun cell(cellReference: String?, formattedValue: String?, comment: XSSFComment?) {
+        val index = columnIndex(cellReference)
+        currentRow[index] = formattedValue.orEmpty()
+        if (index > maxCellIndex) maxCellIndex = index
+    }
+
+    override fun headerFooter(text: String?, isHeader: Boolean, tagName: String?) = Unit
+
+    private fun columnIndex(ref: String?): Int {
+        if (ref.isNullOrBlank()) return 0
+        var result = 0
+        for (ch in ref) {
+            if (!ch.isLetter()) break
+            result = result * 26 + (ch.uppercaseChar() - 'A' + 1)
+        }
+        return (result - 1).coerceAtLeast(0)
     }
 }
 

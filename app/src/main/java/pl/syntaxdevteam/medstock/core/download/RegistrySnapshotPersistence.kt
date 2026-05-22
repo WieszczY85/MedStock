@@ -1,6 +1,7 @@
 package pl.syntaxdevteam.medstock.core.download
 
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import java.security.MessageDigest
 
 /**
@@ -10,6 +11,7 @@ class RegistrySnapshotPersistence(
     private val database: SQLiteDatabase,
     private val parserVersion: String = "1"
 ) {
+    private val tag = "RegistryPersistence"
 
     fun saveSnapshot(
         source: RegistryFileSource,
@@ -55,6 +57,7 @@ class RegistrySnapshotPersistence(
             }
 
             updateBatchRecordCount(batchId, savedRows)
+            Log.i(tag, "Saved snapshot source=${source.name} batchId=$batchId snapshotDate=$snapshotDateUtc rows=$savedRows")
 
             database.setTransactionSuccessful()
             return batchId
