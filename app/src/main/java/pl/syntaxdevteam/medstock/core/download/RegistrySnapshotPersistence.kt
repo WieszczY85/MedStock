@@ -1,6 +1,7 @@
 package pl.syntaxdevteam.medstock.core.download
 
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteStatement
 import android.util.Log
 import java.security.MessageDigest
 
@@ -42,18 +43,38 @@ class RegistrySnapshotPersistence(
             )
 
             clearBatchRows(batchId)
-            val columnIdByKey = ensureColumns(source, batchId, parsed.headers)
+            val resolvedHeaders = resolveHeaders(parsed.headers)
+            val columnIdByKey = ensureColumns(source, batchId, resolvedHeaders)
+            val columnIdsByPosition = resolvedHeaders.map { header -> columnIdByKey[header.trim()] }
+            val rowInsertStatement = database.compileStatement(
+                """
+                INSERT INTO registry_row(batch_id, source_row_number, source_entity_key, row_hash)
+                VALUES (?, ?, ?, ?)
+                """.trimIndent()
+            )
+            val cellInsertStatement = database.compileStatement(
+                "INSERT OR REPLACE INTO registry_cell(row_id, column_id, value_text) VALUES (?, ?, ?)"
+            )
 
             var savedRows = 0
             parsed.records.forEach { record ->
                 val rowId = insertRow(
+                    statement = rowInsertStatement,
                     batchId = batchId,
                     sourceRowNumber = record.rowNumber,
                     sourceEntityKey = detectEntityKey(source, parsed.headers, record.values),
                     rowHash = calculateRowHash(record.values)
                 )
-                insertCells(rowId, columnIdByKey, parsed.headers, record.values)
+                insertCells(
+                    statement = cellInsertStatement,
+                    rowId = rowId,
+                    columnIdsByPosition = columnIdsByPosition,
+                    values = record.values
+                )
                 savedRows += 1
+                if (savedRows % LOG_PROGRESS_EVERY_ROWS == 0) {
+                    Log.i(tag, "Persist progress source=${source.name} batchId=$batchId rows=$savedRows")
+                }
             }
 
             updateBatchRecordCount(batchId, savedRows)
@@ -153,38 +174,46 @@ class RegistrySnapshotPersistence(
     }
 
     private fun insertRow(
+        statement: SQLiteStatement,
         batchId: Long,
         sourceRowNumber: Long,
         sourceEntityKey: String?,
         rowHash: String
     ): Long {
-        database.execSQL(
-            """
-            INSERT INTO registry_row(batch_id, source_row_number, source_entity_key, row_hash)
-            VALUES (?, ?, ?, ?)
-            """.trimIndent(),
-            arrayOf<Any?>(batchId, sourceRowNumber, sourceEntityKey, rowHash)
-        )
-
-        database.rawQuery("SELECT last_insert_rowid()", emptyArray()).use { cursor ->
-            check(cursor.moveToFirst()) { "Brak row_id po INSERT." }
-            return cursor.getLong(0)
+        statement.clearBindings()
+        statement.bindLong(1, batchId)
+        statement.bindLong(2, sourceRowNumber)
+        if (sourceEntityKey == null) statement.bindNull(3) else statement.bindString(3, sourceEntityKey)
+        statement.bindString(4, rowHash)
+        return statement.executeInsert().also { rowId ->
+            check(rowId > 0L) { "Brak row_id po INSERT." }
         }
     }
 
     private fun insertCells(
+        statement: SQLiteStatement,
         rowId: Long,
-        columns: Map<String, Long>,
-        headers: List<String>,
+        columnIdsByPosition: List<Long?>,
         values: List<String>
     ) {
-        headers.forEachIndexed { index, header ->
-            val columnId = columns[header.trim()] ?: return@forEachIndexed
+        columnIdsByPosition.forEachIndexed { index, columnId ->
+            if (columnId == null) return@forEachIndexed
             val value = values.getOrNull(index)
-            database.execSQL(
-                "INSERT OR REPLACE INTO registry_cell(row_id, column_id, value_text) VALUES (?, ?, ?)",
-                arrayOf<Any?>(rowId, columnId, value)
-            )
+            statement.clearBindings()
+            statement.bindLong(1, rowId)
+            statement.bindLong(2, columnId)
+            if (value == null) statement.bindNull(3) else statement.bindString(3, value)
+            statement.executeInsert()
+        }
+    }
+
+    private fun resolveHeaders(headers: List<String>): List<String> {
+        val occurrences = mutableMapOf<String, Int>()
+        return headers.mapIndexed { index, rawHeader ->
+            val base = rawHeader.trim().ifBlank { "kolumna_${index + 1}" }
+            val count = (occurrences[base] ?: 0) + 1
+            occurrences[base] = count
+            if (count == 1) base else "${base}__$count"
         }
     }
 
@@ -212,5 +241,9 @@ class RegistrySnapshotPersistence(
         val normalized = values.joinToString(separator = "\u001F") { it.trim() }
         val digest = MessageDigest.getInstance("SHA-256").digest(normalized.toByteArray(Charsets.UTF_8))
         return digest.joinToString("") { "%02x".format(it) }
+    }
+
+    private companion object {
+        const val LOG_PROGRESS_EVERY_ROWS = 5_000
     }
 }
