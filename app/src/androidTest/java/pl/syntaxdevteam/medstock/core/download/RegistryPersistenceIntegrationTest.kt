@@ -44,7 +44,7 @@ class RegistryPersistenceIntegrationTest {
             assertTrue(it.moveToFirst())
             assertEquals(1, it.getInt(0))
         }
-        db.rawQuery("SELECT COUNT(*) FROM registry_row", emptyArray()).use {
+        db.rawQuery("SELECT COUNT(*) FROM registry_rpl_row", emptyArray()).use {
             assertTrue(it.moveToFirst())
             assertEquals(1, it.getInt(0))
         }

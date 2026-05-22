@@ -48,9 +48,9 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                        COALESCE(MAX(CASE WHEN c.column_key = 'Nazwa produktu leczniczego' THEN cell.value_text END), ''),
                        COALESCE(MAX(CASE WHEN c.column_key = 'Nazwa powszechnie stosowana' THEN cell.value_text END), '')
                 FROM registry_import_batch b
-                JOIN registry_row r ON r.batch_id = b.id
-                JOIN registry_cell cell ON cell.row_id = r.id
-                JOIN registry_column_dictionary c ON c.id = cell.column_id
+                JOIN registry_rpl_row r ON r.batch_id = b.id
+                JOIN registry_rpl_cell cell ON cell.row_id = r.id
+                JOIN registry_rpl_column_dictionary c ON c.id = cell.column_id
                 WHERE b.source_code IN ('RPL_CSV', 'RPL_XLSX')
                   AND b.snapshot_date_utc = (
                       SELECT MAX(snapshot_date_utc)
@@ -95,13 +95,15 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private fun readDiagnostics(db: android.database.sqlite.SQLiteDatabase): String {
         val totalBatches = scalarInt(db, "SELECT COUNT(*) FROM registry_import_batch")
-        val totalRows = scalarInt(db, "SELECT COUNT(*) FROM registry_row")
+        val totalRows = scalarInt(db, "SELECT COUNT(*) FROM registry_rpl_row") +
+            scalarInt(db, "SELECT COUNT(*) FROM registry_ra_row") +
+            scalarInt(db, "SELECT COUNT(*) FROM registry_rdg_row")
         val rplBatches = scalarInt(db, "SELECT COUNT(*) FROM registry_import_batch WHERE source_code IN ('RPL_CSV','RPL_XLSX')")
         val rplRows = scalarInt(
             db,
             """
             SELECT COUNT(*)
-            FROM registry_row r
+            FROM registry_rpl_row r
             JOIN registry_import_batch b ON b.id = r.batch_id
             WHERE b.source_code IN ('RPL_CSV','RPL_XLSX')
             """.trimIndent()
