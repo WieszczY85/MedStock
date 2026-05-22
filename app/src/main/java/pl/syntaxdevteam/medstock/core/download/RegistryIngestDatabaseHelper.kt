@@ -7,6 +7,14 @@ import android.database.sqlite.SQLiteOpenHelper
 class RegistryIngestDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, RegistryIngestSchema.VERSION) {
 
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        db.enableWriteAheadLogging()
+        db.execSQL("PRAGMA synchronous = NORMAL")
+        db.execSQL("PRAGMA temp_store = MEMORY")
+        db.execSQL("PRAGMA foreign_keys = ON")
+    }
+
     override fun onCreate(db: SQLiteDatabase) {
         RegistryIngestSchema.statements.forEach(db::execSQL)
     }
