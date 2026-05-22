@@ -57,4 +57,5 @@
     <string name="medication_catalog_missing_name">Lek bez nazwy</string>
     <string name="medication_catalog_missing_common_name">Brak nazwy powszechnej</string>
 
+    <string name="medication_catalog_details">Dawka: %1$s • EAN: %2$s • Opakowanie: %3$s</string>
 </resources>
