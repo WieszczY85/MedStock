@@ -47,6 +47,13 @@
     <string name="preloader_status_done_source">Zakończono źródło: %1$s</string>
     <string name="preloader_status_done_all">Synchronizacja startowa zakończona.</string>
     <string name="preloader_status_failed">Synchronizacja nieudana: %1$s</string>
+    <string name="preloader_status_failed_source">Źródło %1$s zakończone błędem: %2$s</string>
     <string name="common_unknown_error">nieznany błąd</string>
+
+    <string name="medication_catalog_loading">Wczytywanie katalogu leków z lokalnej bazy…</string>
+    <string name="medication_catalog_empty">Brak zapisanych rekordów leków w lokalnej bazie.</string>
+    <string name="medication_catalog_summary">Zapisane rekordy: %1$d • data snapshotu: %2$s • pokazano pierwsze %3$d pozycji</string>
+    <string name="medication_catalog_missing_name">Lek bez nazwy</string>
+    <string name="medication_catalog_missing_common_name">Brak nazwy powszechnej</string>
 
 </resources>

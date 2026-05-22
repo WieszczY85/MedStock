@@ -47,6 +47,13 @@
     <string name="preloader_status_done_source">Source completed: %1$s</string>
     <string name="preloader_status_done_all">Startup synchronization completed.</string>
     <string name="preloader_status_failed">Synchronization failed: %1$s</string>
+    <string name="preloader_status_failed_source">Source %1$s failed: %2$s</string>
     <string name="common_unknown_error">unknown error</string>
+
+    <string name="medication_catalog_loading">Loading medication catalog from local database…</string>
+    <string name="medication_catalog_empty">No medication records found in local database.</string>
+    <string name="medication_catalog_summary">Saved records: %1$d • snapshot date: %2$s • showing first %3$d items</string>
+    <string name="medication_catalog_missing_name">Unnamed medication</string>
+    <string name="medication_catalog_missing_common_name">No common name</string>
 
 </resources>
