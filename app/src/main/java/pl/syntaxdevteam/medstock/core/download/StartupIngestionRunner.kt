@@ -29,7 +29,7 @@ class StartupIngestionRunner(private val context: Context) {
 
         fun percent(): Int = ((completedPlans * 100f) / totalPlans).toInt().coerceIn(0, 100)
 
-        val dbHelper = RegistryIngestDatabaseHelper(context)
+        val dbHelper = RegistryIngestDatabaseHelper.getInstance(context)
         val persistence = RegistrySnapshotPersistence(dbHelper.writableDatabase)
         val downloader = TemporaryRegistryFileDownloader(context)
         val parsers = RegistryFileParsers()

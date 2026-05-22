@@ -5,11 +5,14 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 class RegistryIngestDatabaseHelper(context: Context) :
-    SQLiteOpenHelper(context, DATABASE_NAME, null, RegistryIngestSchema.VERSION) {
+    SQLiteOpenHelper(context.applicationContext, DATABASE_NAME, null, RegistryIngestSchema.VERSION) {
+
+    init {
+        setWriteAheadLoggingEnabled(true)
+    }
 
     override fun onConfigure(db: SQLiteDatabase) {
         super.onConfigure(db)
-        db.enableWriteAheadLogging()
         db.execSQL("PRAGMA synchronous = NORMAL")
         db.execSQL("PRAGMA temp_store = MEMORY")
         db.execSQL("PRAGMA foreign_keys = ON")
@@ -25,5 +28,14 @@ class RegistryIngestDatabaseHelper(context: Context) :
 
     companion object {
         const val DATABASE_NAME = "registry_ingest.db"
+
+        @Volatile
+        private var instance: RegistryIngestDatabaseHelper? = null
+
+        fun getInstance(context: Context): RegistryIngestDatabaseHelper {
+            return instance ?: synchronized(this) {
+                instance ?: RegistryIngestDatabaseHelper(context).also { instance = it }
+            }
+        }
     }
 }

@@ -74,7 +74,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
             if (isPageLoading) return@launch
             isPageLoading = true
             try {
-                val db = RegistryIngestDatabaseHelper(getApplication()).readableDatabase
+                val db = RegistryIngestDatabaseHelper.getInstance(getApplication()).readableDatabase
                 val diagnostics = readDiagnostics(db)
                 Log.i(tag, "DB diagnostics: $diagnostics")
 
