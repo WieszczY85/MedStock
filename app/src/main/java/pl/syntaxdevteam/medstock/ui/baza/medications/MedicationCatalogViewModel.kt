@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.R
@@ -36,6 +37,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
     private var recordCount: Int = 0
     private var offset: Int = 0
     private var selectedLetter: String = "#"
+    @Volatile private var isPageLoading: Boolean = false
     private val loadedItems = mutableListOf<MedicationCatalogEntry>()
 
     private val _uiState = MutableLiveData(
@@ -48,14 +50,15 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
     }
 
     fun onLetterSelected(letter: String) {
-        if (letter == selectedLetter) return
-        selectedLetter = letter
+        val normalized = normalizeFilter(letter)
+        if (normalized == selectedLetter) return
+        selectedLetter = normalized
         reloadCatalog()
     }
 
     fun loadNextPage() {
         val state = _uiState.value ?: return
-        if (!state.canLoadMore) return
+        if (!state.canLoadMore || isPageLoading) return
         loadPage(reset = false)
     }
 
@@ -68,12 +71,15 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private fun loadPage(reset: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            val db = RegistryIngestDatabaseHelper(getApplication()).readableDatabase
-            val diagnostics = readDiagnostics(db)
-            Log.i(tag, "DB diagnostics: $diagnostics")
+            if (isPageLoading) return@launch
+            isPageLoading = true
+            try {
+                val db = RegistryIngestDatabaseHelper(getApplication()).readableDatabase
+                val diagnostics = readDiagnostics(db)
+                Log.i(tag, "DB diagnostics: $diagnostics")
 
-            if (snapshotDate == null || reset) {
-                db.rawQuery(
+                if (snapshotDate == null || reset) {
+                    db.rawQuery(
                     """
                     SELECT snapshot_date_utc, record_count
                     FROM registry_import_batch
@@ -82,24 +88,28 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                     LIMIT 1
                     """.trimIndent(),
                     emptyArray()
-                ).use { snapshotCursor ->
-                    if (!snapshotCursor.moveToFirst()) {
-                        _uiState.postValue(MedicationCatalogUiState(summaryResId = R.string.medication_catalog_empty, selectedLetter = selectedLetter))
-                        return@launch
+                    ).use { snapshotCursor ->
+                        if (!snapshotCursor.moveToFirst()) {
+                            _uiState.postValue(MedicationCatalogUiState(summaryResId = R.string.medication_catalog_empty, selectedLetter = selectedLetter))
+                            return@launch
+                        }
+                        snapshotDate = snapshotCursor.getString(0)
+                        recordCount = snapshotCursor.getInt(1)
                     }
-                    snapshotDate = snapshotCursor.getString(0)
-                    recordCount = snapshotCursor.getInt(1)
                 }
-            }
 
-            val selectedSnapshot = snapshotDate ?: return@launch
-            val clause = if (selectedLetter == "#") "" else "AND UPPER(medication_name) LIKE ?"
-            val args = mutableListOf<String>(selectedSnapshot)
-            if (selectedLetter != "#") args += "$selectedLetter%"
-            args += pageSize.toString()
-            args += offset.toString()
+                val selectedSnapshot = snapshotDate ?: return@launch
+                val clause = buildFilterClause(selectedLetter)
+                val args = mutableListOf<String>(selectedSnapshot)
+                when (selectedLetter) {
+                    "123" -> args += "[0-9]*"
+                    "#" -> args += "[A-Z0-9a-z]*"
+                    else -> args += "$selectedLetter%"
+                }
+                args += pageSize.toString()
+                args += offset.toString()
 
-            db.rawQuery(
+                db.rawQuery(
                 """
                 WITH row_data AS (
                     SELECT r.id AS row_id,
@@ -129,7 +139,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 LIMIT ? OFFSET ?
                 """.trimIndent(),
                 args.toTypedArray()
-            ).use { cursor ->
+                ).use { cursor ->
                 if (!cursor.moveToFirst()) {
                     val emptyState = loadedItems.isEmpty()
                     if (emptyState) {
@@ -166,7 +176,27 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                     )
                 )
                 Log.i(tag, "Załadowano listę leków: batch=${entries.size}, totalLoaded=${loadedItems.size}, selectedLetter=$selectedLetter, snapshotDate=$selectedSnapshot, recordCount=$recordCount")
+                }
+            } finally {
+                isPageLoading = false
             }
+        }
+    }
+
+    private fun normalizeFilter(letter: String): String {
+        val normalized = letter.trim().uppercase(Locale.ROOT)
+        return when {
+            normalized == "123" -> "123"
+            normalized.length == 1 && normalized[0] in 'A'..'Z' -> normalized
+            else -> "#"
+        }
+    }
+
+    private fun buildFilterClause(filter: String): String {
+        return when (filter) {
+            "123" -> "AND medication_name GLOB ?"
+            "#" -> "AND medication_name NOT GLOB ?"
+            else -> "AND UPPER(medication_name) LIKE ?"
         }
     }
 
