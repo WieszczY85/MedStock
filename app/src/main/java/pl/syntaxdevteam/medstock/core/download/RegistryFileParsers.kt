@@ -19,9 +19,9 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
+import javax.xml.parsers.SAXParserFactory
 import org.xml.sax.InputSource
 import org.xml.sax.XMLReader
-import org.xml.sax.helpers.XMLReaderFactory
 
 class RegistryFileParsers(
     private val parsers: List<RegistryFileParser> = listOf(
@@ -175,7 +175,10 @@ private fun parseWorkbookStreaming(source: RegistryFileSource, file: File): Pars
                 sheetIterator.next().use { sheetInput ->
                     val handler = StreamingSheetHandler(headers, writer)
                     val xmlHandler = XSSFSheetXMLHandler(styles, null, strings, handler, formatter, false)
-                    val parser: XMLReader = XMLReaderFactory.createXMLReader()
+                    val parserFactory = SAXParserFactory.newInstance().apply {
+                        isNamespaceAware = true
+                    }
+                    val parser: XMLReader = parserFactory.newSAXParser().xmlReader
                     parser.contentHandler = xmlHandler
                     parser.parse(InputSource(sheetInput))
                 }
