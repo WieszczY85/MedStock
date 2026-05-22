@@ -254,23 +254,39 @@ private inline fun parseWorkbook(
     crossinline workbookFactory: (FileInputStream) -> org.apache.poi.ss.usermodel.Workbook
 ): ParsedRegistryFile {
     return try {
+        val spoolFile = File.createTempFile("registry_xls_", ".tsv")
         FileInputStream(file).use { input ->
             workbookFactory(input).use { workbook ->
                 val sheet = workbook.getSheetAt(0)
                 val formatter = DataFormatter()
                 val headerRow = sheet.getRow(sheet.firstRowNum)
                 val headers = headerRow?.map { formatter.formatCellValue(it) }.orEmpty()
-                val records = mutableListOf<RawRegistryRecord>()
 
-                for (index in (sheet.firstRowNum + 1)..sheet.lastRowNum) {
-                    val row = sheet.getRow(index) ?: continue
-                    val values = row.map { cell ->
-                        if (cell.cellType == CellType.BLANK) "" else formatter.formatCellValue(cell)
+                BufferedWriter(OutputStreamWriter(spoolFile.outputStream(), Charsets.UTF_8)).use { writer ->
+                    for (index in (sheet.firstRowNum + 1)..sheet.lastRowNum) {
+                        val row = sheet.getRow(index) ?: continue
+                        val values = row.map { cell ->
+                            if (cell.cellType == CellType.BLANK) "" else formatter.formatCellValue(cell)
+                        }
+                        writer.write("$index\t${values.joinToString("\t") { it.replace("\t", " ") }}")
+                        writer.newLine()
                     }
-                    records += RawRegistryRecord(source = source, rowNumber = index.toLong(), values = values)
                 }
 
-                ParsedRegistryFile(source = source, headers = headers, records = records.asSequence())
+                val records = sequence {
+                    BufferedReader(InputStreamReader(spoolFile.inputStream(), Charsets.UTF_8)).use { reader ->
+                        reader.lineSequence().forEach { line ->
+                            val firstSep = line.indexOf('\t')
+                            if (firstSep <= 0) return@forEach
+                            val rowNo = line.substring(0, firstSep).toLongOrNull() ?: return@forEach
+                            val values = line.substring(firstSep + 1).split('\t')
+                            yield(RawRegistryRecord(source = source, rowNumber = rowNo, values = values))
+                        }
+                    }
+                    spoolFile.delete()
+                }
+
+                ParsedRegistryFile(source = source, headers = headers, records = records)
             }
         }
     } catch (exception: Exception) {

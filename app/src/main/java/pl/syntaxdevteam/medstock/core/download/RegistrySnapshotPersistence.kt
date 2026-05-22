@@ -31,6 +31,7 @@ class RegistrySnapshotPersistence(
 
         database.beginTransaction()
         try {
+            val tables = tablesFor(source)
             val batchId = upsertBatch(
                 source = source,
                 sourceUrl = sourceUrl,
@@ -42,18 +43,18 @@ class RegistrySnapshotPersistence(
                 sourceEtag = sourceEtag
             )
 
-            clearBatchRows(batchId)
+            clearBatchRows(batchId, tables)
             val resolvedHeaders = resolveHeaders(parsed.headers)
-            val columnIdByKey = ensureColumns(source, batchId, resolvedHeaders)
+            val columnIdByKey = ensureColumns(batchId, resolvedHeaders, tables)
             val columnIdsByPosition = resolvedHeaders.map { header -> columnIdByKey[header.trim()] }
             val rowInsertStatement = database.compileStatement(
                 """
-                INSERT INTO registry_row(batch_id, source_row_number, source_entity_key, row_hash)
+                INSERT INTO ${tables.rowTable}(batch_id, source_row_number, source_entity_key, row_hash)
                 VALUES (?, ?, ?, ?)
                 """.trimIndent()
             )
             val cellInsertStatement = database.compileStatement(
-                "INSERT OR REPLACE INTO registry_cell(row_id, column_id, value_text) VALUES (?, ?, ?)"
+                "INSERT OR REPLACE INTO ${tables.cellTable}(row_id, column_id, value_text) VALUES (?, ?, ?)"
             )
 
             var savedRows = 0
@@ -136,34 +137,34 @@ class RegistrySnapshotPersistence(
         }
     }
 
-    private fun clearBatchRows(batchId: Long) {
+    private fun clearBatchRows(batchId: Long, tables: RegistryTables) {
         database.execSQL(
-            "DELETE FROM registry_row WHERE batch_id = ?",
+            "DELETE FROM ${tables.rowTable} WHERE batch_id = ?",
             arrayOf<Any?>(batchId)
         )
     }
 
     private fun ensureColumns(
-        source: RegistryFileSource,
         batchId: Long,
-        headers: List<String>
+        headers: List<String>,
+        tables: RegistryTables
     ): Map<String, Long> {
         val normalizedHeaders = headers.map { it.trim() }
         normalizedHeaders.forEach { key ->
             database.execSQL(
                 """
-                INSERT INTO registry_column_dictionary(source_code, column_key, first_seen_batch_id)
-                VALUES (?, ?, ?)
-                ON CONFLICT(source_code, column_key) DO NOTHING
+                INSERT INTO ${tables.columnTable}(column_key, first_seen_batch_id)
+                VALUES (?, ?)
+                ON CONFLICT(column_key) DO NOTHING
                 """.trimIndent(),
-                arrayOf<Any?>(source.name, key, batchId)
+                arrayOf<Any?>(key, batchId)
             )
         }
 
         val result = mutableMapOf<String, Long>()
         database.rawQuery(
-            "SELECT id, column_key FROM registry_column_dictionary WHERE source_code = ?",
-            arrayOf(source.name)
+            "SELECT id, column_key FROM ${tables.columnTable}",
+            emptyArray()
         ).use { cursor ->
             while (cursor.moveToNext()) {
                 result[cursor.getString(1)] = cursor.getLong(0)
@@ -246,4 +247,13 @@ class RegistrySnapshotPersistence(
     private companion object {
         const val LOG_PROGRESS_EVERY_ROWS = 5_000
     }
+}
+
+
+private data class RegistryTables(val rowTable: String, val cellTable: String, val columnTable: String)
+
+private fun tablesFor(source: RegistryFileSource): RegistryTables = when (source) {
+    RegistryFileSource.RPL_CSV, RegistryFileSource.RPL_XLSX -> RegistryTables("registry_rpl_row", "registry_rpl_cell", "registry_rpl_column_dictionary")
+    RegistryFileSource.RA_CSV, RegistryFileSource.RA_XLS -> RegistryTables("registry_ra_row", "registry_ra_cell", "registry_ra_column_dictionary")
+    RegistryFileSource.RDG_XML -> RegistryTables("registry_rdg_row", "registry_rdg_cell", "registry_rdg_column_dictionary")
 }
