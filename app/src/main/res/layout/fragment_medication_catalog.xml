@@ -32,17 +32,29 @@
         tools:text="Pobrano 123 rekordy z dnia 2026-05-21" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_medication_letters"
+        android:layout_width="28dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_medication_catalog_summary"
+        tools:listitem="@android:layout/simple_list_item_1" />
+
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_medication_catalog"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/recycler_medication_letters"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_medication_catalog_summary"
-        tools:listitem="@android:layout/simple_list_item_2" />
+        tools:listitem="@layout/item_medication_catalog" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
