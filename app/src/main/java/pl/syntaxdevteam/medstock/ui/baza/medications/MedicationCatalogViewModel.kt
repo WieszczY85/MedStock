@@ -164,7 +164,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 _uiState.postValue(
                     MedicationCatalogUiState(
                         summaryResId = R.string.medication_catalog_summary,
-                        summaryArgs = listOf(recordCount, selectedSnapshotDate, loadedItems.size),
+                        summaryArgs = listOf(recordCount, selectedSnapshotDate),
                         medications = loadedItems.toList(),
                         selectedLetter = selectedLetter,
                         canLoadMore = canLoadMore

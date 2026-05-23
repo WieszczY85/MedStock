@@ -53,7 +53,7 @@
 
     <string name="medication_catalog_loading">Loading medication catalog from local database…</string>
     <string name="medication_catalog_empty">No medication records found in local database.</string>
-    <string name="medication_catalog_summary">Saved records: %1$d • snapshot date: %2$s • showing first %3$d items</string>
+    <string name="medication_catalog_summary">Medication count: %1$d \nLast update: %2$s</string>
     <string name="medication_catalog_missing_name">Unnamed medication</string>
     <string name="medication_catalog_missing_common_name">No common name</string>
 
