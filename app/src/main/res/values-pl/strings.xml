@@ -54,7 +54,7 @@
 
     <string name="medication_catalog_loading">Wczytywanie katalogu leków z lokalnej bazy…</string>
     <string name="medication_catalog_empty">Brak zapisanych rekordów leków w lokalnej bazie.</string>
-    <string name="medication_catalog_summary">Ilość leków: %1$d /n Ostatnia aktualizacja: %2$s</string>
+    <string name="medication_catalog_summary">Ilość leków: %1$d \n Ostatnia aktualizacja: %2$s</string>
     <string name="medication_catalog_missing_name">Lek bez nazwy</string>
     <string name="medication_catalog_missing_common_name">Brak nazwy powszechnej</string>
 

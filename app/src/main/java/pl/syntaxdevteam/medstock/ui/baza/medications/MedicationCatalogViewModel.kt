@@ -39,6 +39,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
     private var offset: Int = 0
     private var selectedLetter: String = "#"
     private var searchQuery: String = ""
+    private var searchMode: SearchMode = SearchMode.NAME
     @Volatile private var isPageLoading: Boolean = false
     private val loadedItems = mutableListOf<MedicationCatalogEntry>()
 
@@ -68,6 +69,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
         val normalized = query.trim()
         if (normalized == searchQuery) return
         searchQuery = normalized
+        searchMode = SearchMode.NAME
         reloadCatalog()
     }
 
@@ -124,10 +126,12 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                     "#" -> Unit
                     else -> args += "$selectedLetter%"
                 }
-                val searchClause = buildSearchClause(searchQuery)
+                if (searchQuery.isNotBlank() && reset) {
+                    searchMode = resolveSearchMode(db, selectedBatchId, selectedLetter, searchQuery)
+                }
+                val searchClause = buildSearchClause(searchQuery, searchMode)
                 if (searchQuery.isNotBlank()) {
                     val pattern = "%${searchQuery.uppercase(Locale.ROOT)}%"
-                    args += pattern
                     args += pattern
                 }
                 args += pageSize.toString()
@@ -210,14 +214,47 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
         }
     }
 
-    private fun buildSearchClause(query: String): String {
+    private fun buildSearchClause(query: String, mode: SearchMode): String {
         if (query.isBlank()) return ""
-        return """
-            AND (
-                UPPER(COALESCE(s.nazwa_produktu_leczniczego, '')) LIKE ?
-                OR UPPER(COALESCE(s.substancja_czynna, '')) LIKE ?
-            )
-        """.trimIndent()
+        val targetColumn = when (mode) {
+            SearchMode.NAME -> "nazwa_produktu_leczniczego"
+            SearchMode.SUBSTANCE -> "substancja_czynna"
+        }
+        return "AND UPPER(COALESCE(s.$targetColumn, '')) LIKE ?"
+    }
+
+    private fun resolveSearchMode(
+        db: android.database.sqlite.SQLiteDatabase,
+        batchId: Long,
+        letterFilter: String,
+        query: String
+    ): SearchMode {
+        val letterClause = buildFilterClause(letterFilter)
+        val args = mutableListOf<String>(batchId.toString())
+        when (letterFilter) {
+            "123" -> args += "[0-9]*"
+            "#" -> Unit
+            else -> args += "$letterFilter%"
+        }
+        args += "%${query.uppercase(Locale.ROOT)}%"
+
+        val count = scalarInt(
+            db,
+            """
+            SELECT COUNT(*)
+            FROM registry_rpl_snapshot s
+            WHERE s.batch_id = ?
+              $letterClause
+              AND UPPER(COALESCE(s.nazwa_produktu_leczniczego, '')) LIKE ?
+            """.trimIndent(),
+            args.toTypedArray()
+        )
+        return if (count > 0) SearchMode.NAME else SearchMode.SUBSTANCE
+    }
+
+    private enum class SearchMode {
+        NAME,
+        SUBSTANCE
     }
 
     private fun readDiagnostics(db: android.database.sqlite.SQLiteDatabase): String {
@@ -238,8 +275,8 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
         return "batches=$totalBatches rows=$totalRows rplBatches=$rplBatches rplRows=$rplRows"
     }
 
-    private fun scalarInt(db: android.database.sqlite.SQLiteDatabase, sql: String): Int {
-        db.rawQuery(sql, emptyArray()).use { cursor ->
+    private fun scalarInt(db: android.database.sqlite.SQLiteDatabase, sql: String, args: Array<String> = emptyArray()): Int {
+        db.rawQuery(sql, args).use { cursor ->
             return if (cursor.moveToFirst()) cursor.getInt(0) else 0
         }
     }
