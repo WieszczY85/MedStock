@@ -111,32 +111,33 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
                 db.rawQuery(
                 """
-                WITH row_data AS (
+                WITH page_rows AS (
                     SELECT r.id AS row_id,
                            r.source_entity_key,
-                           MAX(CASE WHEN c.column_key = 'Nazwa produktu leczniczego' THEN cell.value_text END) AS medication_name,
-                           MAX(CASE WHEN c.column_key = 'Nazwa powszechnie stosowana' THEN cell.value_text END) AS common_name,
-                           MAX(CASE WHEN c.column_key IN ('Moc', 'Moc dawki') THEN cell.value_text END) AS dose,
-                           MAX(CASE WHEN c.column_key IN ('Kod EAN UDI-DI', 'Kod EAN') THEN cell.value_text END) AS ean,
-                           MAX(CASE WHEN c.column_key IN ('Wielkość opakowania', 'Wielkosc opakowania') THEN cell.value_text END) AS package_size
+                           COALESCE(name_cell.value_text, '') AS medication_name
                     FROM registry_import_batch b
-                    JOIN registry_row r ON r.batch_id = b.id
-                    JOIN registry_cell cell ON cell.row_id = r.id
-                    JOIN registry_column_dictionary c ON c.id = cell.column_id
+                    JOIN registry_rpl_row r ON r.batch_id = b.id
+                    LEFT JOIN registry_rpl_column_dictionary name_col
+                           ON name_col.column_key = 'Nazwa produktu leczniczego'
+                    LEFT JOIN registry_rpl_cell name_cell
+                           ON name_cell.row_id = r.id AND name_cell.column_id = name_col.id
                     WHERE b.source_code IN ('RPL_CSV', 'RPL_XLSX')
                       AND b.snapshot_date_utc = ?
-                    GROUP BY r.id, r.source_entity_key
+                      $clause
+                    ORDER BY medication_name COLLATE NOCASE ASC
+                    LIMIT ? OFFSET ?
                 )
-                SELECT source_entity_key,
-                       COALESCE(medication_name, ''),
-                       COALESCE(common_name, ''),
-                       COALESCE(dose, ''),
-                       COALESCE(ean, ''),
-                       COALESCE(package_size, '')
-                FROM row_data
-                WHERE 1=1 $clause
-                ORDER BY medication_name COLLATE NOCASE ASC
-                LIMIT ? OFFSET ?
+                SELECT page_rows.source_entity_key,
+                       page_rows.medication_name,
+                       COALESCE(MAX(CASE WHEN c.column_key = 'Nazwa powszechnie stosowana' THEN cell.value_text END), ''),
+                       COALESCE(MAX(CASE WHEN c.column_key IN ('Moc', 'Moc dawki') THEN cell.value_text END), ''),
+                       COALESCE(MAX(CASE WHEN c.column_key IN ('Kod EAN UDI-DI', 'Kod EAN') THEN cell.value_text END), ''),
+                       COALESCE(MAX(CASE WHEN c.column_key IN ('Wielkość opakowania', 'Wielkosc opakowania') THEN cell.value_text END), '')
+                FROM page_rows
+                LEFT JOIN registry_rpl_cell cell ON cell.row_id = page_rows.row_id
+                LEFT JOIN registry_rpl_column_dictionary c ON c.id = cell.column_id
+                GROUP BY page_rows.row_id, page_rows.source_entity_key, page_rows.medication_name
+                ORDER BY page_rows.medication_name COLLATE NOCASE ASC
                 """.trimIndent(),
                 args.toTypedArray()
                 ).use { cursor ->
@@ -194,9 +195,9 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private fun buildFilterClause(filter: String): String {
         return when (filter) {
-            "123" -> "AND medication_name GLOB ?"
-            "#" -> "AND medication_name NOT GLOB ?"
-            else -> "AND UPPER(medication_name) LIKE ?"
+            "123" -> "AND COALESCE(name_cell.value_text, '') GLOB ?"
+            "#" -> "AND COALESCE(name_cell.value_text, '') NOT GLOB ?"
+            else -> "AND UPPER(COALESCE(name_cell.value_text, '')) LIKE ?"
         }
     }
 
