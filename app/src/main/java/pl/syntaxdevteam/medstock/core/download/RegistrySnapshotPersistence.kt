@@ -31,7 +31,6 @@ class RegistrySnapshotPersistence(
 
         database.beginTransaction()
         try {
-            val tables = tablesFor(source)
             val batchId = upsertBatch(
                 source = source,
                 sourceUrl = sourceUrl,
@@ -43,21 +42,10 @@ class RegistrySnapshotPersistence(
                 sourceEtag = sourceEtag
             )
 
-            clearBatchRows(batchId, tables)
-            val resolvedHeaders = resolveHeaders(parsed.headers)
-            val columnIdByKey = ensureColumns(batchId, resolvedHeaders, tables)
-            val columnIdsByPosition = resolvedHeaders.map { header -> columnIdByKey[header.trim()] }
-            val rowInsertStatement = database.compileStatement(
-                """
-                INSERT INTO ${tables.rowTable}(batch_id, source_row_number, source_entity_key, row_hash)
-                VALUES (?, ?, ?, ?)
-                """.trimIndent()
-            )
-            val cellInsertStatement = database.compileStatement(
-                "INSERT OR REPLACE INTO ${tables.cellTable}(row_id, column_id, value_text) VALUES (?, ?, ?)"
-            )
+            clearBatchRows(batchId, source)
 
             var savedRows = 0
+            val resolvedHeaders = resolveHeaders(parsed.headers)
             val canonicalHeaders = resolvedHeaders.map { canonicalizeHeader(it) }
             val rplProjection = if (source == RegistryFileSource.RPL_CSV || source == RegistryFileSource.RPL_XLSX) {
                 prepareProjection(canonicalHeaders, rplHeaderMap)
@@ -66,27 +54,17 @@ class RegistrySnapshotPersistence(
                 prepareProjection(canonicalHeaders, raHeaderMap)
             } else null
             parsed.records.forEach { record ->
-                val rowId = insertRow(
-                    statement = rowInsertStatement,
-                    batchId = batchId,
-                    sourceRowNumber = record.rowNumber,
-                    sourceEntityKey = detectEntityKey(source, parsed.headers, record.values),
-                    rowHash = calculateRowHash(record.values)
-                )
-                insertCells(
-                    statement = cellInsertStatement,
-                    rowId = rowId,
-                    columnIdsByPosition = columnIdsByPosition,
-                    values = record.values
-                )
+                val entityKey = detectEntityKey(source, parsed.headers, record.values)
                 when (source) {
                     RegistryFileSource.RPL_CSV, RegistryFileSource.RPL_XLSX -> {
-                        insertRplSnapshot(database, batchId, record.rowNumber, detectEntityKey(source, parsed.headers, record.values), record.values, rplProjection)
+                        insertRplSnapshot(database, batchId, record.rowNumber, entityKey, record.values, rplProjection)
                     }
                     RegistryFileSource.RA_CSV, RegistryFileSource.RA_XLS -> {
-                        insertRaSnapshot(database, batchId, record.rowNumber, detectEntityKey(source, parsed.headers, record.values), record.values, raProjection)
+                        insertRaSnapshot(database, batchId, record.rowNumber, entityKey, record.values, raProjection)
                     }
-                    RegistryFileSource.RDG_XML -> Unit
+                    RegistryFileSource.RDG_XML -> {
+                        persistRdgRow(batchId, record.rowNumber, entityKey, record.values, parsed.headers)
+                    }
                 }
                 savedRows += 1
                 if (savedRows % LOG_PROGRESS_EVERY_ROWS == 0) {
@@ -153,13 +131,18 @@ class RegistrySnapshotPersistence(
         }
     }
 
-    private fun clearBatchRows(batchId: Long, tables: RegistryTables) {
-        database.execSQL(
-            "DELETE FROM ${tables.rowTable} WHERE batch_id = ?",
-            arrayOf<Any?>(batchId)
-        )
-        database.execSQL("DELETE FROM registry_rpl_snapshot WHERE batch_id = ?", arrayOf<Any?>(batchId))
-        database.execSQL("DELETE FROM registry_ra_snapshot WHERE batch_id = ?", arrayOf<Any?>(batchId))
+    private fun clearBatchRows(batchId: Long, source: RegistryFileSource) {
+        when (source) {
+            RegistryFileSource.RPL_CSV, RegistryFileSource.RPL_XLSX -> {
+                database.execSQL("DELETE FROM registry_rpl_snapshot WHERE batch_id = ?", arrayOf<Any?>(batchId))
+            }
+            RegistryFileSource.RA_CSV, RegistryFileSource.RA_XLS -> {
+                database.execSQL("DELETE FROM registry_ra_snapshot WHERE batch_id = ?", arrayOf<Any?>(batchId))
+            }
+            RegistryFileSource.RDG_XML -> {
+                database.execSQL("DELETE FROM registry_rdg_row WHERE batch_id = ?", arrayOf<Any?>(batchId))
+            }
+        }
     }
 
     private fun ensureColumns(
@@ -260,6 +243,30 @@ class RegistrySnapshotPersistence(
         val normalized = values.joinToString(separator = "\u001F") { it.trim() }
         val digest = MessageDigest.getInstance("SHA-256").digest(normalized.toByteArray(Charsets.UTF_8))
         return digest.joinToString("") { "%02x".format(it) }
+    }
+
+    private fun persistRdgRow(
+        batchId: Long,
+        sourceRowNumber: Long,
+        sourceEntityKey: String?,
+        values: List<String>,
+        headers: List<String>
+    ) {
+        val tables = tablesFor(RegistryFileSource.RDG_XML)
+        val resolvedHeaders = resolveHeaders(headers)
+        val columnIdByKey = ensureColumns(batchId, resolvedHeaders, tables)
+        val columnIdsByPosition = resolvedHeaders.map { header -> columnIdByKey[header.trim()] }
+        val rowInsertStatement = database.compileStatement(
+            """
+            INSERT INTO ${tables.rowTable}(batch_id, source_row_number, source_entity_key, row_hash)
+            VALUES (?, ?, ?, ?)
+            """.trimIndent()
+        )
+        val cellInsertStatement = database.compileStatement(
+            "INSERT OR REPLACE INTO ${tables.cellTable}(row_id, column_id, value_text) VALUES (?, ?, ?)"
+        )
+        val rowId = insertRow(rowInsertStatement, batchId, sourceRowNumber, sourceEntityKey, calculateRowHash(values))
+        insertCells(cellInsertStatement, rowId, columnIdsByPosition, values)
     }
 
     private companion object {

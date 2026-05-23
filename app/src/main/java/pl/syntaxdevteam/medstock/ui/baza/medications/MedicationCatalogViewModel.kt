@@ -34,6 +34,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private val pageSize = 20
     private var snapshotDate: String? = null
+    private var snapshotBatchId: Long? = null
     private var recordCount: Int = 0
     private var offset: Int = 0
     private var selectedLetter: String = "#"
@@ -64,6 +65,8 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private fun reloadCatalog() {
         offset = 0
+        snapshotBatchId = null
+        snapshotDate = null
         loadedItems.clear()
         _uiState.postValue(MedicationCatalogUiState(summaryResId = R.string.medication_catalog_loading, selectedLetter = selectedLetter))
         loadPage(reset = true)
@@ -81,10 +84,12 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 if (snapshotDate == null || reset) {
                     db.rawQuery(
                     """
-                    SELECT snapshot_date_utc, record_count
+                    SELECT id, snapshot_date_utc
                     FROM registry_import_batch
                     WHERE source_code IN ('RPL_CSV', 'RPL_XLSX')
-                    ORDER BY snapshot_date_utc DESC
+                    ORDER BY snapshot_date_utc DESC,
+                             CASE WHEN source_code = 'RPL_XLSX' THEN 0 ELSE 1 END,
+                             id DESC
                     LIMIT 1
                     """.trimIndent(),
                     emptyArray()
@@ -93,14 +98,19 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                             _uiState.postValue(MedicationCatalogUiState(summaryResId = R.string.medication_catalog_empty, selectedLetter = selectedLetter))
                             return@launch
                         }
-                        snapshotDate = snapshotCursor.getString(0)
-                        recordCount = snapshotCursor.getInt(1)
+                        snapshotBatchId = snapshotCursor.getLong(0)
+                        snapshotDate = snapshotCursor.getString(1)
+                        recordCount = scalarInt(
+                            db,
+                            "SELECT COUNT(*) FROM registry_rpl_snapshot WHERE batch_id = ${snapshotBatchId ?: -1L}"
+                        )
                     }
                 }
 
-                val selectedSnapshot = snapshotDate ?: return@launch
+                val selectedSnapshotDate = snapshotDate ?: return@launch
+                val selectedBatchId = snapshotBatchId ?: return@launch
                 val clause = buildFilterClause(selectedLetter)
-                val args = mutableListOf<String>(selectedSnapshot)
+                val args = mutableListOf<String>(selectedBatchId.toString())
                 when (selectedLetter) {
                     "123" -> args += "[0-9]*"
                     "#" -> args += "[A-Z0-9a-z]*"
@@ -118,9 +128,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                        COALESCE(s.kod_ean, ''),
                        COALESCE(s.opakowanie, '')
                 FROM registry_rpl_snapshot s
-                JOIN registry_import_batch b ON b.id = s.batch_id
-                WHERE b.source_code IN ('RPL_CSV', 'RPL_XLSX')
-                  AND b.snapshot_date_utc = ?
+                WHERE s.batch_id = ?
                   $clause
                 ORDER BY s.nazwa_produktu_leczniczego COLLATE NOCASE ASC
                 LIMIT ? OFFSET ?
@@ -156,13 +164,13 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 _uiState.postValue(
                     MedicationCatalogUiState(
                         summaryResId = R.string.medication_catalog_summary,
-                        summaryArgs = listOf(recordCount, selectedSnapshot, loadedItems.size),
+                        summaryArgs = listOf(recordCount, selectedSnapshotDate, loadedItems.size),
                         medications = loadedItems.toList(),
                         selectedLetter = selectedLetter,
                         canLoadMore = canLoadMore
                     )
                 )
-                Log.i(tag, "Załadowano listę leków: batch=${entries.size}, totalLoaded=${loadedItems.size}, selectedLetter=$selectedLetter, snapshotDate=$selectedSnapshot, recordCount=$recordCount")
+                Log.i(tag, "Załadowano listę leków: batch=${entries.size}, totalLoaded=${loadedItems.size}, selectedLetter=$selectedLetter, snapshotDate=$selectedSnapshotDate, snapshotBatchId=$selectedBatchId, recordCount=$recordCount")
                 }
             } finally {
                 isPageLoading = false
