@@ -60,4 +60,11 @@
 
     <string name="medication_catalog_details">Dawka: %1$s • EAN: %2$s • Opakowanie: %3$s</string>
     <string name="medication_catalog_search_hint">Szukaj po nazwie lub substancji czynnej</string>
+    <string name="pharmacy_catalog_loading">Wczytywanie katalogu aptek z lokalnej bazy…</string>
+    <string name="pharmacy_catalog_empty">Brak zapisanych rekordów aptek w lokalnej bazie.</string>
+    <string name="pharmacy_catalog_summary">Ilość aptek: %1$d \n Ostatnia aktualizacja: %2$s</string>
+    <string name="pharmacy_catalog_missing_name">Apteka bez nazwy</string>
+    <string name="pharmacy_catalog_missing_status">Brak statusu</string>
+    <string name="pharmacy_catalog_details">Miasto: %1$s • Ulica: %2$s • Budynek: %3$s</string>
+    <string name="pharmacy_catalog_search_hint">Szukaj po nazwie apteki</string>
 </resources>

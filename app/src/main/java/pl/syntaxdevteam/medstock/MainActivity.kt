@@ -21,6 +21,7 @@ import pl.syntaxdevteam.medstock.core.download.StartupIngestionRunner
 import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment
+import pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,6 +40,8 @@ class MainActivity : AppCompatActivity() {
                 ?.childFragmentManager
                 ?.primaryNavigationFragment
             if (currentFragment is MedicationCatalogFragment) {
+                currentFragment.toggleSearch()
+            } else if (currentFragment is PharmacyCatalogFragment) {
                 currentFragment.toggleSearch()
             } else {
                 Snackbar.make(view, getString(R.string.snackbar_placeholder_action), Snackbar.LENGTH_LONG)
@@ -76,6 +79,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_baza_apteki_screen -> {
                     titleToolbar.title = getString(R.string.menu_baza)
                     titleToolbar.subtitle = getString(R.string.menu_baza_apteki)
+                    binding.appBarMain.fab?.setImageResource(android.R.drawable.ic_menu_search)
+                    binding.appBarMain.fab?.contentDescription = getString(R.string.fab_search_content_description)
                 }
 
                 R.id.nav_alerty_lista_screen -> {

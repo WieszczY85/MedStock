@@ -7,27 +7,56 @@
     tools:context=".ui.baza.pharmacy.PharmacyCatalogFragment">
 
     <TextView
-        android:id="@+id/text_baza_title"
-        android:layout_width="wrap_content"
+        android:id="@+id/text_pharmacy_catalog_summary"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/menu_baza"
-        android:textSize="26sp"
-        android:textStyle="bold"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Ilość aptek: 3456 \n Ostatnia aktualizacja: 2026-05-23" />
 
-    <TextView
-        android:id="@+id/text_baza_subtitle"
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/search_pharmacy_catalog"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/menu_baza_apteki"
-        android:textSize="20sp"
-        android:textStyle="normal"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:iconifiedByDefault="false"
+        android:queryHint="@string/pharmacy_catalog_search_hint"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_baza_title" />
+        app:layout_constraintTop_toBottomOf="@id/text_pharmacy_catalog_summary" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_pharmacy_letters"
+        android:layout_width="44dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_pharmacy_catalog"
+        tools:listitem="@android:layout/simple_list_item_1" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_pharmacy_catalog"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/recycler_pharmacy_letters"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_pharmacy_catalog"
+        tools:listitem="@layout/item_pharmacy_catalog" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

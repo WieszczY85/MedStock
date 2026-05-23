@@ -60,4 +60,11 @@
 
     <string name="medication_catalog_details">Dose: %1$s • EAN: %2$s • Package: %3$s</string>
     <string name="medication_catalog_search_hint">Search by name or active substance</string>
+    <string name="pharmacy_catalog_loading">Loading pharmacy catalog from local database…</string>
+    <string name="pharmacy_catalog_empty">No pharmacy records found in local database.</string>
+    <string name="pharmacy_catalog_summary">Pharmacy count: %1$d \n Last update: %2$s</string>
+    <string name="pharmacy_catalog_missing_name">Unnamed pharmacy</string>
+    <string name="pharmacy_catalog_missing_status">No status</string>
+    <string name="pharmacy_catalog_details">City: %1$s • Street: %2$s • Building: %3$s</string>
+    <string name="pharmacy_catalog_search_hint">Search by pharmacy name</string>
 </resources>
