@@ -111,33 +111,19 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
                 db.rawQuery(
                 """
-                WITH page_rows AS (
-                    SELECT r.id AS row_id,
-                           r.source_entity_key,
-                           COALESCE(name_cell.value_text, '') AS medication_name
-                    FROM registry_import_batch b
-                    JOIN registry_rpl_row r ON r.batch_id = b.id
-                    LEFT JOIN registry_rpl_column_dictionary name_col
-                           ON name_col.column_key = 'Nazwa produktu leczniczego'
-                    LEFT JOIN registry_rpl_cell name_cell
-                           ON name_cell.row_id = r.id AND name_cell.column_id = name_col.id
-                    WHERE b.source_code IN ('RPL_CSV', 'RPL_XLSX')
-                      AND b.snapshot_date_utc = ?
-                      $clause
-                    ORDER BY medication_name COLLATE NOCASE ASC
-                    LIMIT ? OFFSET ?
-                )
-                SELECT page_rows.source_entity_key,
-                       page_rows.medication_name,
-                       COALESCE(MAX(CASE WHEN c.column_key = 'Nazwa powszechnie stosowana' THEN cell.value_text END), ''),
-                       COALESCE(MAX(CASE WHEN c.column_key IN ('Moc', 'Moc dawki') THEN cell.value_text END), ''),
-                       COALESCE(MAX(CASE WHEN c.column_key IN ('Kod EAN UDI-DI', 'Kod EAN') THEN cell.value_text END), ''),
-                       COALESCE(MAX(CASE WHEN c.column_key IN ('Wielkość opakowania', 'Wielkosc opakowania') THEN cell.value_text END), '')
-                FROM page_rows
-                LEFT JOIN registry_rpl_cell cell ON cell.row_id = page_rows.row_id
-                LEFT JOIN registry_rpl_column_dictionary c ON c.id = cell.column_id
-                GROUP BY page_rows.row_id, page_rows.source_entity_key, page_rows.medication_name
-                ORDER BY page_rows.medication_name COLLATE NOCASE ASC
+                SELECT s.source_entity_key,
+                       COALESCE(s.nazwa_produktu_leczniczego, ''),
+                       COALESCE(s.substancja_czynna, ''),
+                       COALESCE(s.moc, ''),
+                       COALESCE(s.kod_ean, ''),
+                       COALESCE(s.opakowanie, '')
+                FROM registry_rpl_snapshot s
+                JOIN registry_import_batch b ON b.id = s.batch_id
+                WHERE b.source_code IN ('RPL_CSV', 'RPL_XLSX')
+                  AND b.snapshot_date_utc = ?
+                  $clause
+                ORDER BY s.nazwa_produktu_leczniczego COLLATE NOCASE ASC
+                LIMIT ? OFFSET ?
                 """.trimIndent(),
                 args.toTypedArray()
                 ).use { cursor ->
@@ -195,23 +181,23 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private fun buildFilterClause(filter: String): String {
         return when (filter) {
-            "123" -> "AND COALESCE(name_cell.value_text, '') GLOB ?"
-            "#" -> "AND COALESCE(name_cell.value_text, '') NOT GLOB ?"
-            else -> "AND UPPER(COALESCE(name_cell.value_text, '')) LIKE ?"
+            "123" -> "AND COALESCE(s.nazwa_produktu_leczniczego, '') GLOB ?"
+            "#" -> "AND COALESCE(s.nazwa_produktu_leczniczego, '') NOT GLOB ?"
+            else -> "AND UPPER(COALESCE(s.nazwa_produktu_leczniczego, '')) LIKE ?"
         }
     }
 
     private fun readDiagnostics(db: android.database.sqlite.SQLiteDatabase): String {
         val totalBatches = scalarInt(db, "SELECT COUNT(*) FROM registry_import_batch")
-        val totalRows = scalarInt(db, "SELECT COUNT(*) FROM registry_rpl_row") +
-            scalarInt(db, "SELECT COUNT(*) FROM registry_ra_row") +
+        val totalRows = scalarInt(db, "SELECT COUNT(*) FROM registry_rpl_snapshot") +
+            scalarInt(db, "SELECT COUNT(*) FROM registry_ra_snapshot") +
             scalarInt(db, "SELECT COUNT(*) FROM registry_rdg_row")
         val rplBatches = scalarInt(db, "SELECT COUNT(*) FROM registry_import_batch WHERE source_code IN ('RPL_CSV','RPL_XLSX')")
         val rplRows = scalarInt(
             db,
             """
             SELECT COUNT(*)
-            FROM registry_rpl_row r
+            FROM registry_rpl_snapshot r
             JOIN registry_import_batch b ON b.id = r.batch_id
             WHERE b.source_code IN ('RPL_CSV','RPL_XLSX')
             """.trimIndent()
