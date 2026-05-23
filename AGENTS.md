@@ -88,7 +88,7 @@ This matches the current project setup:
 
 - `app/build.gradle.kts` requires Android platform `36.1` (`compileSdk` release `36` with `minorApiLevel = 1`)
 - `gradle/gradle-daemon-jvm.properties` pins the Gradle daemon toolchain to JDK `21`
-- `gradle/wrapper/gradle-wrapper.properties` uses Gradle `9.5.0`
+- `gradle/wrapper/gradle-wrapper.properties` uses Gradle `9.5.1`
 
 ## Validation commands
 
