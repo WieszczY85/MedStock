@@ -19,6 +19,12 @@ class StartupIngestionRunner(private val context: Context) {
     private val tag = "StartupIngestionRunner"
 
     fun run(): Flow<StartupProgress> = flow {
+        val schedule = StartupIngestionSchedule(context)
+        if (!schedule.shouldRunNow()) {
+            emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_all)))
+            return@flow
+        }
+
         val sourcePlans = listOf(
             listOf(RegistryFileSource.RDG_XML),
             listOf(RegistryFileSource.RPL_XLSX, RegistryFileSource.RPL_CSV),
@@ -87,6 +93,7 @@ class StartupIngestionRunner(private val context: Context) {
             }
         }
 
+        schedule.markRunCompleted()
         emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_all)))
     }.flowOn(Dispatchers.IO)
 
