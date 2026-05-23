@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Gravity
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -145,8 +146,11 @@ private class MedicationLettersAdapter(
 
         fun bind(letter: String, isSelected: Boolean, onClick: (String) -> Unit) {
             text.text = letter
-            text.textSize = 11f
-            text.alpha = if (isSelected) 1f else 0.6f
+            text.textSize = 12f
+            text.gravity = Gravity.CENTER
+            text.setTextColor(0xFF1B1B1B.toInt())
+            text.alpha = if (isSelected) 1f else 0.7f
+            text.setTypeface(text.typeface, if (isSelected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
             itemView.setOnClickListener { onClick(letter) }
         }
     }

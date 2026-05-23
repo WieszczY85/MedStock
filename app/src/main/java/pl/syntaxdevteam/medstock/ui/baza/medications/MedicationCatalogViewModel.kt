@@ -113,7 +113,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 val args = mutableListOf<String>(selectedBatchId.toString())
                 when (selectedLetter) {
                     "123" -> args += "[0-9]*"
-                    "#" -> args += "[A-Z0-9a-z]*"
+                    "#" -> Unit
                     else -> args += "$selectedLetter%"
                 }
                 args += pageSize.toString()
@@ -190,7 +190,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
     private fun buildFilterClause(filter: String): String {
         return when (filter) {
             "123" -> "AND COALESCE(s.nazwa_produktu_leczniczego, '') GLOB ?"
-            "#" -> "AND COALESCE(s.nazwa_produktu_leczniczego, '') NOT GLOB ?"
+            "#" -> ""
             else -> "AND UPPER(COALESCE(s.nazwa_produktu_leczniczego, '')) LIKE ?"
         }
     }

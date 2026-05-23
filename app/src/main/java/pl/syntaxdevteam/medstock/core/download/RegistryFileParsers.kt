@@ -1,9 +1,9 @@
 package pl.syntaxdevteam.medstock.core.download
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.DataFormatter
+import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
 import org.apache.poi.xssf.eventusermodel.XSSFReader
 import org.apache.poi.xssf.model.StylesTable
@@ -143,7 +143,7 @@ class XlsRegistryFileParser : RegistryFileParser {
     override fun supports(source: RegistryFileSource): Boolean = source == RegistryFileSource.RA_XLS
 
     override fun parse(source: RegistryFileSource, file: File): ParsedRegistryFile {
-        return parseWorkbook(source, file) { stream -> HSSFWorkbook(stream) }
+        return parseWorkbook(source, file) { f -> WorkbookFactory.create(f) }
     }
 }
 
@@ -251,27 +251,34 @@ private class StreamingSheetHandler(
 private inline fun parseWorkbook(
     source: RegistryFileSource,
     file: File,
-    crossinline workbookFactory: (FileInputStream) -> org.apache.poi.ss.usermodel.Workbook
+    crossinline workbookFactory: (File) -> org.apache.poi.ss.usermodel.Workbook
 ): ParsedRegistryFile {
     return try {
         val spoolFile = File.createTempFile("registry_xls_", ".tsv")
-        FileInputStream(file).use { input ->
-            workbookFactory(input).use { workbook ->
-                val sheet = workbook.getSheetAt(0)
-                val formatter = DataFormatter()
-                val headerRow = sheet.getRow(sheet.firstRowNum)
-                val headers = headerRow?.map { formatter.formatCellValue(it) }.orEmpty()
-
-                BufferedWriter(OutputStreamWriter(spoolFile.outputStream(), Charsets.UTF_8)).use { writer ->
-                    for (index in (sheet.firstRowNum + 1)..sheet.lastRowNum) {
-                        val row = sheet.getRow(index) ?: continue
-                        val values = row.map { cell ->
-                            if (cell.cellType == CellType.BLANK) "" else formatter.formatCellValue(cell)
-                        }
-                        writer.write("$index\t${values.joinToString("\t") { it.replace("\t", " ") }}")
-                        writer.newLine()
-                    }
+        workbookFactory(file).use { workbook ->
+            val sheet = workbook.getSheetAt(0)
+            val formatter = DataFormatter()
+            val headerRow = sheet.getRow(sheet.firstRowNum)
+            val headers = headerRow?.let { row ->
+                (0 until row.lastCellNum).map { c ->
+                    val cell = row.getCell(c)
+                    if (cell == null || cell.cellType == CellType.BLANK) ""
+                    else formatter.formatCellValue(cell).replace("\t", " ")
                 }
+            }.orEmpty()
+
+            BufferedWriter(OutputStreamWriter(spoolFile.outputStream(), Charsets.UTF_8)).use { writer ->
+                for (index in (sheet.firstRowNum + 1)..sheet.lastRowNum) {
+                    val row = sheet.getRow(index) ?: continue
+                    val values = (0 until row.lastCellNum).joinToString("\t") { c ->
+                        val cell = row.getCell(c)
+                        if (cell == null || cell.cellType == CellType.BLANK) ""
+                        else formatter.formatCellValue(cell).replace("\t", " ")
+                    }
+                    writer.write("$index\t$values")
+                    writer.newLine()
+                }
+            }
 
                 val records = sequence {
                     BufferedReader(InputStreamReader(spoolFile.inputStream(), Charsets.UTF_8)).use { reader ->
@@ -287,7 +294,6 @@ private inline fun parseWorkbook(
                 }
 
                 ParsedRegistryFile(source = source, headers = headers, records = records)
-            }
         }
     } catch (exception: Exception) {
         throw RegistryFileParsingException(source, "Nie udało się sparsować arkusza", exception)
