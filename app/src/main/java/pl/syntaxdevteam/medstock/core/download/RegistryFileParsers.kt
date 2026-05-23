@@ -1,27 +1,39 @@
 package pl.syntaxdevteam.medstock.core.download
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener
+import org.apache.poi.hssf.eventusermodel.HSSFEventFactory
+import org.apache.poi.hssf.eventusermodel.HSSFRequest
+import org.apache.poi.hssf.eventusermodel.MissingRecordAwareHSSFListener
+import org.apache.poi.hssf.eventusermodel.dummyrecord.LastCellOfRowDummyRecord
+import org.apache.poi.hssf.eventusermodel.dummyrecord.MissingCellDummyRecord
+import org.apache.poi.hssf.record.BOFRecord
+import org.apache.poi.hssf.record.BoundSheetRecord
+import org.apache.poi.hssf.record.LabelSSTRecord
+import org.apache.poi.hssf.record.NumberRecord
+import org.apache.poi.hssf.record.RKRecord
+import org.apache.poi.hssf.record.Record
+import org.apache.poi.hssf.record.SSTRecord
+import org.apache.poi.hssf.record.StringRecord
+import org.apache.poi.hssf.record.FormulaRecord
+import org.apache.poi.hssf.usermodel.HSSFDataFormatter
 import org.apache.poi.openxml4j.opc.OPCPackage
-import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.DataFormatter
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
 import org.apache.poi.xssf.eventusermodel.XSSFReader
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
 import org.apache.poi.xssf.model.StylesTable
 import org.apache.poi.xssf.usermodel.XSSFComment
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.apache.poi.xssf.usermodel.XSSFRichTextString
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
+import org.xml.sax.InputSource
+import org.xml.sax.XMLReader
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.BufferedReader
+import java.io.BufferedWriter
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
-import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import javax.xml.parsers.SAXParserFactory
-import org.xml.sax.InputSource
-import org.xml.sax.XMLReader
 
 class RegistryFileParsers(
     private val parsers: List<RegistryFileParser> = listOf(
@@ -142,9 +154,8 @@ class XmlRegistryFileParser : RegistryFileParser {
 class XlsRegistryFileParser : RegistryFileParser {
     override fun supports(source: RegistryFileSource): Boolean = source == RegistryFileSource.RA_XLS
 
-    override fun parse(source: RegistryFileSource, file: File): ParsedRegistryFile {
-        return parseWorkbook(source, file) { stream -> HSSFWorkbook(stream) }
-    }
+    override fun parse(source: RegistryFileSource, file: File): ParsedRegistryFile =
+        parseXlsWorkbookStreaming(source, file)
 }
 
 class XlsxRegistryFileParser : RegistryFileParser {
@@ -208,12 +219,10 @@ private class StreamingSheetHandler(
     private val headers: MutableList<String>,
     private val writer: BufferedWriter
 ) : XSSFSheetXMLHandler.SheetContentsHandler {
-    private var currentRowNum: Int = -1
     private val currentRow = mutableMapOf<Int, String>()
     private var maxCellIndex = -1
 
     override fun startRow(rowNum: Int) {
-        currentRowNum = rowNum
         currentRow.clear()
         maxCellIndex = -1
     }
@@ -248,48 +257,148 @@ private class StreamingSheetHandler(
     }
 }
 
-private inline fun parseWorkbook(
-    source: RegistryFileSource,
-    file: File,
-    crossinline workbookFactory: (FileInputStream) -> org.apache.poi.ss.usermodel.Workbook
-): ParsedRegistryFile {
+private fun parseXlsWorkbookStreaming(source: RegistryFileSource, file: File): ParsedRegistryFile {
     return try {
-        val spoolFile = File.createTempFile("registry_xls_", ".tsv")
-        FileInputStream(file).use { input ->
-            workbookFactory(input).use { workbook ->
-                val sheet = workbook.getSheetAt(0)
-                val formatter = DataFormatter()
-                val headerRow = sheet.getRow(sheet.firstRowNum)
-                val headers = headerRow?.map { formatter.formatCellValue(it) }.orEmpty()
+        val spoolFile = File.createTempFile("ra_stream_", ".tsv")
+        val headers = mutableListOf<String>()
 
-                BufferedWriter(OutputStreamWriter(spoolFile.outputStream(), Charsets.UTF_8)).use { writer ->
-                    for (index in (sheet.firstRowNum + 1)..sheet.lastRowNum) {
-                        val row = sheet.getRow(index) ?: continue
-                        val values = row.map { cell ->
-                            if (cell.cellType == CellType.BLANK) "" else formatter.formatCellValue(cell)
-                        }
-                        writer.write("$index\t${values.joinToString("\t") { it.replace("\t", " ") }}")
-                        writer.newLine()
-                    }
+        BufferedWriter(OutputStreamWriter(spoolFile.outputStream(), Charsets.UTF_8)).use { writer ->
+            val handler = XlsSheetEventHandler(headers, writer)
+            val request = HSSFRequest()
+            val formatListener = FormatTrackingHSSFListener(handler)
+            request.addListenerForAllRecords(MissingRecordAwareHSSFListener(formatListener))
+            FileInputStream(file).use { input ->
+                HSSFEventFactory().processEvents(request, input)
+            }
+            handler.flushPendingFormulaString()
+        }
+
+        val records = sequence {
+            BufferedReader(InputStreamReader(spoolFile.inputStream(), Charsets.UTF_8)).use { reader ->
+                reader.lineSequence().forEach { line ->
+                    val firstSep = line.indexOf('\t')
+                    if (firstSep <= 0) return@forEach
+                    val rowNo = line.substring(0, firstSep).toLongOrNull() ?: return@forEach
+                    val values = line.substring(firstSep + 1).split('\t')
+                    yield(RawRegistryRecord(source = source, rowNumber = rowNo, values = values))
                 }
+            }
+            spoolFile.delete()
+        }
 
-                val records = sequence {
-                    BufferedReader(InputStreamReader(spoolFile.inputStream(), Charsets.UTF_8)).use { reader ->
-                        reader.lineSequence().forEach { line ->
-                            val firstSep = line.indexOf('\t')
-                            if (firstSep <= 0) return@forEach
-                            val rowNo = line.substring(0, firstSep).toLongOrNull() ?: return@forEach
-                            val values = line.substring(firstSep + 1).split('\t')
-                            yield(RawRegistryRecord(source = source, rowNumber = rowNo, values = values))
-                        }
-                    }
-                    spoolFile.delete()
+        ParsedRegistryFile(source = source, headers = headers, records = records)
+    } catch (exception: Exception) {
+        throw RegistryFileParsingException(source, "Nie udało się sparsować arkusza XLS strumieniowo", exception)
+    }
+}
+
+private class XlsSheetEventHandler(
+    private val headers: MutableList<String>,
+    private val writer: BufferedWriter
+) : org.apache.poi.hssf.eventusermodel.HSSFListener {
+    private var sharedStringsTable: SSTRecord? = null
+    private var currentRow = -1
+    private var currentColumn = -1
+    private var currentSheetIndex = -1
+    private var targetSheetIndex = 0
+    private var inTargetSheet = false
+    private var outputNextStringRecord = false
+    private var pendingFormulaStringCol = -1
+    private val rowValues = mutableMapOf<Int, String>()
+    private var maxCellIndex = -1
+
+    override fun processRecord(record: Record) {
+        when (record.sid.toInt()) {
+            BoundSheetRecord.sid.toInt() -> currentSheetIndex += 1
+            BOFRecord.sid.toInt() -> {
+                val bof = record as BOFRecord
+                if (bof.type == BOFRecord.TYPE_WORKSHEET) {
+                    inTargetSheet = currentSheetIndex == targetSheetIndex
                 }
-
-                ParsedRegistryFile(source = source, headers = headers, records = records)
+            }
+            SSTRecord.sid.toInt() -> sharedStringsTable = record as SSTRecord
+            FormulaRecord.sid.toInt() -> handleFormulaRecord(record as FormulaRecord)
+            StringRecord.sid.toInt() -> handleStringRecord(record as StringRecord)
+            LabelSSTRecord.sid.toInt() -> {
+                if (!inTargetSheet) return
+                val label = record as LabelSSTRecord
+                putValue(label.row.toInt(), label.column.toInt(), sharedStringsTable?.getString(label.sstIndex)?.string.orEmpty())
+            }
+            NumberRecord.sid.toInt() -> {
+                if (!inTargetSheet) return
+                val number = record as NumberRecord
+                putValue(number.row.toInt(), number.column.toInt(), HSSFDataFormatter().formatRawCellContents(number.value, -1, null))
+            }
+            RKRecord.sid.toInt() -> {
+                if (!inTargetSheet) return
+                val rk = record as RKRecord
+                putValue(rk.row.toInt(), rk.column.toInt(), rk.rkNumber.toString())
             }
         }
-    } catch (exception: Exception) {
-        throw RegistryFileParsingException(source, "Nie udało się sparsować arkusza", exception)
+
+        if (!inTargetSheet) return
+        when (record) {
+            is MissingCellDummyRecord -> {
+                currentRow = record.row
+                currentColumn = record.column
+                if (currentColumn > maxCellIndex) maxCellIndex = currentColumn
+            }
+            is LastCellOfRowDummyRecord -> {
+                flushRow(record.row)
+            }
+        }
+    }
+
+    private fun handleFormulaRecord(record: FormulaRecord) {
+        if (!inTargetSheet) return
+        val hasString = java.lang.Double.isNaN(record.value)
+        if (hasString) {
+            outputNextStringRecord = true
+            pendingFormulaStringCol = record.column.toInt()
+            currentRow = record.row.toInt()
+        } else {
+            putValue(
+                record.row.toInt(),
+                record.column.toInt(),
+                HSSFDataFormatter().formatRawCellContents(record.value, -1, null)
+            )
+        }
+    }
+
+    private fun handleStringRecord(record: StringRecord) {
+        if (!inTargetSheet || !outputNextStringRecord) return
+        putValue(currentRow, pendingFormulaStringCol, record.string)
+        outputNextStringRecord = false
+        pendingFormulaStringCol = -1
+    }
+
+    fun flushPendingFormulaString() {
+        outputNextStringRecord = false
+        pendingFormulaStringCol = -1
+    }
+
+    private fun putValue(row: Int, col: Int, value: String) {
+        if (row != currentRow) {
+            currentRow = row
+        }
+        currentColumn = col
+        rowValues[col] = value.replace("\t", " ")
+        if (col > maxCellIndex) maxCellIndex = col
+    }
+
+    private fun flushRow(rowNum: Int) {
+        if (rowValues.isEmpty() && maxCellIndex < 0) return
+
+        if (rowNum == 0) {
+            headers.clear()
+            for (idx in 0..maxCellIndex) headers += rowValues[idx].orEmpty()
+        } else {
+            val values = (0..maxCellIndex).joinToString("\t") { idx -> rowValues[idx].orEmpty() }
+            writer.write("$rowNum\t$values")
+            writer.newLine()
+        }
+
+        rowValues.clear()
+        maxCellIndex = -1
     }
 }

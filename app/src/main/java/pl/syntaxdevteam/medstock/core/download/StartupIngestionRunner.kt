@@ -28,7 +28,7 @@ class StartupIngestionRunner(private val context: Context) {
         val sourcePlans = listOf(
             listOf(RegistryFileSource.RDG_XML),
             listOf(RegistryFileSource.RPL_XLSX, RegistryFileSource.RPL_CSV),
-            listOf(RegistryFileSource.RA_XLS, RegistryFileSource.RA_CSV)
+            listOf(RegistryFileSource.RA_CSV, RegistryFileSource.RA_XLS)
         )
         val totalPlans = sourcePlans.size
         var completedPlans = 0
