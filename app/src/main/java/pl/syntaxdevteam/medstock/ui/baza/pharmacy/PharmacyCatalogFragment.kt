@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -119,13 +120,25 @@ private class PharmacyCatalogViewHolder(view: View) : RecyclerView.ViewHolder(vi
     fun bind(item: PharmacyCatalogEntry) {
         val context = itemView.context
         title.text = item.name.ifBlank { context.getString(R.string.pharmacy_catalog_missing_name) }
-        subtitle.text = item.status.ifBlank { context.getString(R.string.pharmacy_catalog_missing_status) }
+        subtitle.text = item.city.ifBlank { context.getString(R.string.pharmacy_catalog_missing_city) }
         details.text = context.getString(
             R.string.pharmacy_catalog_details,
-            item.city.ifBlank { "—" },
             item.street.ifBlank { "—" },
-            item.buildingNumber.ifBlank { "—" }
+            item.buildingNumber.ifBlank { "—" },
+            item.unitNumber.ifBlank { "—" },
+            item.status.ifBlank { context.getString(R.string.pharmacy_catalog_missing_status) }
         )
+
+        val isInactive = item.status.contains("nieakty", ignoreCase = true) ||
+            item.status.contains("inactive", ignoreCase = true)
+        val textColor = ContextCompat.getColor(
+            context,
+            if (isInactive) android.R.color.darker_gray else android.R.color.black
+        )
+        title.setTextColor(textColor)
+        subtitle.setTextColor(textColor)
+        details.setTextColor(textColor)
+        itemView.alpha = if (isInactive) 0.72f else 1f
     }
 }
 

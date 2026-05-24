@@ -17,7 +17,8 @@ data class PharmacyCatalogEntry(
     val status: String,
     val city: String,
     val street: String,
-    val buildingNumber: String
+    val buildingNumber: String,
+    val unitNumber: String
 )
 
 data class PharmacyCatalogUiState(
@@ -131,13 +132,16 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                            COALESCE(s.stan_apteki, ''),
                            COALESCE(s.miejscowosc, ''),
                            TRIM(COALESCE(s.typ_ulicy, '') || ' ' || COALESCE(s.nazwa_ulicy, '')),
-                           COALESCE(s.numer_budynku, '')
+                           COALESCE(s.numer_budynku, ''),
+                           COALESCE(s.numer_lokalu, '')
                     FROM registry_ra_snapshot s
                     WHERE s.batch_id = ?
                       $clause
                       $searchClause
                     ORDER BY COALESCE(s.miejscowosc, '') COLLATE NOCASE ASC,
                              COALESCE(s.nazwa_ulicy, '') COLLATE NOCASE ASC,
+                             COALESCE(s.numer_budynku, '') COLLATE NOCASE ASC,
+                             COALESCE(s.numer_lokalu, '') COLLATE NOCASE ASC,
                              COALESCE(s.nazwa_apteki, '') COLLATE NOCASE ASC
                     LIMIT ? OFFSET ?
                     """.trimIndent(),
@@ -158,7 +162,8 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                             status = cursor.getString(2).orEmpty(),
                             city = cursor.getString(3).orEmpty(),
                             street = cursor.getString(4).orEmpty(),
-                            buildingNumber = cursor.getString(5).orEmpty()
+                            buildingNumber = cursor.getString(5).orEmpty(),
+                            unitNumber = cursor.getString(6).orEmpty()
                         )
                     } while (cursor.moveToNext())
 

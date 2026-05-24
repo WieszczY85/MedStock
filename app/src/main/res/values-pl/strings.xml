@@ -71,6 +71,7 @@
     <string name="pharmacy_catalog_summary">Ilość aptek: %1$d \n Ostatnia aktualizacja: %2$s</string>
     <string name="pharmacy_catalog_missing_name">Apteka bez nazwy</string>
     <string name="pharmacy_catalog_missing_status">Brak statusu</string>
-    <string name="pharmacy_catalog_details">Miasto: %1$s • Ulica: %2$s • Budynek: %3$s</string>
+    <string name="pharmacy_catalog_details">Ulica: %1$s • Budynek: %2$s • Lokal: %3$s • Status: %4$s</string>
+    <string name="pharmacy_catalog_missing_city">Brak miejscowości</string>
     <string name="pharmacy_catalog_search_hint">Szukaj po nazwie apteki</string>
 </resources>
