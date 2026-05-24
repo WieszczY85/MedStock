@@ -6,7 +6,7 @@
     <string name="navigation_drawer_open">Otwórz menu nawigacyjne</string>
     <string name="navigation_drawer_close">Zamknij menu nawigacyjne</string>
     <string name="nav_header_title">@string/app_name</string>
-    <string name="nav_header_subtitle">wieszczy85@gmail.com</string>
+    <string name="nav_header_subtitle">by WieszczY (SyntaxDevTeam)</string>
     <string name="nav_header_desc">Nagłówek nawigacji</string>
     <string name="action_settings">Ustawienia</string>
 
