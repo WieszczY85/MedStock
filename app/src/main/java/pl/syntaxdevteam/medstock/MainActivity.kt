@@ -16,12 +16,12 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
-import com.google.android.material.snackbar.Snackbar
 import pl.syntaxdevteam.medstock.core.download.StartupIngestionRunner
 import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment
 import pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment
+import pl.syntaxdevteam.medstock.ui.transform.TransformFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,7 +35,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.appBarMain.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        binding.appBarMain.fab?.setOnClickListener { view ->
+        binding.appBarMain.fab?.setOnClickListener {
+            val navController = findNavController(R.id.nav_host_fragment_content_main)
             val currentFragment = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as? NavHostFragment)
                 ?.childFragmentManager
                 ?.primaryNavigationFragment
@@ -43,10 +44,8 @@ class MainActivity : AppCompatActivity() {
                 currentFragment.toggleSearch()
             } else if (currentFragment is PharmacyCatalogFragment) {
                 currentFragment.toggleSearch()
-            } else {
-                Snackbar.make(view, getString(R.string.snackbar_placeholder_action), Snackbar.LENGTH_LONG)
-                    .setAction(getString(R.string.common_action), null)
-                    .setAnchorView(R.id.fab).show()
+            } else if (currentFragment is TransformFragment) {
+                navController.navigate(R.id.nav_medication_editor)
             }
         }
 
@@ -93,12 +92,29 @@ class MainActivity : AppCompatActivity() {
                     titleToolbar.subtitle = getString(R.string.menu_alerty_przypomnienia)
                 }
 
+                R.id.nav_transform -> {
+                    titleToolbar.title = getString(R.string.menu_transform)
+                    titleToolbar.subtitle = getString(R.string.transform_subtitle)
+                    binding.appBarMain.fab?.setImageResource(android.R.drawable.ic_input_add)
+                    binding.appBarMain.fab?.contentDescription = getString(R.string.fab_add_medication_content_description)
+                }
+
+                R.id.nav_medication_editor -> {
+                    titleToolbar.title = getString(R.string.medication_editor_title)
+                    titleToolbar.subtitle = getString(R.string.transform_subtitle)
+                    binding.appBarMain.fab?.hide()
+                }
+
                 else -> {
                     titleToolbar.title = destination.label ?: getString(R.string.app_name)
                     titleToolbar.subtitle = null
                     binding.appBarMain.fab?.setImageResource(android.R.drawable.ic_dialog_email)
                     binding.appBarMain.fab?.contentDescription = getString(R.string.fab_content_description)
                 }
+            }
+
+            if (destination.id != R.id.nav_medication_editor) {
+                binding.appBarMain.fab?.show()
             }
         }
 

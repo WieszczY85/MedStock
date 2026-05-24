@@ -41,6 +41,9 @@
     <string name="common_action">Action</string>
     <string name="transform_item_label">This is item # %1$d</string>
 
+    <string name="medication_name_hint">Medication name, e.g. Ibuprofen 200 mg</string>
+    <string name="add_medication">Add medication</string>
+    <string name="medication_name_required">Enter a medication name first.</string>
     <string name="preloader_status_init">Preparing startup synchronization…</string>
     <string name="preloader_status_download">Downloading source: %1$s</string>
     <string name="preloader_status_parse">Parsing file: %1$s</string>
@@ -77,4 +80,14 @@
     <string name="pharmacy_catalog_find_on_map">Find on map</string>
     <string name="pharmacy_catalog_missing_address">No address data for this pharmacy.</string>
     <string name="pharmacy_catalog_map_unavailable">No map app available on this device.</string>
+
+    <string name="transform_summary">Medication count: %1$d</string>
+    <string name="transform_subtitle">Your medication list</string>
+    <string name="fab_add_medication_content_description">Add medication to your list</string>
+    <string name="medication_editor_title">Medication form</string>
+    <string name="medication_note_hint">Note, dosage, schedule</string>
+    <string name="medication_editor_add">Add to list</string>
+    <string name="medication_editor_save">Save changes</string>
+    <string name="medication_editor_required">Name and note are required.</string>
+
 </resources>

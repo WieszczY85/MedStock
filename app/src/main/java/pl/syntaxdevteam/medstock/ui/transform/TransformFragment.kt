@@ -4,101 +4,81 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import pl.syntaxdevteam.medstock.R
 import pl.syntaxdevteam.medstock.databinding.FragmentTransformBinding
-import pl.syntaxdevteam.medstock.databinding.ItemTransformBinding
 
-/**
- * Fragment that demonstrates a responsive layout pattern where the format of the content
- * transforms depending on the size of the screen. Specifically this Fragment shows items in
- * the [RecyclerView] using LinearLayoutManager in a small screen
- * and shows items using GridLayoutManager in a large screen.
- */
 class TransformFragment : Fragment() {
 
     private var _binding: FragmentTransformBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
+    private val transformViewModel: TransformViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val transformViewModel = ViewModelProvider(this).get(TransformViewModel::class.java)
         _binding = FragmentTransformBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
-        val recyclerView = binding.recyclerviewTransform
-        val adapter = TransformAdapter()
-        recyclerView.adapter = adapter
-        transformViewModel.itemNumbers.observe(viewLifecycleOwner) {
-            adapter.submitList(it)
+        val adapter = TransformAdapter { index ->
+            findNavController().navigate(
+                R.id.nav_medication_editor,
+                Bundle().apply { putInt(MedicationEditorFragment.ARG_MEDICATION_INDEX, index) }
+            )
         }
-        return root
+        binding.recyclerviewTransform.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerviewTransform.adapter = adapter
+
+        transformViewModel.itemNumbers.observe(viewLifecycleOwner) { medications ->
+            binding.textTransformSummary.text = getString(R.string.transform_summary, medications.size)
+            adapter.submitList(medications)
+        }
+
+        return binding.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+}
 
-    class TransformAdapter :
-        ListAdapter<Int, TransformViewHolder>(object : DiffUtil.ItemCallback<Int>() {
+private class TransformAdapter(
+    private val onClick: (Int) -> Unit
+) : RecyclerView.Adapter<TransformViewHolder>() {
+    private val items = mutableListOf<UserMedication>()
 
-            override fun areItemsTheSame(oldItem: Int, newItem: Int): Boolean =
-                oldItem == newItem
-
-            override fun areContentsTheSame(oldItem: Int, newItem: Int): Boolean =
-                oldItem == newItem
-        }) {
-
-        private val drawables = listOf(
-            R.drawable.avatar_1,
-            R.drawable.avatar_2,
-            R.drawable.avatar_3,
-            R.drawable.avatar_4,
-            R.drawable.avatar_5,
-            R.drawable.avatar_6,
-            R.drawable.avatar_7,
-            R.drawable.avatar_8,
-            R.drawable.avatar_9,
-            R.drawable.avatar_10,
-            R.drawable.avatar_11,
-            R.drawable.avatar_12,
-            R.drawable.avatar_13,
-            R.drawable.avatar_14,
-            R.drawable.avatar_15,
-            R.drawable.avatar_16,
-        )
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransformViewHolder {
-            val binding = ItemTransformBinding.inflate(LayoutInflater.from(parent.context))
-            return TransformViewHolder(binding)
-        }
-
-        override fun onBindViewHolder(holder: TransformViewHolder, position: Int) {
-            holder.textView.text = holder.itemView.context.getString(R.string.transform_item_label, getItem(position))
-            holder.imageView.setImageDrawable(
-                ResourcesCompat.getDrawable(holder.imageView.resources, drawables[position], null)
-            )
-        }
+    fun submitList(data: List<UserMedication>) {
+        items.clear()
+        items.addAll(data)
+        notifyDataSetChanged()
     }
 
-    class TransformViewHolder(binding: ItemTransformBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransformViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_user_medication, parent, false)
+        return TransformViewHolder(view)
+    }
 
-        val imageView: ImageView = binding.imageViewItemTransform
-        val textView: TextView = binding.textViewItemTransform
+    override fun onBindViewHolder(holder: TransformViewHolder, position: Int) {
+        holder.bind(items[position]) { onClick(position) }
+    }
+
+    override fun getItemCount(): Int = items.size
+}
+
+private class TransformViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    private val name: TextView = view.findViewById(R.id.text_user_medication_name)
+    private val note: TextView = view.findViewById(R.id.text_user_medication_note)
+
+    fun bind(item: UserMedication, onClick: () -> Unit) {
+        name.text = item.name
+        note.text = item.note
+        itemView.setOnClickListener { onClick() }
     }
 }

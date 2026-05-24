@@ -41,6 +41,9 @@
     <string name="common_action">Akcja</string>
     <string name="transform_item_label">To jest element nr %1$d</string>
 
+    <string name="medication_name_hint">Nazwa leku, np. Ibuprofen 200 mg</string>
+    <string name="add_medication">Dodaj lek</string>
+    <string name="medication_name_required">Najpierw wpisz nazwę leku.</string>
     <string name="preloader_status_init">Przygotowywanie synchronizacji startowej…</string>
     <string name="preloader_status_download">Pobieranie źródła: %1$s</string>
     <string name="preloader_status_parse">Parsowanie pliku: %1$s</string>
@@ -77,4 +80,14 @@
     <string name="pharmacy_catalog_find_on_map">Znajdź na mapie</string>
     <string name="pharmacy_catalog_missing_address">Brak danych adresowych tej apteki.</string>
     <string name="pharmacy_catalog_map_unavailable">Brak aplikacji map na tym urządzeniu.</string>
+
+    <string name="transform_summary">Liczba leków: %1$d</string>
+    <string name="transform_subtitle">Twoja lista leków</string>
+    <string name="fab_add_medication_content_description">Dodaj lek do listy</string>
+    <string name="medication_editor_title">Formularz leku</string>
+    <string name="medication_note_hint">Notatka, dawkowanie, harmonogram</string>
+    <string name="medication_editor_add">Dodaj do listy</string>
+    <string name="medication_editor_save">Zapisz zmiany</string>
+    <string name="medication_editor_required">Nazwa i notatka są wymagane.</string>
+
 </resources>
