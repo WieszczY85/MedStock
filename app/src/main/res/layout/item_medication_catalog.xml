@@ -21,9 +21,18 @@
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
     <TextView
-        android:id="@+id/text_medication_details"
+        android:id="@+id/text_medication_collapsed_hint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:text="@string/medication_catalog_expand_hint"
+        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+    <TextView
+        android:id="@+id/text_medication_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:visibility="gone"
         android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 </LinearLayout>

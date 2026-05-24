@@ -8,14 +8,35 @@
             android:id="@+id/nav_transform"
             android:icon="@drawable/ic_list_black_24dp"
             android:title="@string/menu_transform" />
+
         <item
-            android:id="@+id/nav_baza_leki_screen"
+            android:id="@+id/nav_baza_group"
             android:icon="@drawable/ic_database_black_24dp"
-            android:title="@string/menu_baza_nav" />
+            android:title="@string/menu_baza_nav">
+            <menu>
+                <item
+                    android:id="@+id/nav_baza_leki_screen"
+                    android:title="@string/menu_baza_leki" />
+                <item
+                    android:id="@+id/nav_baza_apteki_screen"
+                    android:title="@string/menu_baza_apteki" />
+            </menu>
+        </item>
+
         <item
-            android:id="@+id/nav_alerty_lista_screen"
+            android:id="@+id/nav_alerty_group"
             android:icon="@drawable/ic_notifications_black_24dp"
-            android:title="@string/menu_alerty_nav" />
+            android:title="@string/menu_alerty_nav">
+            <menu>
+                <item
+                    android:id="@+id/nav_alerty_lista_screen"
+                    android:title="@string/menu_alerty_lista" />
+                <item
+                    android:id="@+id/nav_alerty_przypomnienia_screen"
+                    android:title="@string/menu_alerty_przypomnienia" />
+            </menu>
+        </item>
+
         <item
             android:id="@+id/nav_account"
             android:icon="@drawable/avatar_1"

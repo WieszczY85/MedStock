@@ -58,7 +58,13 @@
     <string name="medication_catalog_missing_name">Lek bez nazwy</string>
     <string name="medication_catalog_missing_common_name">Brak nazwy powszechnej</string>
 
-    <string name="medication_catalog_details">Dawka: %1$s • EAN: %2$s • Opakowanie: %3$s</string>
+    <string name="medication_catalog_collapsed_subtitle">%1$s • %2$s</string>
+    <string name="medication_catalog_expanded_subtitle">%1$s • %2$s • %3$s</string>
+    <string name="medication_catalog_expand_hint">Kliknij aby zobaczyć więcej…</string>
+    <string name="medication_catalog_responsible_entity">Podmiot odpowiedzialny: %1$s</string>
+    <string name="medication_catalog_packages_header">Opakowanie:</string>
+    <string name="medication_catalog_package_row">%1$s - %2$s</string>
+    <string name="medication_catalog_package_unknown">Brak danych o opakowaniu</string>
     <string name="medication_catalog_search_hint">Szukaj po nazwie lub substancji czynnej</string>
     <string name="pharmacy_catalog_loading">Wczytywanie katalogu aptek z lokalnej bazy…</string>
     <string name="pharmacy_catalog_empty">Brak zapisanych rekordów aptek w lokalnej bazie.</string>

@@ -91,6 +91,7 @@ private fun buildAlphabetFilter(): List<String> = listOf("#", "123") + ('A'..'Z'
 
 private class MedicationCatalogAdapter : RecyclerView.Adapter<MedicationCatalogViewHolder>() {
     private val items = mutableListOf<MedicationCatalogEntry>()
+    private val expandedKeys = mutableSetOf<String>()
 
     fun submitList(data: List<MedicationCatalogEntry>) {
         items.clear()
@@ -105,7 +106,13 @@ private class MedicationCatalogAdapter : RecyclerView.Adapter<MedicationCatalogV
     }
 
     override fun onBindViewHolder(holder: MedicationCatalogViewHolder, position: Int) {
-        holder.bind(items[position])
+        val item = items[position]
+        holder.bind(item, expandedKeys.contains(item.entityKey)) {
+            if (!expandedKeys.add(item.entityKey)) {
+                expandedKeys.remove(item.entityKey)
+            }
+            notifyItemChanged(position)
+        }
     }
 
     override fun getItemCount(): Int = items.size
@@ -114,9 +121,10 @@ private class MedicationCatalogAdapter : RecyclerView.Adapter<MedicationCatalogV
 private class MedicationCatalogViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val title: TextView = view.findViewById(R.id.text_medication_title)
     private val subtitle: TextView = view.findViewById(R.id.text_medication_common_name)
+    private val collapsedHint: TextView = view.findViewById(R.id.text_medication_collapsed_hint)
     private val details: TextView = view.findViewById(R.id.text_medication_details)
 
-    fun bind(item: MedicationCatalogEntry) {
+    fun bind(item: MedicationCatalogEntry, expanded: Boolean, onClick: () -> Unit) {
         val context = itemView.context
         val medicationName = item.displayName.ifBlank {
             context.getString(R.string.medication_catalog_missing_name)
@@ -124,15 +132,38 @@ private class MedicationCatalogViewHolder(view: View) : RecyclerView.ViewHolder(
         val commonName = item.commonName.ifBlank {
             context.getString(R.string.medication_catalog_missing_common_name)
         }
-
         title.text = medicationName
-        subtitle.text = commonName
-        details.text = context.getString(
-            R.string.medication_catalog_details,
-            item.dose.ifBlank { "—" },
-            item.ean.ifBlank { "—" },
-            item.packageSize.ifBlank { "—" }
-        )
+        subtitle.text = if (expanded) {
+            context.getString(
+                R.string.medication_catalog_expanded_subtitle,
+                commonName,
+                item.dose.ifBlank { "—" },
+                item.route.ifBlank { "—" }
+            )
+        } else {
+            context.getString(
+                R.string.medication_catalog_collapsed_subtitle,
+                commonName,
+                item.dose.ifBlank { "—" }
+            )
+        }
+        collapsedHint.visibility = if (expanded) View.GONE else View.VISIBLE
+        details.visibility = if (expanded) View.VISIBLE else View.GONE
+        details.text = buildString {
+            append(context.getString(R.string.medication_catalog_responsible_entity, item.responsibleEntity.ifBlank { "—" }))
+            append("\n")
+            append(context.getString(R.string.medication_catalog_packages_header))
+            if (item.packages.isEmpty()) {
+                append("\n• ")
+                append(context.getString(R.string.medication_catalog_package_unknown))
+            } else {
+                item.packages.forEach { pkg ->
+                    append("\n• ")
+                    append(context.getString(R.string.medication_catalog_package_row, pkg.ean, pkg.quantity))
+                }
+            }
+        }
+        itemView.setOnClickListener { onClick() }
     }
 }
 

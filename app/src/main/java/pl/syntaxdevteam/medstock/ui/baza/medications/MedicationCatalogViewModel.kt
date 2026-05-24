@@ -17,8 +17,14 @@ data class MedicationCatalogEntry(
     val displayName: String,
     val commonName: String,
     val dose: String,
+    val route: String,
+    val responsibleEntity: String,
+    val packages: List<MedicationPackageInfo>
+)
+
+data class MedicationPackageInfo(
     val ean: String,
-    val packageSize: String
+    val quantity: String
 )
 
 data class MedicationCatalogUiState(
@@ -143,6 +149,8 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                        COALESCE(s.nazwa_produktu_leczniczego, ''),
                        COALESCE(s.substancja_czynna, ''),
                        COALESCE(s.moc, ''),
+                       COALESCE(s.droga_podania_gatunek_tkanka_okres_karencji, ''),
+                       COALESCE(s.podmiot_odpowiedzialny, ''),
                        COALESCE(s.kod_ean, ''),
                        COALESCE(s.opakowanie, '')
                 FROM registry_rpl_snapshot s
@@ -171,8 +179,12 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                         displayName = cursor.getString(1).orEmpty(),
                         commonName = cursor.getString(2).orEmpty(),
                         dose = cursor.getString(3).orEmpty(),
-                        ean = cursor.getString(4).orEmpty(),
-                        packageSize = cursor.getString(5).orEmpty()
+                        route = cursor.getString(4).orEmpty(),
+                        responsibleEntity = cursor.getString(5).orEmpty(),
+                        packages = parsePackageInfo(
+                            kodEan = cursor.getString(6).orEmpty(),
+                            opakowanie = cursor.getString(7).orEmpty()
+                        )
                     )
                 } while (cursor.moveToNext())
 
@@ -279,5 +291,35 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
         db.rawQuery(sql, args).use { cursor ->
             return if (cursor.moveToFirst()) cursor.getInt(0) else 0
         }
+    }
+
+    private fun parsePackageInfo(kodEan: String, opakowanie: String): List<MedicationPackageInfo> {
+        val lines = opakowanie.lines().map { it.trim() }.filter { it.isNotBlank() }
+        val packages = mutableListOf<MedicationPackageInfo>()
+        var pendingEan: String? = null
+        for (line in lines) {
+            val eanCandidate = line.substringBefore("¦").trim()
+            if (eanCandidate.matches(Regex("\\d{8,14}"))) {
+                pendingEan = eanCandidate
+                continue
+            }
+            val quantityCandidate = line.substringBefore("¦").trim()
+            if (pendingEan != null && quantityCandidate.matches(Regex(".*\\d.*"))) {
+                packages += MedicationPackageInfo(
+                    ean = pendingEan,
+                    quantity = quantityCandidate
+                )
+                pendingEan = null
+            }
+        }
+        if (packages.isEmpty() && kodEan.isNotBlank()) {
+            return listOf(
+                MedicationPackageInfo(
+                    ean = kodEan.trim(),
+                    quantity = getApplication<Application>().getString(R.string.medication_catalog_package_unknown)
+                )
+            )
+        }
+        return packages
     }
 }
