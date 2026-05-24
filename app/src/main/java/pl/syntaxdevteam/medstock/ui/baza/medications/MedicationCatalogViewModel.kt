@@ -37,6 +37,7 @@ data class MedicationCatalogUiState(
 
 class MedicationCatalogViewModel(application: Application) : AndroidViewModel(application) {
     private val tag = "MedicationCatalogVM"
+    private val polishLocale = Locale.forLanguageTag("pl-PL")
 
     private val pageSize = 20
     private var snapshotDate: String? = null
@@ -137,8 +138,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 }
                 val searchClause = buildSearchClause(searchQuery, searchMode)
                 if (searchQuery.isNotBlank()) {
-                    val pattern = "%${searchQuery.uppercase(Locale.ROOT)}%"
-                    args += pattern
+                    args += buildSearchPatterns(searchQuery)
                 }
                 args += pageSize.toString()
                 args += offset.toString()
@@ -232,7 +232,23 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
             SearchMode.NAME -> "nazwa_produktu_leczniczego"
             SearchMode.SUBSTANCE -> "substancja_czynna"
         }
-        return "AND UPPER(COALESCE(s.$targetColumn, '')) LIKE ?"
+        return """
+            AND (
+                COALESCE(s.$targetColumn, '') LIKE ?
+                OR COALESCE(s.$targetColumn, '') LIKE ?
+                OR COALESCE(s.$targetColumn, '') LIKE ?
+            )
+        """.trimIndent()
+    }
+
+    private fun buildSearchPatterns(query: String): List<String> {
+        val trimmed = query.trim()
+        if (trimmed.isBlank()) return emptyList()
+        return listOf(
+            "%$trimmed%",
+            "%${trimmed.lowercase(polishLocale)}%",
+            "%${trimmed.uppercase(polishLocale)}%"
+        )
     }
 
     private fun resolveSearchMode(

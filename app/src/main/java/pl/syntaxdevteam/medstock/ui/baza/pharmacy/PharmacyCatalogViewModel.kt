@@ -31,12 +31,14 @@ data class PharmacyCatalogUiState(
 
 class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(application) {
     private val pageSize = 20
+    private val polishLocale = Locale.forLanguageTag("pl-PL")
     private var snapshotDate: String? = null
     private var snapshotBatchId: Long? = null
     private var recordCount: Int = 0
     private var offset: Int = 0
     private var selectedLetter: String = "#"
     private var searchQuery: String = ""
+    private var searchMode: SearchMode = SearchMode.CITY
     @Volatile private var isPageLoading: Boolean = false
     private val loadedItems = mutableListOf<PharmacyCatalogEntry>()
 
@@ -66,6 +68,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
         val normalized = query.trim()
         if (normalized == searchQuery) return
         searchQuery = normalized
+        searchMode = SearchMode.CITY
         reloadCatalog()
     }
 
@@ -120,8 +123,11 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                     else -> args += "$selectedLetter%"
                 }
 
-                val searchClause = if (searchQuery.isBlank()) "" else "AND UPPER(COALESCE(s.nazwa_apteki, '')) LIKE ?"
-                if (searchQuery.isNotBlank()) args += "%${searchQuery.uppercase(Locale.ROOT)}%"
+                if (searchQuery.isNotBlank() && reset) {
+                    searchMode = resolveSearchMode(db, selectedBatchId, selectedLetter, searchQuery)
+                }
+                val searchClause = buildSearchClause(searchQuery, searchMode)
+                if (searchQuery.isNotBlank()) args += buildSearchPatterns(searchQuery)
                 args += pageSize.toString()
                 args += offset.toString()
 
@@ -195,14 +201,77 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
     }
 
     private fun buildFilterClause(filter: String): String = when (filter) {
-        "123" -> "AND COALESCE(s.nazwa_apteki, '') GLOB ?"
+        "123" -> "AND COALESCE(s.miejscowosc, '') GLOB ?"
         "#" -> ""
-        else -> "AND UPPER(COALESCE(s.nazwa_apteki, '')) LIKE ?"
+        else -> "AND UPPER(COALESCE(s.miejscowosc, '')) LIKE ?"
     }
 
-    private fun scalarInt(db: android.database.sqlite.SQLiteDatabase, sql: String): Int {
-        db.rawQuery(sql, emptyArray()).use { cursor ->
+    private fun buildSearchClause(query: String, mode: SearchMode): String {
+        if (query.isBlank()) return ""
+        val targetColumn = when (mode) {
+            SearchMode.CITY -> "miejscowosc"
+            SearchMode.STREET -> "nazwa_ulicy"
+        }
+        return """
+            AND (
+                COALESCE(s.$targetColumn, '') LIKE ?
+                OR COALESCE(s.$targetColumn, '') LIKE ?
+                OR COALESCE(s.$targetColumn, '') LIKE ?
+            )
+        """.trimIndent()
+    }
+
+    private fun scalarInt(db: android.database.sqlite.SQLiteDatabase, sql: String, args: Array<String> = emptyArray()): Int {
+        db.rawQuery(sql, args).use { cursor ->
             return if (cursor.moveToFirst()) cursor.getInt(0) else 0
         }
+    }
+
+    private fun buildSearchPatterns(query: String): List<String> {
+        val trimmed = query.trim()
+        if (trimmed.isBlank()) return emptyList()
+        return listOf(
+            "%$trimmed%",
+            "%${trimmed.lowercase(polishLocale)}%",
+            "%${trimmed.uppercase(polishLocale)}%"
+        )
+    }
+
+    private fun resolveSearchMode(
+        db: android.database.sqlite.SQLiteDatabase,
+        batchId: Long,
+        letterFilter: String,
+        query: String
+    ): SearchMode {
+        val letterClause = buildFilterClause(letterFilter)
+        val args = mutableListOf<String>(batchId.toString())
+        when (letterFilter) {
+            "123" -> args += "[0-9]*"
+            "#" -> Unit
+            else -> args += "$letterFilter%"
+        }
+        args += buildSearchPatterns(query)
+
+        val cityMatches = scalarInt(
+            db,
+            """
+            SELECT COUNT(*)
+            FROM registry_ra_snapshot s
+            WHERE s.batch_id = ?
+              $letterClause
+              AND (
+                  COALESCE(s.miejscowosc, '') LIKE ?
+                  OR COALESCE(s.miejscowosc, '') LIKE ?
+                  OR COALESCE(s.miejscowosc, '') LIKE ?
+              )
+            """.trimIndent(),
+            args.toTypedArray()
+        )
+        return if (cityMatches > 0) SearchMode.CITY else SearchMode.STREET
+    }
+
+    private enum class SearchMode {
+        CITY,
+        STREET
     }
 }
