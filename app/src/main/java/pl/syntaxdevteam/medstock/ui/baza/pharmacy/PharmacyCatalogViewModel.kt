@@ -88,8 +88,10 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                         """
                         SELECT id, snapshot_date_utc
                         FROM registry_import_batch
-                        WHERE source_code = 'RA_XLS'
-                        ORDER BY snapshot_date_utc DESC, id DESC
+                        WHERE source_code IN ('RA_CSV', 'RA_XLS')
+                        ORDER BY snapshot_date_utc DESC,
+                                 CASE WHEN source_code = 'RA_XLS' THEN 0 ELSE 1 END,
+                                 id DESC
                         LIMIT 1
                         """.trimIndent(),
                         emptyArray()
