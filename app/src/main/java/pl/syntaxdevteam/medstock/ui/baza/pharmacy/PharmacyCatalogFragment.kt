@@ -1,10 +1,13 @@
 package pl.syntaxdevteam.medstock.ui.baza.pharmacy
 
 import android.os.Bundle
+import android.net.Uri
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -29,7 +32,7 @@ class PharmacyCatalogFragment : Fragment() {
 
         _binding = FragmentPharmacyCatalogBinding.inflate(inflater, container, false)
 
-        val listAdapter = PharmacyCatalogAdapter()
+        val listAdapter = PharmacyCatalogAdapter { item -> openPharmacyInGoogleMaps(item) }
         val lettersAdapter = PharmacyLettersAdapter { letter -> pharmacyCatalogViewModel.onLetterSelected(letter) }
         binding.recyclerPharmacyCatalog.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerPharmacyCatalog.adapter = listAdapter
@@ -86,11 +89,54 @@ class PharmacyCatalogFragment : Fragment() {
             searchView.clearFocus()
         }
     }
+
+    private fun openPharmacyInGoogleMaps(item: PharmacyCatalogEntry) {
+        val query = buildMapQuery(item)
+        if (query.isBlank()) {
+            Toast.makeText(requireContext(), R.string.pharmacy_catalog_missing_address, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uri = Uri.parse("geo:0,0?q=${Uri.encode(query)}")
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            setPackage("com.google.android.apps.maps")
+        }
+
+        val packageManager = requireContext().packageManager
+        when {
+            intent.resolveActivity(packageManager) != null -> startActivity(intent)
+            Intent(Intent.ACTION_VIEW, uri).resolveActivity(packageManager) != null -> {
+                startActivity(Intent(Intent.ACTION_VIEW, uri))
+            }
+
+            else -> Toast.makeText(requireContext(), R.string.pharmacy_catalog_map_unavailable, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun buildMapQuery(item: PharmacyCatalogEntry): String {
+        val addressParts = listOf(
+            item.street,
+            item.buildingNumber,
+            item.unitNumber.takeIf { it.isNotBlank() }?.let { "lok. $it" }.orEmpty(),
+            item.city,
+            "Polska"
+        ).map { it.trim() }.filter { it.isNotBlank() }
+
+        return if (addressParts.isEmpty()) {
+            item.name.trim()
+        } else {
+            listOf(item.name.trim().takeIf { it.isNotBlank() }, addressParts.joinToString(" "))
+                .filterNotNull()
+                .joinToString(", ")
+        }
+    }
 }
 
 private fun buildAlphabetFilter(): List<String> = listOf("#", "123") + ('A'..'Z').map { it.toString() }
 
-private class PharmacyCatalogAdapter : RecyclerView.Adapter<PharmacyCatalogViewHolder>() {
+private class PharmacyCatalogAdapter(
+    private val onMapClick: (PharmacyCatalogEntry) -> Unit
+) : RecyclerView.Adapter<PharmacyCatalogViewHolder>() {
     private val items = mutableListOf<PharmacyCatalogEntry>()
 
     fun submitList(data: List<PharmacyCatalogEntry>) {
@@ -102,7 +148,7 @@ private class PharmacyCatalogAdapter : RecyclerView.Adapter<PharmacyCatalogViewH
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PharmacyCatalogViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_pharmacy_catalog, parent, false)
-        return PharmacyCatalogViewHolder(view)
+        return PharmacyCatalogViewHolder(view, onMapClick)
     }
 
     override fun onBindViewHolder(holder: PharmacyCatalogViewHolder, position: Int) {
@@ -112,10 +158,14 @@ private class PharmacyCatalogAdapter : RecyclerView.Adapter<PharmacyCatalogViewH
     override fun getItemCount(): Int = items.size
 }
 
-private class PharmacyCatalogViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+private class PharmacyCatalogViewHolder(
+    view: View,
+    private val onMapClick: (PharmacyCatalogEntry) -> Unit
+) : RecyclerView.ViewHolder(view) {
     private val title: TextView = view.findViewById(R.id.text_pharmacy_title)
     private val subtitle: TextView = view.findViewById(R.id.text_pharmacy_status)
     private val details: TextView = view.findViewById(R.id.text_pharmacy_details)
+    private val mapButton: View = view.findViewById(R.id.button_find_on_map)
 
     fun bind(item: PharmacyCatalogEntry) {
         val context = itemView.context
@@ -139,6 +189,7 @@ private class PharmacyCatalogViewHolder(view: View) : RecyclerView.ViewHolder(vi
         subtitle.setTextColor(textColor)
         details.setTextColor(textColor)
         itemView.alpha = if (isInactive) 0.72f else 1f
+        mapButton.setOnClickListener { onMapClick(item) }
     }
 }
 

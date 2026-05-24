@@ -74,4 +74,7 @@
     <string name="pharmacy_catalog_details">Ulica: %1$s • Budynek: %2$s • Lokal: %3$s • Status: %4$s</string>
     <string name="pharmacy_catalog_missing_city">Brak miejscowości</string>
     <string name="pharmacy_catalog_search_hint">Szukaj po nazwie apteki</string>
+    <string name="pharmacy_catalog_find_on_map">Znajdź na mapie</string>
+    <string name="pharmacy_catalog_missing_address">Brak danych adresowych tej apteki.</string>
+    <string name="pharmacy_catalog_map_unavailable">Brak aplikacji map na tym urządzeniu.</string>
 </resources>

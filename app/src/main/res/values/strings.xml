@@ -74,4 +74,7 @@
     <string name="pharmacy_catalog_details">Street: %1$s • Building: %2$s • Unit: %3$s • Status: %4$s</string>
     <string name="pharmacy_catalog_missing_city">No city</string>
     <string name="pharmacy_catalog_search_hint">Search by pharmacy name</string>
+    <string name="pharmacy_catalog_find_on_map">Find on map</string>
+    <string name="pharmacy_catalog_missing_address">No address data for this pharmacy.</string>
+    <string name="pharmacy_catalog_map_unavailable">No map app available on this device.</string>
 </resources>

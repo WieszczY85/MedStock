@@ -36,6 +36,14 @@
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
             android:textColor="@color/text_primary" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_find_on_map"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_2"
+            android:text="@string/pharmacy_catalog_find_on_map" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
