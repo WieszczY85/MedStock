@@ -149,7 +149,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                        COALESCE(s.nazwa_produktu_leczniczego, ''),
                        COALESCE(s.substancja_czynna, ''),
                        COALESCE(s.moc, ''),
-                       COALESCE(s.droga_podania_gatunek_tkanka_okres_karencji, ''),
+                       COALESCE(s.postac_farmaceutyczna, ''),
                        COALESCE(s.podmiot_odpowiedzialny, ''),
                        COALESCE(s.kod_ean, ''),
                        COALESCE(s.opakowanie, '')
