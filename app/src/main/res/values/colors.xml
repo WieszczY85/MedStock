@@ -11,6 +11,8 @@
     <color name="cta_support_bg">#FFD8F7D1</color>
     <color name="cta_danger_bg">#FFFFE0E0</color>
     <color name="cta_danger_text">#FFAA1F1F</color>
+    <color name="alert_pastel_red_stroke">#FFFFB3B3</color>
+    <color name="alert_pastel_red_background">#FFFFF3F3</color>
     <color name="text_primary">#FF19321C</color>
     <color name="text_secondary">#FF446647</color>
     <color name="black">#FF000000</color>

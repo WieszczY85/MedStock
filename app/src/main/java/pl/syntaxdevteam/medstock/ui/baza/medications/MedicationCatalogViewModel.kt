@@ -149,7 +149,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                        COALESCE(s.nazwa_produktu_leczniczego, ''),
                        COALESCE(s.substancja_czynna, ''),
                        COALESCE(s.moc, ''),
-                       COALESCE(s.postac_farmaceutyczna, ''),
+                       COALESCE(s.droga_podania_gatunek_tkanka_okres_karencji, ''),
                        COALESCE(s.podmiot_odpowiedzialny, ''),
                        COALESCE(s.kod_ean, ''),
                        COALESCE(s.opakowanie, '')
@@ -318,6 +318,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
         val packages = mutableListOf<MedicationPackageInfo>()
         var pendingEan: String? = null
         val eanRegex = Regex("\\d{8,14}")
+        val packageUnitsRegex = Regex("(?i)\\b(tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*)\\b")
         for (line in lines) {
             val eanCandidate = line.substringBefore("¦").trim()
             if (eanCandidate.matches(eanRegex)) {
@@ -325,7 +326,10 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 continue
             }
             val quantityCandidate = line.substringBefore("¦").trim()
-            if (pendingEan != null && quantityCandidate.matches(Regex(".*\\d.*"))) {
+            if (pendingEan != null &&
+                quantityCandidate.matches(Regex(".*\\d.*")) &&
+                packageUnitsRegex.containsMatchIn(quantityCandidate)
+            ) {
                 packages += MedicationPackageInfo(
                     ean = pendingEan,
                     quantity = quantityCandidate
@@ -335,7 +339,10 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
         }
         if (packages.isEmpty() && normalizedPackaging.isNotBlank()) {
             val compact = normalizedPackaging.replace("\n", " ")
-            val matches = Regex("(\\d{8,14})\\s*¦[^\\d]*(?:\\d+[^¦\\n]*)?\\s*(\\d+\\s*[^¦\\n]*)").findAll(compact)
+            val matches = Regex(
+                "(\\d{8,14})\\s*¦[^\\n]*?(\\d+\\s*(?:tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*)[^\\n¦]*)",
+                RegexOption.IGNORE_CASE
+            ).findAll(compact)
             for (match in matches) {
                 packages += MedicationPackageInfo(
                     ean = match.groupValues[1].trim(),
