@@ -1,7 +1,7 @@
 package pl.syntaxdevteam.medstock.core.download
 
 internal object RegistryIngestSchema {
-    const val VERSION = 7
+    const val VERSION = 8
 
     val statements: List<String> = listOf(
         """
@@ -198,6 +198,7 @@ internal object RegistryIngestSchema {
             current_stock INTEGER NOT NULL DEFAULT 0,
             dosage TEXT NOT NULL DEFAULT '',
             alert_days INTEGER NOT NULL DEFAULT 0,
+            last_stock_update_utc TEXT NOT NULL DEFAULT (datetime('now')),
             created_at_utc TEXT NOT NULL DEFAULT (datetime('now')),
             updated_at_utc TEXT NOT NULL DEFAULT (datetime('now'))
         )

@@ -36,6 +36,14 @@ class RegistryIngestDatabaseHelper(context: Context) :
             ensureColumn(db, table = "user_medication", column = "dosage", definition = "TEXT NOT NULL DEFAULT ''")
             ensureColumn(db, table = "user_medication", column = "alert_days", definition = "TEXT NOT NULL DEFAULT ''")
         }
+        if (oldVersion < 8) {
+            ensureColumn(
+                db,
+                table = "user_medication",
+                column = "last_stock_update_utc",
+                definition = "TEXT NOT NULL DEFAULT (datetime('now'))"
+            )
+        }
     }
 
     private fun ensureColumn(db: SQLiteDatabase, table: String, column: String, definition: String) {
