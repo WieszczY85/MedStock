@@ -100,5 +100,11 @@
     <string name="medication_editor_autofill_substance">Substancja czynna: %1$s</string>
     <string name="medication_editor_autofill_strength">Moc: %1$s</string>
     <string name="medication_editor_autofill_package">Opakowanie: %1$s</string>
+    <string name="medication_list_title_with_strength">%1$s%2$s</string>
+    <string name="medication_list_stock_and_days">Stan: %1$d %2$s | Dni zapasu: %3$d\nStatus: %4$s</string>
+    <string name="medication_stock_status_ok">Ok</string>
+    <string name="medication_stock_status_low">Kończy się</string>
+    <string name="medication_stock_status_empty">Brak</string>
+    <string name="medication_default_unit">tabl.</string>
 
 </resources>

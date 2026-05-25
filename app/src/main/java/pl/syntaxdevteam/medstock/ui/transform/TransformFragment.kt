@@ -77,17 +77,33 @@ private class TransformViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val note: TextView = view.findViewById(R.id.text_user_medication_note)
 
     fun bind(item: UserMedication, onClick: () -> Unit) {
-        name.text = item.name
-        note.text = listOf(
-            item.strength,
-            item.activeSubstance,
-            item.packageSize,
-            item.unit,
-            item.currentStock.takeIf { value -> value > 0 }?.toString().orEmpty(),
-            item.dosage,
-            item.alertDays.takeIf { value -> value > 0 }?.toString().orEmpty()
-        ).filter { it.isNotBlank() }
-            .joinToString(separator = " • ")
+        val strengthSuffix = item.strength.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty()
+        val dosagePerDay = parseDailyDosage(item.dosage)
+        val daysSupply = if (item.currentStock > 0 && dosagePerDay > 0.0) {
+            kotlin.math.floor(item.currentStock / dosagePerDay).toInt()
+        } else {
+            0
+        }
+        val status = when {
+            daysSupply == 0 -> itemView.context.getString(R.string.medication_stock_status_empty)
+            daysSupply < item.alertDays -> itemView.context.getString(R.string.medication_stock_status_low)
+            else -> itemView.context.getString(R.string.medication_stock_status_ok)
+        }
+
+        name.text = itemView.context.getString(R.string.medication_list_title_with_strength, item.name, strengthSuffix)
+        note.text = itemView.context.getString(
+            R.string.medication_list_stock_and_days,
+            item.currentStock,
+            item.unit.ifBlank { itemView.context.getString(R.string.medication_default_unit) },
+            daysSupply,
+            status
+        )
         itemView.setOnClickListener { onClick() }
+    }
+
+    private fun parseDailyDosage(rawDosage: String): Double {
+        val normalized = rawDosage.replace(',', '.')
+        val match = Regex("""\d+(?:\.\d+)?""").find(normalized) ?: return 0.0
+        return match.value.toDoubleOrNull()?.takeIf { it > 0.0 } ?: 0.0
     }
 }
