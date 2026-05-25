@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/edit_text_medication_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,13 +14,67 @@
         android:inputType="textCapSentences" />
 
     <EditText
-        android:id="@+id/edit_text_medication_note"
+        android:id="@+id/edit_text_medication_strength"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="@string/medication_note_hint"
-        android:imeOptions="actionDone"
+        android:hint="@string/medication_strength_hint"
+        android:imeOptions="actionNext"
         android:inputType="textCapSentences" />
+
+    <EditText
+        android:id="@+id/edit_text_medication_package_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="@string/medication_package_size_hint"
+        android:imeOptions="actionNext"
+        android:inputType="textCapSentences" />
+
+    <EditText
+        android:id="@+id/edit_text_medication_substance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="@string/medication_substance_hint"
+        android:imeOptions="actionNext"
+        android:inputType="textCapSentences" />
+
+    <EditText
+        android:id="@+id/edit_text_medication_unit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="@string/medication_unit_hint"
+        android:imeOptions="actionNext"
+        android:inputType="textCapSentences" />
+
+    <EditText
+        android:id="@+id/edit_text_medication_current_stock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="@string/medication_current_stock_hint"
+        android:imeOptions="actionNext"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/edit_text_medication_dosage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="@string/medication_dosage_hint"
+        android:imeOptions="actionNext"
+        android:inputType="textCapSentences" />
+
+    <EditText
+        android:id="@+id/edit_text_medication_alert_days"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="@string/medication_alert_days_hint"
+        android:imeOptions="actionDone"
+        android:inputType="number" />
 
     <Button
         android:id="@+id/button_save_medication"
@@ -28,5 +82,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:text="@string/medication_editor_add" />
+
+    <Button
+        android:id="@+id/button_delete_medication"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/medication_editor_delete" />
 
 </LinearLayout>

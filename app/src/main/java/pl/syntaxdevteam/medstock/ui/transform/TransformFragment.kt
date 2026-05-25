@@ -26,10 +26,10 @@ class TransformFragment : Fragment() {
     ): View {
         _binding = FragmentTransformBinding.inflate(inflater, container, false)
 
-        val adapter = TransformAdapter { index ->
+        val adapter = TransformAdapter { medicationId ->
             findNavController().navigate(
                 R.id.nav_medication_editor,
-                Bundle().apply { putInt(MedicationEditorFragment.ARG_MEDICATION_INDEX, index) }
+                Bundle().apply { putLong(MedicationEditorFragment.ARG_MEDICATION_ID, medicationId) }
             )
         }
         binding.recyclerviewTransform.layoutManager = LinearLayoutManager(requireContext())
@@ -50,7 +50,7 @@ class TransformFragment : Fragment() {
 }
 
 private class TransformAdapter(
-    private val onClick: (Int) -> Unit
+    private val onClick: (Long) -> Unit
 ) : RecyclerView.Adapter<TransformViewHolder>() {
     private val items = mutableListOf<UserMedication>()
 
@@ -66,7 +66,7 @@ private class TransformAdapter(
     }
 
     override fun onBindViewHolder(holder: TransformViewHolder, position: Int) {
-        holder.bind(items[position]) { onClick(position) }
+        holder.bind(items[position]) { onClick(items[position].id) }
     }
 
     override fun getItemCount(): Int = items.size
@@ -78,7 +78,16 @@ private class TransformViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     fun bind(item: UserMedication, onClick: () -> Unit) {
         name.text = item.name
-        note.text = item.note
+        note.text = listOf(
+            item.strength,
+            item.activeSubstance,
+            item.packageSize,
+            item.unit,
+            item.currentStock.takeIf { value -> value > 0 }?.toString().orEmpty(),
+            item.dosage,
+            item.alertDays.takeIf { value -> value > 0 }?.toString().orEmpty()
+        ).filter { it.isNotBlank() }
+            .joinToString(separator = " • ")
         itemView.setOnClickListener { onClick() }
     }
 }
