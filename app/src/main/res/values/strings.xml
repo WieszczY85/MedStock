@@ -64,7 +64,7 @@
     <string name="medication_catalog_collapsed_subtitle">%1$s • %2$s</string>
     <string name="medication_catalog_expanded_subtitle">%1$s • %2$s • %3$s</string>
     <string name="medication_catalog_expand_hint">Tap to see more…</string>
-    <string name="medication_catalog_responsible_entity">Responsible entity: %1$s</string>
+    <string name="medication_catalog_responsible_entity">Responsible entity: \n%1$s</string>
     <string name="medication_catalog_packages_header">Packaging:</string>
     <string name="medication_catalog_package_row">%1$s - %2$s</string>
     <string name="medication_catalog_package_unknown">No package data</string>
