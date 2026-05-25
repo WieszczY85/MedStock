@@ -85,9 +85,20 @@
     <string name="transform_subtitle">Your medication list</string>
     <string name="fab_add_medication_content_description">Add medication to your list</string>
     <string name="medication_editor_title">Medication form</string>
-    <string name="medication_note_hint">Note, dosage, schedule</string>
+    <string name="medication_strength_hint">Strength, e.g. 200 mg</string>
+    <string name="medication_package_size_hint">Package size, e.g. 20</string>
+    <string name="medication_substance_hint">Active substance</string>
+    <string name="medication_unit_hint">Unit, e.g. tablets</string>
+    <string name="medication_current_stock_hint">Current stock</string>
+    <string name="medication_dosage_hint">Dosage, e.g. 1 tablet daily</string>
+    <string name="medication_alert_days_hint">Alert days, e.g. 7</string>
     <string name="medication_editor_add">Add to list</string>
     <string name="medication_editor_save">Save changes</string>
-    <string name="medication_editor_required">Name and note are required.</string>
+    <string name="medication_editor_delete">Delete medication</string>
+    <string name="medication_editor_required">Medication name is required.</string>
+    <string name="medication_editor_invalid_numbers">Current stock and alert days must be valid numbers.</string>
+    <string name="medication_editor_autofill_substance">Active substance: %1$s</string>
+    <string name="medication_editor_autofill_strength">Strength: %1$s</string>
+    <string name="medication_editor_autofill_package">Package: %1$s</string>
 
 </resources>

@@ -85,9 +85,20 @@
     <string name="transform_subtitle">Twoja lista leków</string>
     <string name="fab_add_medication_content_description">Dodaj lek do listy</string>
     <string name="medication_editor_title">Formularz leku</string>
-    <string name="medication_note_hint">Notatka, dawkowanie, harmonogram</string>
+    <string name="medication_strength_hint">Moc, np. 200 mg</string>
+    <string name="medication_package_size_hint">Wielkość opakowania, np. 20</string>
+    <string name="medication_substance_hint">Substancja czynna</string>
+    <string name="medication_unit_hint">Jednostka, np. tabletki</string>
+    <string name="medication_current_stock_hint">Aktualny stan</string>
+    <string name="medication_dosage_hint">Dawkowanie, np. 1 tabletka dziennie</string>
+    <string name="medication_alert_days_hint">Alert dni, np. 7</string>
     <string name="medication_editor_add">Dodaj do listy</string>
     <string name="medication_editor_save">Zapisz zmiany</string>
-    <string name="medication_editor_required">Nazwa i notatka są wymagane.</string>
+    <string name="medication_editor_delete">Usuń lek</string>
+    <string name="medication_editor_required">Nazwa leku jest wymagana.</string>
+    <string name="medication_editor_invalid_numbers">Aktualny stan i alert dni muszą być poprawnymi liczbami.</string>
+    <string name="medication_editor_autofill_substance">Substancja czynna: %1$s</string>
+    <string name="medication_editor_autofill_strength">Moc: %1$s</string>
+    <string name="medication_editor_autofill_package">Opakowanie: %1$s</string>
 
 </resources>

@@ -24,6 +24,33 @@ class RegistryIngestDatabaseHelper(context: Context) :
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         RegistryIngestSchema.statements.forEach(db::execSQL)
+        if (oldVersion < 5) {
+            ensureColumn(db, table = "user_medication", column = "strength", definition = "TEXT NOT NULL DEFAULT ''")
+            ensureColumn(db, table = "user_medication", column = "package_description", definition = "TEXT NOT NULL DEFAULT ''")
+            ensureColumn(db, table = "user_medication", column = "active_substance", definition = "TEXT NOT NULL DEFAULT ''")
+        }
+        if (oldVersion < 6) {
+            ensureColumn(db, table = "user_medication", column = "package_size", definition = "TEXT NOT NULL DEFAULT ''")
+            ensureColumn(db, table = "user_medication", column = "unit", definition = "TEXT NOT NULL DEFAULT ''")
+            ensureColumn(db, table = "user_medication", column = "current_stock", definition = "TEXT NOT NULL DEFAULT ''")
+            ensureColumn(db, table = "user_medication", column = "dosage", definition = "TEXT NOT NULL DEFAULT ''")
+            ensureColumn(db, table = "user_medication", column = "alert_days", definition = "TEXT NOT NULL DEFAULT ''")
+        }
+    }
+
+    private fun ensureColumn(db: SQLiteDatabase, table: String, column: String, definition: String) {
+        var exists = false
+        db.rawQuery("PRAGMA table_info($table)", null).use { cursor ->
+            while (cursor.moveToNext()) {
+                if (cursor.getString(1) == column) {
+                    exists = true
+                    break
+                }
+            }
+        }
+        if (!exists) {
+            db.execSQL("ALTER TABLE $table ADD COLUMN $column $definition")
+        }
     }
 
     companion object {

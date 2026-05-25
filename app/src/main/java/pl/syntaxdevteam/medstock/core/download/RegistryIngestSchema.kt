@@ -1,7 +1,7 @@
 package pl.syntaxdevteam.medstock.core.download
 
 internal object RegistryIngestSchema {
-    const val VERSION = 3
+    const val VERSION = 7
 
     val statements: List<String> = listOf(
         """
@@ -185,6 +185,23 @@ internal object RegistryIngestSchema {
         """.trimIndent(),
         "CREATE UNIQUE INDEX IF NOT EXISTS ux_registry_ra_snapshot_batch_row ON registry_ra_snapshot(batch_id, source_row_number)",
         "CREATE INDEX IF NOT EXISTS ix_registry_ra_snapshot_nazwa ON registry_ra_snapshot(nazwa_apteki)",
-        "CREATE INDEX IF NOT EXISTS ix_registry_ra_snapshot_entity ON registry_ra_snapshot(source_entity_key)"
+        "CREATE INDEX IF NOT EXISTS ix_registry_ra_snapshot_entity ON registry_ra_snapshot(source_entity_key)",
+
+        """
+        CREATE TABLE IF NOT EXISTS user_medication (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            strength TEXT NOT NULL DEFAULT '',
+            active_substance TEXT NOT NULL DEFAULT '',
+            package_size TEXT NOT NULL DEFAULT '',
+            unit TEXT NOT NULL DEFAULT '',
+            current_stock INTEGER NOT NULL DEFAULT 0,
+            dosage TEXT NOT NULL DEFAULT '',
+            alert_days INTEGER NOT NULL DEFAULT 0,
+            created_at_utc TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at_utc TEXT NOT NULL DEFAULT (datetime('now'))
+        )
+        """.trimIndent(),
+        "CREATE INDEX IF NOT EXISTS ix_user_medication_name ON user_medication(name)"
     )
 }
