@@ -53,6 +53,7 @@
     <string name="preloader_status_failed">Synchronization failed: %1$s</string>
     <string name="preloader_status_failed_source">Source %1$s failed: %2$s</string>
     <string name="preloader_status_no_fallback">No working fallback source in this group.</string>
+    <string name="preloader_status_partial_completion">Startup sync incomplete — will retry at next app start.</string>
     <string name="common_unknown_error">unknown error</string>
 
     <string name="medication_catalog_loading">Loading medication catalog from local database…</string>

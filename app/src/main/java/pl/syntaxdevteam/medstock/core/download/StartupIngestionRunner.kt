@@ -42,6 +42,8 @@ class StartupIngestionRunner(private val context: Context) {
 
         emit(StartupProgress(percent(), context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_init)))
 
+        var allPlansHandled = true
+
         for (plan in sourcePlans) {
             val primary = plan.first()
             var handled = false
@@ -79,6 +81,7 @@ class StartupIngestionRunner(private val context: Context) {
             if (handled) {
                 emit(StartupProgress(percent(), context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_source, primary.name)))
             } else {
+                allPlansHandled = false
                 val reason = lastError?.message ?: context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_no_fallback)
                 emit(
                     StartupProgress(
@@ -93,8 +96,12 @@ class StartupIngestionRunner(private val context: Context) {
             }
         }
 
-        schedule.markRunCompleted()
-        emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_all)))
+        if (allPlansHandled) {
+            schedule.markRunCompleted()
+            emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_all)))
+        } else {
+            emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_partial_completion)))
+        }
     }.flowOn(Dispatchers.IO)
 
     private fun sha256(file: File): String {
