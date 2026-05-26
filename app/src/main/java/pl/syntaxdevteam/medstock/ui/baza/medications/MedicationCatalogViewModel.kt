@@ -310,6 +310,23 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
     }
 
     private fun parsePackageInfo(kodEan: String, opakowanie: String): List<MedicationPackageInfo> {
+        return MedicationPackageParser.parse(
+            kodEan = kodEan,
+            opakowanie = opakowanie,
+            unknownPackageLabel = getApplication<Application>().getString(R.string.medication_catalog_package_unknown)
+        )
+    }
+}
+
+internal object MedicationPackageParser {
+    private val eanRegex = Regex("\\d{8,14}")
+    private val packageUnitsRegex = Regex("(?i)\\b(tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*)\\b")
+    private val quantityOnlyRegex = Regex(
+        "(\\d+\\s*(?:tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*)[^¦]*)",
+        RegexOption.IGNORE_CASE
+    )
+
+    fun parse(kodEan: String, opakowanie: String, unknownPackageLabel: String): List<MedicationPackageInfo> {
         val normalizedPackaging = opakowanie
             .replace("\\r\\n", "\n")
             .replace("\\n", "\n")
@@ -317,11 +334,9 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
         val lines = normalizedPackaging.lines().map { it.trim() }.filter { it.isNotBlank() }
         val packages = mutableListOf<MedicationPackageInfo>()
         var pendingEan: String? = null
-        val eanRegex = Regex("\\d{8,14}")
-        val packageUnitsRegex = Regex("(?i)\\b(tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*)\\b")
         for (line in lines) {
             val eanCandidate = line.substringBefore("¦").trim()
-            if (eanCandidate.matches(eanRegex)) {
+            if (eanCandidate.matches(Regex("\\d{8,14}"))) {
                 pendingEan = eanCandidate
                 continue
             }
@@ -330,33 +345,26 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 quantityCandidate.matches(Regex(".*\\d.*")) &&
                 packageUnitsRegex.containsMatchIn(quantityCandidate)
             ) {
-                packages += MedicationPackageInfo(
-                    ean = pendingEan,
-                    quantity = quantityCandidate
-                )
+                packages += MedicationPackageInfo(ean = pendingEan, quantity = quantityCandidate)
                 pendingEan = null
             }
         }
         if (packages.isEmpty() && normalizedPackaging.isNotBlank()) {
             val compact = normalizedPackaging.replace("\n", " ")
-            val matches = Regex(
-                "(\\d{8,14})\\s*¦[^\\n]*?(\\d+\\s*(?:tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*)[^\\n¦]*)",
-                RegexOption.IGNORE_CASE
-            ).findAll(compact)
-            for (match in matches) {
-                packages += MedicationPackageInfo(
-                    ean = match.groupValues[1].trim(),
-                    quantity = match.groupValues[2].trim()
-                )
+            val eans = eanRegex.findAll(compact).toList()
+            for (index in eans.indices) {
+                val ean = eans[index].value
+                val segmentStart = eans[index].range.last + 1
+                val segmentEnd = if (index + 1 < eans.size) eans[index + 1].range.first else compact.length
+                val segment = compact.substring(segmentStart, segmentEnd)
+                val quantity = quantityOnlyRegex.find(segment)?.groupValues?.get(1)?.trim()
+                if (!quantity.isNullOrBlank()) {
+                    packages += MedicationPackageInfo(ean = ean, quantity = quantity)
+                }
             }
         }
         if (packages.isEmpty() && kodEan.isNotBlank()) {
-            return listOf(
-                MedicationPackageInfo(
-                    ean = kodEan.trim(),
-                    quantity = getApplication<Application>().getString(R.string.medication_catalog_package_unknown)
-                )
-            )
+            return listOf(MedicationPackageInfo(ean = kodEan.trim(), quantity = unknownPackageLabel))
         }
         return packages
     }
