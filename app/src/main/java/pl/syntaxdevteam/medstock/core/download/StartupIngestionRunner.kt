@@ -18,9 +18,9 @@ data class StartupProgress(
 class StartupIngestionRunner(private val context: Context) {
     private val tag = "StartupIngestionRunner"
 
-    fun run(): Flow<StartupProgress> = flow {
+    fun run(force: Boolean = false): Flow<StartupProgress> = flow {
         val schedule = StartupIngestionSchedule(context)
-        if (!schedule.shouldRunNow()) {
+        if (!force && !schedule.shouldRunNow()) {
             emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_all)))
             return@flow
         }
