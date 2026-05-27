@@ -60,4 +60,16 @@ class MedicationPackageParserTest {
         assertEquals(MedicationPackageInfo("05909990419173", "90 tabl."), result[1])
     }
 
+    @Test
+    fun `nie pokazuje brak danych gdy opakowanie ma opis bez EAN`() {
+        val input = "Blister 20 tabletek powlekanych"
+
+        val result = MedicationPackageParser.parse("", input, "Brak danych")
+
+        assertEquals(1, result.size)
+        assertEquals("-", result[0].ean)
+        assertTrue(result[0].quantity.contains("20"))
+        assertTrue(result[0].quantity.contains("tablet", ignoreCase = true))
+    }
+
 }

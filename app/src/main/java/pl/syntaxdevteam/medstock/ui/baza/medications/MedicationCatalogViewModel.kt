@@ -367,6 +367,21 @@ internal object MedicationPackageParser {
                 }
             }
         }
+        if (packages.isEmpty() && normalizedPackaging.isNotBlank()) {
+            val compact = normalizedPackaging.replace("\n", " ").trim()
+            val hasAnyEan = eanRegex.containsMatchIn(compact)
+            if (!hasAnyEan) {
+                val quantity = quantityOnlyRegex.find(compact)?.groupValues?.get(1)?.trim().orEmpty()
+                val fallbackQuantity = when {
+                    quantity.isNotBlank() -> quantity
+                    compact.contains(Regex("[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż]")) -> compact
+                    else -> ""
+                }
+                if (fallbackQuantity.isNotBlank()) {
+                    return listOf(MedicationPackageInfo(ean = "-", quantity = fallbackQuantity))
+                }
+            }
+        }
         if (packages.isEmpty() && kodEan.isNotBlank()) {
             return listOf(MedicationPackageInfo(ean = kodEan.trim(), quantity = unknownPackageLabel))
         }
