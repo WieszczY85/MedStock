@@ -338,14 +338,17 @@ internal object MedicationPackageParser {
         for (line in lines) {
             val eanCandidate = line.substringBefore("¦").trim()
             if (eanCandidate.matches(Regex("\\d{8,14}"))) {
-                pendingEan = eanCandidate
+                val inlineQuantity = extractInlineQuantity(line)
+                if (inlineQuantity != null) {
+                    packages += MedicationPackageInfo(ean = eanCandidate, quantity = inlineQuantity)
+                    pendingEan = null
+                } else {
+                    pendingEan = eanCandidate
+                }
                 continue
             }
             val quantityCandidate = line.substringBefore("¦").trim()
-            if (pendingEan != null &&
-                quantityCandidate.matches(Regex(".*\\d.*")) &&
-                packageUnitsRegex.containsMatchIn(quantityCandidate)
-            ) {
+            if (pendingEan != null && isPlausibleQuantity(quantityCandidate)) {
                 packages += MedicationPackageInfo(ean = pendingEan, quantity = quantityCandidate)
                 pendingEan = null
             }
@@ -368,5 +371,18 @@ internal object MedicationPackageParser {
             return listOf(MedicationPackageInfo(ean = kodEan.trim(), quantity = unknownPackageLabel))
         }
         return packages
+    }
+
+    private fun extractInlineQuantity(line: String): String? {
+        if (eanRegex.findAll(line).count() > 1) return null
+        val segments = line.split("¦").map { it.trim() }.filter { it.isNotBlank() }
+        val candidates = segments.drop(1).filter { isPlausibleQuantity(it) }
+        return candidates.firstOrNull { packageUnitsRegex.containsMatchIn(it) } ?: candidates.firstOrNull()
+    }
+
+    private fun isPlausibleQuantity(value: String): Boolean {
+        if (!value.contains(Regex("\\d"))) return false
+        if (packageUnitsRegex.containsMatchIn(value)) return true
+        return value.contains(Regex("(?i)\\b(x|ml|mg|g|l|szt|op|amp|kaps|tabl)\\b"))
     }
 }

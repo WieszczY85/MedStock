@@ -46,4 +46,18 @@ class MedicationPackageParserTest {
         assertTrue(result.all { it.quantity.contains("tabl", ignoreCase = true) })
     }
 
+    @Test
+    fun `parsuje ilosc opakowania z tej samej linii co EAN`() {
+        val input = """
+            05909990991914 ¦ Rp ¦ 30 tabl.
+            05909990419173 ¦ Rp ¦ 90 tabl.
+        """.trimIndent()
+
+        val result = MedicationPackageParser.parse("", input, "Brak danych")
+
+        assertEquals(2, result.size)
+        assertEquals(MedicationPackageInfo("05909990991914", "30 tabl."), result[0])
+        assertEquals(MedicationPackageInfo("05909990419173", "90 tabl."), result[1])
+    }
+
 }
