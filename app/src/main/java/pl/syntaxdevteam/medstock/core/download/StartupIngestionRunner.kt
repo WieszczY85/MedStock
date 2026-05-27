@@ -12,7 +12,9 @@ import java.security.MessageDigest
 
 data class StartupProgress(
     val progressPercent: Int,
-    val message: String
+    val message: String,
+    val currentTask: Int,
+    val totalTasks: Int
 )
 
 class StartupIngestionRunner(private val context: Context) {
@@ -21,7 +23,7 @@ class StartupIngestionRunner(private val context: Context) {
     fun run(force: Boolean = false): Flow<StartupProgress> = flow {
         val schedule = StartupIngestionSchedule(context)
         if (!force && !schedule.shouldRunNow()) {
-            emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_all)))
+            emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_all), 1, 1))
             return@flow
         }
 
@@ -30,17 +32,22 @@ class StartupIngestionRunner(private val context: Context) {
             listOf(RegistryFileSource.RPL_XLSX, RegistryFileSource.RPL_CSV),
             listOf(RegistryFileSource.RA_CSV, RegistryFileSource.RA_XLS)
         )
-        val totalPlans = sourcePlans.size
-        var completedPlans = 0
+        val totalTasks = 1 + (sourcePlans.size * 4)
+        var completedTasks = 0
 
-        fun percent(): Int = ((completedPlans * 100f) / totalPlans).toInt().coerceIn(0, 100)
+        fun percent(): Int = ((completedTasks * 100f) / totalTasks).toInt().coerceIn(0, 100)
+        suspend fun emitProgress(message: String) {
+            val currentTask = (completedTasks + 1).coerceAtMost(totalTasks)
+            emit(StartupProgress(percent(), message, currentTask, totalTasks))
+        }
 
         val dbHelper = RegistryIngestDatabaseHelper.getInstance(context)
         val persistence = RegistrySnapshotPersistence(dbHelper.writableDatabase)
         val downloader = TemporaryRegistryFileDownloader(context)
         val parsers = RegistryFileParsers()
 
-        emit(StartupProgress(percent(), context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_init)))
+        emitProgress(context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_init))
+        completedTasks++
 
         var allPlansHandled = true
 
@@ -52,12 +59,14 @@ class StartupIngestionRunner(private val context: Context) {
             for (source in plan) {
                 try {
                     Log.i(tag, "Start source=${source.name} url=${source.url}")
-                    emit(StartupProgress(percent(), context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_download, source.name)))
+                    emitProgress(context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_download, source.name))
                     val downloaded = downloader.download(source)
                     Log.i(tag, "Downloaded source=${source.name} file=${downloaded.file.absolutePath} size=${downloaded.file.length()}")
-                    emit(StartupProgress(percent(), context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_parse, source.name)))
+                    completedTasks++
+                    emitProgress(context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_parse, source.name))
                     val parsed = parsers.parse(source, downloaded.file)
-                    emit(StartupProgress(percent(), context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_save, source.name)))
+                    completedTasks++
+                    emitProgress(context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_save, source.name))
                     val batchId = persistence.saveSnapshot(
                         source = source,
                         sourceUrl = source.url,
@@ -69,6 +78,7 @@ class StartupIngestionRunner(private val context: Context) {
                     )
                     Log.i(tag, "Saved source=${source.name} batchId=$batchId")
                     downloaded.cleanup()
+                    completedTasks++
                     handled = true
                     break
                 } catch (error: Exception) {
@@ -77,30 +87,27 @@ class StartupIngestionRunner(private val context: Context) {
                 }
             }
 
-            completedPlans++
             if (handled) {
-                emit(StartupProgress(percent(), context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_source, primary.name)))
+                emitProgress(context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_source, primary.name))
             } else {
                 allPlansHandled = false
                 val reason = lastError?.message ?: context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_no_fallback)
-                emit(
-                    StartupProgress(
-                        percent(),
-                        context.getString(
-                            pl.syntaxdevteam.medstock.R.string.preloader_status_failed_source,
-                            primary.name,
-                            reason
-                        )
+                emitProgress(
+                    context.getString(
+                        pl.syntaxdevteam.medstock.R.string.preloader_status_failed_source,
+                        primary.name,
+                        reason
                     )
                 )
             }
+            completedTasks++
         }
 
         if (allPlansHandled) {
             schedule.markRunCompleted()
-            emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_all)))
+            emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_done_all), totalTasks, totalTasks))
         } else {
-            emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_partial_completion)))
+            emit(StartupProgress(100, context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_partial_completion), totalTasks, totalTasks))
         }
     }.flowOn(Dispatchers.IO)
 

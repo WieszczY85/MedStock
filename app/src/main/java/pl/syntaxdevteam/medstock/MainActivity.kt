@@ -193,7 +193,13 @@ class MainActivity : AppCompatActivity() {
                 runCatching {
                     StartupIngestionRunner(applicationContext).run(force = true).collect { state ->
                         progress.progress = state.progressPercent
-                        status.text = state.message
+                        status.text = getString(
+                            R.string.preloader_status_with_progress,
+                            state.progressPercent,
+                            state.currentTask,
+                            state.totalTasks,
+                            state.message
+                        )
                     }
                 }.onFailure {
                     status.text = getString(R.string.preloader_status_failed, it.message ?: getString(R.string.common_unknown_error))
