@@ -45,4 +45,5 @@ class MedicationPackageParserTest {
         assertEquals(2, result.size)
         assertTrue(result.all { it.quantity.contains("tabl", ignoreCase = true) })
     }
+
 }
