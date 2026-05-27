@@ -16,6 +16,8 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import pl.syntaxdevteam.medstock.core.download.StartupIngestionRunner
 import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
@@ -190,12 +192,38 @@ class MainActivity : AppCompatActivity() {
 
         preloader.post {
             lifecycleScope.launch {
+                var latestState: pl.syntaxdevteam.medstock.core.download.StartupProgress? = null
+                var phaseStartedAtMs = System.currentTimeMillis()
+                var displayedPercent = 0
+                var animationJob: Job? = null
                 runCatching {
+                    animationJob = launch {
+                        while (true) {
+                            val state = latestState
+                            if (state != null) {
+                                val nowMs = System.currentTimeMillis()
+                                val elapsedMs = (nowMs - phaseStartedAtMs).coerceAtLeast(0L)
+                                val taskRange = (100f / state.totalTasks).coerceAtLeast(0.5f)
+                                val basePercent = ((state.currentTask - 1) * 100f / state.totalTasks).toInt().coerceIn(0, 100)
+                                val animatedInsideTask = ((elapsedMs.toFloat() / 8_000f) * (taskRange * 0.9f)).toInt()
+                                val animatedPercent = (basePercent + animatedInsideTask).coerceIn(0, 99)
+                                val targetPercent = maxOf(state.progressPercent, animatedPercent)
+                                if (targetPercent > displayedPercent) {
+                                    displayedPercent = targetPercent
+                                    progress.progress = displayedPercent
+                                }
+                            }
+                            delay(250)
+                        }
+                    }
                     StartupIngestionRunner(applicationContext).run(force = true).collect { state ->
-                        progress.progress = state.progressPercent
+                        latestState = state
+                        phaseStartedAtMs = System.currentTimeMillis()
+                        displayedPercent = maxOf(displayedPercent, state.progressPercent)
+                        progress.progress = displayedPercent
                         status.text = getString(
                             R.string.preloader_status_with_progress,
-                            state.progressPercent,
+                            displayedPercent,
                             state.currentTask,
                             state.totalTasks,
                             state.message
@@ -203,6 +231,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }.onFailure {
                     status.text = getString(R.string.preloader_status_failed, it.message ?: getString(R.string.common_unknown_error))
+                }.also {
+                    animationJob?.cancel()
                 }
                 preloader.visibility = View.GONE
             }
