@@ -1,4 +1,4 @@
-package pl.syntaxdevteam.medstock.ui.transform
+package pl.syntaxdevteam.medstock.ui.medicationlist
 
 import android.text.Editable
 import android.text.TextWatcher

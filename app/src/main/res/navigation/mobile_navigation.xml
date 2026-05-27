@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_transform">
+    app:startDestination="@+id/nav_medication_list">
 
     <fragment
-        android:id="@+id/nav_transform"
-        android:name="pl.syntaxdevteam.medstock.ui.transform.TransformFragment"
-        android:label="@string/menu_transform"
-        tools:layout="@layout/fragment_transform" />
+        android:id="@+id/nav_medication_list"
+        android:name="pl.syntaxdevteam.medstock.ui.medicationlist.MedicationListFragment"
+        android:label="@string/menu_medication_list"
+        tools:layout="@layout/fragment_medication_list" />
 
     <fragment
         android:id="@+id/nav_baza_leki_screen"
@@ -39,7 +39,7 @@
 
     <fragment
         android:id="@+id/nav_medication_editor"
-        android:name="pl.syntaxdevteam.medstock.ui.transform.MedicationEditorFragment"
+        android:name="pl.syntaxdevteam.medstock.ui.medicationlist.MedicationEditorFragment"
         android:label="@string/medication_editor_title"
         tools:layout="@layout/fragment_medication_editor" />
 

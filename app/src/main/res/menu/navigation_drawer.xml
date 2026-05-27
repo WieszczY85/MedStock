@@ -5,9 +5,9 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_transform"
+            android:id="@+id/nav_medication_list"
             android:icon="@drawable/ic_list_black_24dp"
-            android:title="@string/menu_transform" />
+            android:title="@string/menu_medication_list" />
 
         <item
             android:id="@+id/nav_baza_group"

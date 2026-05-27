@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.transform.TransformFragment">
+    tools:context=".ui.medicationlist.MedicationListFragment">
 
     <TextView
-        android:id="@+id/text_transform_summary"
+        android:id="@+id/text_medication_list_summary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -20,7 +20,7 @@
         tools:text="Liczba leków: 3" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview_transform"
+        android:id="@+id/recyclerview_medication_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -30,7 +30,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_transform_summary"
+        app:layout_constraintTop_toBottomOf="@id/text_medication_list_summary"
         tools:listitem="@layout/item_user_medication" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
