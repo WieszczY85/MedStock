@@ -116,5 +116,10 @@
     <string name="settings_unknown_value">Brak danych</string>
     <string name="settings_database_size_value">Rozmiar bazy: %1$s (modyfikacja: %2$s)</string>
     <string name="settings_force_update_button">Wymuś aktualizację katalogów</string>
+    <string name="settings_export_database_button">Zrzut bazy danych</string>
+    <string name="settings_export_database_default_filename">medstock-zrzut-bazy.db</string>
+    <string name="settings_export_database_success">Baza danych została wyeksportowana.</string>
+    <string name="settings_export_database_missing">Lokalny plik bazy danych nie istnieje.</string>
+    <string name="settings_export_database_failed">Nie udało się wyeksportować bazy danych.</string>
 
 </resources>

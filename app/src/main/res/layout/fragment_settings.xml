@@ -97,5 +97,13 @@
             android:layout_height="wrap_content"
             android:text="@string/settings_force_update_button" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/settings_export_database_button"
+            style="@style/Widget.MedStock.Button.CtaPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_2"
+            android:text="@string/settings_export_database_button" />
+
     </LinearLayout>
 </ScrollView>

@@ -116,5 +116,10 @@
     <string name="settings_unknown_value">No data</string>
     <string name="settings_database_size_value">Database size: %1$s (modified: %2$s)</string>
     <string name="settings_force_update_button">Force catalog update</string>
+    <string name="settings_export_database_button">Database dump</string>
+    <string name="settings_export_database_default_filename">medstock-database-export.db</string>
+    <string name="settings_export_database_success">Database exported successfully.</string>
+    <string name="settings_export_database_missing">Local database file does not exist.</string>
+    <string name="settings_export_database_failed">Failed to export database.</string>
 
 </resources>
