@@ -191,7 +191,7 @@ class MainActivity : AppCompatActivity() {
         preloader.post {
             lifecycleScope.launch {
                 runCatching {
-                    StartupIngestionRunner(applicationContext).run().collect { state ->
+                    StartupIngestionRunner(applicationContext).run(force = true).collect { state ->
                         progress.progress = state.progressPercent
                         status.text = state.message
                     }
