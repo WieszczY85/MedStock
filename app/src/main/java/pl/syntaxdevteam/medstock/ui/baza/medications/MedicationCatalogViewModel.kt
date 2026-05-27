@@ -320,9 +320,10 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
 internal object MedicationPackageParser {
     private val eanRegex = Regex("\\d{8,14}")
-    private val packageUnitsRegex = Regex("(?i)\\b(tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*)\\b")
+    private const val packageUnitPattern = "tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*|op\\.?|opak\\w*|but\\.?|butel\\w*|flak\\w*|czop\\w*|glob\\w*|draż\\w*"
+    private val packageUnitsRegex = Regex("(?i)($packageUnitPattern)")
     private val quantityOnlyRegex = Regex(
-        "(\\d+\\s*(?:tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*)[^¦]*)",
+        "(\\d+[\\d\\s,./xX-]*(?:$packageUnitPattern)[^¦]*)",
         RegexOption.IGNORE_CASE
     )
 
