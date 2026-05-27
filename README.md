@@ -12,3 +12,11 @@ Aplikacja nie ma doradzać medycznie ani samodzielnie ustalać dawkowania. Ma po
 
 > Na przyszłość:
 > Następny krok dla rozwoju i18n to jawny language_preference (np. system|pl|en) i warunek w LocaleManager, który najpierw sprawdza preferencję usera, potem dopiero system.
+## Szybkie odświeżenie APK na emulatorze
+Jeżeli emulator czasem trzyma stary stan po zmianach, użyj zadania:
+
+```bash
+./gradlew cleanRunDebug --no-daemon
+```
+
+To zadanie wykonuje kolejno `:app:clean`, `:app:assembleDebug` i `:app:installDebug`, dzięki czemu instalujesz świeżą paczkę debug na urządzeniu.
