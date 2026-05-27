@@ -10,7 +10,7 @@
     <string name="nav_header_desc">Nagłówek nawigacji</string>
     <string name="action_settings">Ustawienia</string>
 
-    <string name="menu_transform">Lista</string>
+    <string name="menu_medication_list">Lista</string>
     <string name="menu_baza_nav">Baza</string>
     <string name="menu_baza">Baza</string>
     <string name="menu_alerty_nav">Alerty</string>
@@ -36,10 +36,10 @@
 
     <string name="fab_content_description">Przycisk uruchamiający akcję</string>
     <string name="fab_search_content_description">Szukaj leków</string>
-    <string name="image_view_item_transform_content_description">Podgląd obrazu elementu listy</string>
+    <string name="image_view_item_medication_list_entry_content_description">Podgląd obrazu elementu listy</string>
     <string name="snackbar_placeholder_action">Zastąp własną akcją</string>
     <string name="common_action">Akcja</string>
-    <string name="transform_item_label">To jest element nr %1$d</string>
+    <string name="medication_list_item_label">To jest element nr %1$d</string>
 
     <string name="medication_name_hint">Nazwa leku, np. Ibuprofen 200 mg</string>
     <string name="add_medication">Dodaj lek</string>
@@ -82,8 +82,8 @@
     <string name="pharmacy_catalog_missing_address">Brak danych adresowych tej apteki.</string>
     <string name="pharmacy_catalog_map_unavailable">Brak aplikacji map na tym urządzeniu.</string>
 
-    <string name="transform_summary">Liczba leków: %1$d</string>
-    <string name="transform_subtitle">Twoja lista leków</string>
+    <string name="medication_list_summary">Liczba leków: %1$d</string>
+    <string name="medication_list_subtitle">Twoja lista leków</string>
     <string name="fab_add_medication_content_description">Dodaj lek do listy</string>
     <string name="medication_editor_title">Formularz leku</string>
     <string name="medication_strength_hint">Moc, np. 200 mg</string>
@@ -116,6 +116,5 @@
     <string name="settings_unknown_value">Brak danych</string>
     <string name="settings_database_size_value">Rozmiar bazy: %1$s (modyfikacja: %2$s)</string>
     <string name="settings_force_update_button">Wymuś aktualizację katalogów</string>
-    <string name="settings_force_update_todo">Wymuszenie aktualizacji katalogów będzie dostępne w kolejnym kroku.</string>
 
 </resources>

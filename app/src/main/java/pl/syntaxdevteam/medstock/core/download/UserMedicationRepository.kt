@@ -3,7 +3,7 @@ package pl.syntaxdevteam.medstock.core.download
 import android.content.ContentValues
 import android.content.Context
 import kotlin.math.floor
-import pl.syntaxdevteam.medstock.ui.transform.UserMedication
+import pl.syntaxdevteam.medstock.ui.medicationlist.UserMedication
 
 class UserMedicationRepository(context: Context) {
 

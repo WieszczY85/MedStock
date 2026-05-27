@@ -1,4 +1,4 @@
-package pl.syntaxdevteam.medstock.ui.transform
+package pl.syntaxdevteam.medstock.ui.medicationlist
 
 data class UserMedication(
     val id: Long,

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import pl.syntaxdevteam.medstock.R
@@ -33,7 +32,7 @@ class SettingsFragment : Fragment() {
         }
 
         binding.settingsForceUpdateButton.setOnClickListener {
-            Toast.makeText(requireContext(), R.string.settings_force_update_todo, Toast.LENGTH_SHORT).show()
+            (activity as? pl.syntaxdevteam.medstock.MainActivity)?.triggerCatalogForceUpdate()
         }
 
         return binding.root

@@ -1,4 +1,4 @@
-package pl.syntaxdevteam.medstock.ui.transform
+package pl.syntaxdevteam.medstock.ui.medicationlist
 
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -21,7 +21,7 @@ class MedicationEditorFragment : Fragment() {
 
     private var _binding: FragmentMedicationEditorBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: TransformViewModel by activityViewModels()
+    private val viewModel: MedicationListViewModel by activityViewModels()
     private lateinit var suggestionRepository: MedicationCatalogSuggestionRepository
     private var suggestionJob: Job? = null
 
@@ -39,7 +39,7 @@ class MedicationEditorFragment : Fragment() {
         binding.buttonSaveMedication.text = getString(if (isEdit) R.string.medication_editor_save else R.string.medication_editor_add)
 
         if (isEdit) {
-            val item = viewModel.itemNumbers.value.orEmpty().firstOrNull { it.id == medicationId }
+            val item = viewModel.medications.value.orEmpty().firstOrNull { it.id == medicationId }
             if (item != null) {
                 binding.editTextMedicationName.setText(item.name)
                 binding.editTextMedicationStrength.setText(item.strength)

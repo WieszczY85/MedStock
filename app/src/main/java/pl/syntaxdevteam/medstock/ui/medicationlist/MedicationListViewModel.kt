@@ -1,4 +1,4 @@
-package pl.syntaxdevteam.medstock.ui.transform
+package pl.syntaxdevteam.medstock.ui.medicationlist
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -9,12 +9,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.core.download.UserMedicationRepository
 
-class TransformViewModel(application: Application) : AndroidViewModel(application) {
+class MedicationListViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = UserMedicationRepository(getApplication())
 
-    private val _itemNumbers = MutableLiveData<List<UserMedication>>()
-    val itemNumbers: LiveData<List<UserMedication>> = _itemNumbers
+    private val _medications = MutableLiveData<List<UserMedication>>()
+    val medications: LiveData<List<UserMedication>> = _medications
 
     init {
         refreshMedications()
@@ -22,7 +22,7 @@ class TransformViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun refreshMedications() {
         viewModelScope.launch(Dispatchers.IO) {
-            _itemNumbers.postValue(repository.getAll())
+            _medications.postValue(repository.getAll())
         }
     }
 

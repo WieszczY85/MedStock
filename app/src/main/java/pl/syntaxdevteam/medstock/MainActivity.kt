@@ -21,7 +21,7 @@ import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment
 import pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment
-import pl.syntaxdevteam.medstock.ui.transform.TransformFragment
+import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationListFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
                 currentFragment.toggleSearch()
             } else if (currentFragment is PharmacyCatalogFragment) {
                 currentFragment.toggleSearch()
-            } else if (currentFragment is TransformFragment) {
+            } else if (currentFragment is MedicationListFragment) {
                 navController.navigate(R.id.nav_medication_editor)
             }
         }
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         binding.navView?.let {
             appBarConfiguration = AppBarConfiguration(
                 setOf(
-                    R.id.nav_transform, R.id.nav_baza_leki_screen, R.id.nav_alerty_lista_screen, R.id.nav_settings, R.id.nav_account
+                    R.id.nav_medication_list, R.id.nav_baza_leki_screen, R.id.nav_alerty_lista_screen, R.id.nav_settings, R.id.nav_account
                 ),
                 binding.drawerLayout
             )
@@ -92,16 +92,16 @@ class MainActivity : AppCompatActivity() {
                     titleToolbar.subtitle = getString(R.string.menu_alerty_przypomnienia)
                 }
 
-                R.id.nav_transform -> {
-                    titleToolbar.title = getString(R.string.menu_transform)
-                    titleToolbar.subtitle = getString(R.string.transform_subtitle)
+                R.id.nav_medication_list -> {
+                    titleToolbar.title = getString(R.string.menu_medication_list)
+                    titleToolbar.subtitle = getString(R.string.medication_list_subtitle)
                     binding.appBarMain.fab?.setImageResource(android.R.drawable.ic_input_add)
                     binding.appBarMain.fab?.contentDescription = getString(R.string.fab_add_medication_content_description)
                 }
 
                 R.id.nav_medication_editor -> {
                     titleToolbar.title = getString(R.string.medication_editor_title)
-                    titleToolbar.subtitle = getString(R.string.transform_subtitle)
+                    titleToolbar.subtitle = getString(R.string.medication_list_subtitle)
                     binding.appBarMain.fab?.hide()
                 }
 
@@ -119,12 +119,12 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        startPreloaderIngestion()
+        runIngestionWithPreloader()
 
         binding.appBarMain.contentMain.bottomNavView?.let {
             appBarConfiguration = AppBarConfiguration(
                 setOf(
-                    R.id.nav_transform, R.id.nav_baza_leki_screen, R.id.nav_alerty_lista_screen, R.id.nav_account
+                    R.id.nav_medication_list, R.id.nav_baza_leki_screen, R.id.nav_alerty_lista_screen, R.id.nav_account
                 )
             )
             setupActionBarWithNavController(navController, appBarConfiguration)
@@ -175,7 +175,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun startPreloaderIngestion() {
+    fun triggerCatalogForceUpdate() {
+        runIngestionWithPreloader()
+    }
+
+    private fun runIngestionWithPreloader() {
         val preloader = binding.activityContainer.findViewById<View>(R.id.startup_preloader)
         val progress = binding.activityContainer.findViewById<android.widget.ProgressBar>(R.id.preloader_progress)
         val status = binding.activityContainer.findViewById<android.widget.TextView>(R.id.preloader_status)

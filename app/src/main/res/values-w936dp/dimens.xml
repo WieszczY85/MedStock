@@ -1,3 +1,3 @@
 <resources>
-    <dimen name="item_transform_image_length">160dp</dimen>
+    <dimen name="item_medication_list_entry_image_length">160dp</dimen>
 </resources>

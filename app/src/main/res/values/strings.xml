@@ -10,7 +10,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_transform">List</string>
+    <string name="menu_medication_list">List</string>
     <string name="menu_baza_nav">Database</string>
     <string name="menu_baza">Database</string>
     <string name="menu_alerty_nav">Alerts</string>
@@ -36,10 +36,10 @@
 
     <string name="fab_content_description">Represents a view to invoke an action</string>
     <string name="fab_search_content_description">Search medications</string>
-    <string name="image_view_item_transform_content_description">Represents an image view in the item</string>
+    <string name="image_view_item_medication_list_entry_content_description">Represents an image view in the item</string>
     <string name="snackbar_placeholder_action">Replace with your own action</string>
     <string name="common_action">Action</string>
-    <string name="transform_item_label">This is item # %1$d</string>
+    <string name="medication_list_item_label">This is item # %1$d</string>
 
     <string name="medication_name_hint">Medication name, e.g. Ibuprofen 200 mg</string>
     <string name="add_medication">Add medication</string>
@@ -82,8 +82,8 @@
     <string name="pharmacy_catalog_missing_address">No address data for this pharmacy.</string>
     <string name="pharmacy_catalog_map_unavailable">No map app available on this device.</string>
 
-    <string name="transform_summary">Medication count: %1$d</string>
-    <string name="transform_subtitle">Your medication list</string>
+    <string name="medication_list_summary">Medication count: %1$d</string>
+    <string name="medication_list_subtitle">Your medication list</string>
     <string name="fab_add_medication_content_description">Add medication to your list</string>
     <string name="medication_editor_title">Medication form</string>
     <string name="medication_strength_hint">Strength, e.g. 200 mg</string>
@@ -116,6 +116,5 @@
     <string name="settings_unknown_value">No data</string>
     <string name="settings_database_size_value">Database size: %1$s (modified: %2$s)</string>
     <string name="settings_force_update_button">Force catalog update</string>
-    <string name="settings_force_update_todo">Force catalog update will be available in the next step.</string>
 
 </resources>
