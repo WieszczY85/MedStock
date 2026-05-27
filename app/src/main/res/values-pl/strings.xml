@@ -116,6 +116,5 @@
     <string name="settings_unknown_value">Brak danych</string>
     <string name="settings_database_size_value">Rozmiar bazy: %1$s (modyfikacja: %2$s)</string>
     <string name="settings_force_update_button">Wymuś aktualizację katalogów</string>
-    <string name="settings_force_update_todo">Wymuszenie aktualizacji katalogów będzie dostępne w kolejnym kroku.</string>
 
 </resources>

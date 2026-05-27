@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        startPreloaderIngestion()
+        runIngestionWithPreloader()
 
         binding.appBarMain.contentMain.bottomNavView?.let {
             appBarConfiguration = AppBarConfiguration(
@@ -175,7 +175,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun startPreloaderIngestion() {
+    fun triggerCatalogForceUpdate() {
+        runIngestionWithPreloader()
+    }
+
+    private fun runIngestionWithPreloader() {
         val preloader = binding.activityContainer.findViewById<View>(R.id.startup_preloader)
         val progress = binding.activityContainer.findViewById<android.widget.ProgressBar>(R.id.preloader_progress)
         val status = binding.activityContainer.findViewById<android.widget.TextView>(R.id.preloader_status)
