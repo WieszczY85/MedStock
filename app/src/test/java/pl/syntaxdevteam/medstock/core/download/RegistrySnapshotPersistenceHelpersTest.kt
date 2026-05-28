@@ -42,4 +42,13 @@ class RegistrySnapshotPersistenceHelpersTest {
         assertTrue(payload.contains("\\n"))
         assertTrue(payload.contains("\\\"test\\\""))
     }
+
+    @Test
+    fun `rpl schema nie zawiera osobnej kolumny kod_ean`() {
+        val rplCreateStatement = RegistryIngestSchema.statements.first { it.contains("CREATE TABLE IF NOT EXISTS rpl") }
+
+        assertTrue(rplCreateStatement.contains("opakowanie TEXT"))
+        assertTrue(!rplCreateStatement.contains("kod_ean"))
+    }
+
 }

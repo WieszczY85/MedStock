@@ -1,7 +1,7 @@
 package pl.syntaxdevteam.medstock.core.download
 
 internal object RegistryIngestSchema {
-    const val VERSION = 1
+    const val VERSION = 2
 
     val statements: List<String> = listOf(
         """
@@ -27,7 +27,6 @@ internal object RegistryIngestSchema {
             moc TEXT,
             postac_farmaceutyczna TEXT,
             podmiot_odpowiedzialny TEXT,
-            kod_ean TEXT,
             opakowanie TEXT,
             substancja_czynna TEXT,
             kraj_wytworcy TEXT,

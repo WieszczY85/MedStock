@@ -145,7 +145,6 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                        COALESCE(s.moc, ''),
                        COALESCE(s.droga_podania, ''),
                        COALESCE(s.podmiot_odpowiedzialny, ''),
-                       COALESCE(s.kod_ean, ''),
                        COALESCE(s.opakowanie, '')
                 FROM rpl s
                 WHERE s.data_snapshot = ?
@@ -176,8 +175,8 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                         route = cursor.getString(4).orEmpty(),
                         responsibleEntity = cursor.getString(5).orEmpty(),
                         packages = parsePackageInfo(
-                            kodEan = cursor.getString(6).orEmpty(),
-                            opakowanie = cursor.getString(7).orEmpty()
+                            kodEan = "",
+                            opakowanie = cursor.getString(6).orEmpty()
                         )
                     )
                 } while (cursor.moveToNext())

@@ -25,6 +25,10 @@ class RegistryIngestDatabaseHelper(context: Context) :
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         RegistryIngestSchema.statements.forEach(db::execSQL)
         cleanupLegacyRegistryTables(db)
+        if (oldVersion < 2) {
+            migrateRplWithoutKodEan(db)
+            RegistryIngestSchema.statements.forEach(db::execSQL)
+        }
         if (oldVersion < 5) {
             ensureColumn(db, table = "user_medication", column = "strength", definition = "TEXT NOT NULL DEFAULT ''")
             ensureColumn(db, table = "user_medication", column = "package_description", definition = "TEXT NOT NULL DEFAULT ''")
@@ -53,17 +57,64 @@ class RegistryIngestDatabaseHelper(context: Context) :
     }
 
     private fun ensureColumn(db: SQLiteDatabase, table: String, column: String, definition: String) {
-        var exists = false
+        if (!columnExists(db, table, column)) {
+            db.execSQL("ALTER TABLE $table ADD COLUMN $column $definition")
+        }
+    }
+
+    private fun columnExists(db: SQLiteDatabase, table: String, column: String): Boolean {
         db.rawQuery("PRAGMA table_info($table)", null).use { cursor ->
             while (cursor.moveToNext()) {
-                if (cursor.getString(1) == column) {
-                    exists = true
-                    break
-                }
+                if (cursor.getString(1) == column) return true
             }
         }
-        if (!exists) {
-            db.execSQL("ALTER TABLE $table ADD COLUMN $column $definition")
+        return false
+    }
+
+    private fun migrateRplWithoutKodEan(db: SQLiteDatabase) {
+        if (!tableExists(db, "rpl") || !columnExists(db, table = "rpl", column = "kod_ean")) return
+
+        db.execSQL("DROP TABLE IF EXISTS rpl_without_kod_ean")
+        db.execSQL(
+            """
+            CREATE TABLE rpl_without_kod_ean (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                data_snapshot TEXT NOT NULL,
+                identyfikator_produktu TEXT,
+                nazwa_produktu TEXT,
+                droga_podania TEXT,
+                moc TEXT,
+                postac_farmaceutyczna TEXT,
+                podmiot_odpowiedzialny TEXT,
+                opakowanie TEXT,
+                substancja_czynna TEXT,
+                kraj_wytworcy TEXT,
+                ulotka TEXT,
+                charakterystyka TEXT
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            INSERT INTO rpl_without_kod_ean(
+                id,data_snapshot,identyfikator_produktu,nazwa_produktu,droga_podania,moc,postac_farmaceutyczna,
+                podmiot_odpowiedzialny,opakowanie,substancja_czynna,kraj_wytworcy,ulotka,charakterystyka
+            )
+            SELECT id,data_snapshot,identyfikator_produktu,nazwa_produktu,droga_podania,moc,postac_farmaceutyczna,
+                   podmiot_odpowiedzialny,opakowanie,substancja_czynna,kraj_wytworcy,ulotka,charakterystyka
+            FROM rpl
+            """.trimIndent()
+        )
+        db.execSQL("DROP TABLE rpl")
+        db.execSQL("ALTER TABLE rpl_without_kod_ean RENAME TO rpl")
+    }
+
+    private fun tableExists(db: SQLiteDatabase, table: String): Boolean {
+        db.rawQuery(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
+            arrayOf(table)
+        ).use { cursor ->
+            return cursor.moveToFirst()
         }
     }
 
