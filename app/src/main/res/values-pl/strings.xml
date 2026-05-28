@@ -55,7 +55,7 @@
     <string name="preloader_status_no_fallback">Brak działającego źródła zapasowego w tej grupie.</string>
     <string name="preloader_status_partial_completion">Synchronizacja startowa niepełna — ponowna próba przy następnym uruchomieniu aplikacji.</string>
     <string name="preloader_status_with_progress">%1$d%% (%2$d/%3$d) %4$s</string>
-    <string name="preloader_status_long_running">%1$s — ten etap może potrwać dłużej. Aplikacja nadal pracuje, proszę czekać…</string>
+    <string name="preloader_status_long_running">%1$s \n - ten etap może potrwać dłużej. \nAplikacja nadal pracuje, proszę czekać…</string>
     <string name="common_unknown_error">nieznany błąd</string>
 
     <string name="medication_catalog_loading">Wczytywanie katalogu leków z lokalnej bazy…</string>
