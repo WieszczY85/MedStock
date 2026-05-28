@@ -18,7 +18,6 @@ import org.apache.poi.hssf.record.FormulaRecord
 import org.apache.poi.hssf.usermodel.HSSFDataFormatter
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.usermodel.DataFormatter
-import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
 import org.apache.poi.xssf.eventusermodel.XSSFReader
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
@@ -57,22 +56,33 @@ class CsvRegistryFileParser : RegistryFileParser {
         source == RegistryFileSource.RPL_CSV || source == RegistryFileSource.RA_CSV
 
     override fun parse(source: RegistryFileSource, file: File): ParsedRegistryFile {
-        return try {
-            val records = mutableListOf<RawRegistryRecord>()
-            var headers: List<String> = emptyList()
+        val delimiter = delimiterFor(source)
+        val headers = try {
+            BufferedReader(InputStreamReader(file.inputStream(), Charsets.UTF_8), CSV_READ_BUFFER_SIZE).use { reader ->
+                reader.readLine()?.let { splitCsvLine(it, delimiter) }.orEmpty()
+            }
+        } catch (exception: Exception) {
+            throw RegistryFileParsingException(source, "Nie udało się odczytać nagłówków CSV", exception)
+        }
 
-            BufferedReader(InputStreamReader(file.inputStream(), Charsets.UTF_8)).use { reader ->
-                reader.lineSequence().forEachIndexed { index, line ->
-                    val values = splitCsvLine(line, delimiterFor(source))
-                    if (index == 0) {
-                        headers = values
-                    } else {
-                        records += RawRegistryRecord(source = source, rowNumber = index.toLong(), values = values)
-                    }
+        return ParsedRegistryFile(
+            source = source,
+            headers = headers,
+            records = streamCsvRecords(source, file, delimiter)
+        )
+    }
+
+    private fun streamCsvRecords(source: RegistryFileSource, file: File, delimiter: Char): Sequence<RawRegistryRecord> = sequence {
+        try {
+            BufferedReader(InputStreamReader(file.inputStream(), Charsets.UTF_8), CSV_READ_BUFFER_SIZE).use { reader ->
+                reader.readLine() ?: return@use
+                var rowNumber = 1L
+                while (true) {
+                    val line = reader.readLine() ?: break
+                    yield(RawRegistryRecord(source = source, rowNumber = rowNumber, values = splitCsvLine(line, delimiter)))
+                    rowNumber += 1L
                 }
             }
-
-            ParsedRegistryFile(source = source, headers = headers, records = records.asSequence())
         } catch (exception: Exception) {
             throw RegistryFileParsingException(source, "Nie udało się sparsować CSV", exception)
         }
@@ -86,25 +96,36 @@ class CsvRegistryFileParser : RegistryFileParser {
         }
 
     private fun splitCsvLine(line: String, delimiter: Char): List<String> {
-        val result = mutableListOf<String>()
+        val result = ArrayList<String>(line.count { it == delimiter } + 1)
         val current = StringBuilder()
         var inQuotes = false
+        var index = 0
 
-        line.forEach { char ->
+        while (index < line.length) {
+            val char = line[index]
             when {
-                char == '"' -> {
-                    inQuotes = !inQuotes
+                char == '"' && inQuotes && index + 1 < line.length && line[index + 1] == '"' -> {
+                    current.append('"')
+                    index += 1
                 }
+                char == '"' -> inQuotes = !inQuotes
                 char == delimiter && !inQuotes -> {
-                    result += current.toString().trim().removePrefix("\uFEFF")
+                    result += normalizeCsvValue(current)
                     current.clear()
                 }
                 else -> current.append(char)
             }
+            index += 1
         }
 
-        result += current.toString().trim().removePrefix("\uFEFF")
+        result += normalizeCsvValue(current)
         return result
+    }
+
+    private fun normalizeCsvValue(value: StringBuilder): String = value.toString().trim().removePrefix("\uFEFF")
+
+    private companion object {
+        const val CSV_READ_BUFFER_SIZE = 64 * 1024
     }
 }
 
@@ -197,18 +218,7 @@ private fun parseWorkbookStreaming(source: RegistryFileSource, file: File): Pars
             }
         }
 
-        val records = sequence {
-            BufferedReader(InputStreamReader(spoolFile.inputStream(), Charsets.UTF_8)).use { reader ->
-                reader.lineSequence().forEach { line ->
-                    val firstSep = line.indexOf('\t')
-                    if (firstSep <= 0) return@forEach
-                    val rowNo = line.substring(0, firstSep).toLongOrNull() ?: return@forEach
-                    val values = line.substring(firstSep + 1).split('\t')
-                    yield(RawRegistryRecord(source = source, rowNumber = rowNo, values = values))
-                }
-            }
-            spoolFile.delete()
-        }
+        val records = spooledTsvRecords(source, spoolFile)
 
         ParsedRegistryFile(source = source, headers = headers, records = records)
     } catch (exception: Exception) {
@@ -220,7 +230,8 @@ private class StreamingSheetHandler(
     private val headers: MutableList<String>,
     private val writer: BufferedWriter
 ) : XSSFSheetXMLHandler.SheetContentsHandler {
-    private val currentRow = mutableMapOf<Int, String>()
+    private val currentRow = ArrayList<String>(EXPECTED_RPL_COLUMN_COUNT)
+    private val lineBuilder = StringBuilder(EXPECTED_RPL_COLUMN_COUNT * AVERAGE_CELL_CHARS)
     private var maxCellIndex = -1
 
     override fun startRow(rowNum: Int) {
@@ -229,18 +240,26 @@ private class StreamingSheetHandler(
     }
 
     override fun endRow(rowNum: Int) {
+        if (maxCellIndex < 0) return
         if (rowNum == 0) {
-            for (index in 0..maxCellIndex) headers += currentRow[index].orEmpty()
+            headers.clear()
+            for (index in 0..maxCellIndex) headers += currentRow.getOrNull(index).orEmpty()
             return
         }
-        if (maxCellIndex < 0) return
-        val values = (0..maxCellIndex).joinToString("\t") { idx -> currentRow[idx].orEmpty().replace("\t", " ") }
-        writer.write("$rowNum\t$values")
+
+        lineBuilder.setLength(0)
+        lineBuilder.append(rowNum)
+        for (index in 0..maxCellIndex) {
+            lineBuilder.append('\t')
+            appendTsvSafe(lineBuilder, currentRow.getOrNull(index).orEmpty())
+        }
+        writer.append(lineBuilder)
         writer.newLine()
     }
 
     override fun cell(cellReference: String?, formattedValue: String?, comment: XSSFComment?) {
         val index = columnIndex(cellReference)
+        ensureSize(currentRow, index + 1)
         currentRow[index] = formattedValue.orEmpty()
         if (index > maxCellIndex) maxCellIndex = index
     }
@@ -258,6 +277,52 @@ private class StreamingSheetHandler(
     }
 }
 
+private fun spooledTsvRecords(source: RegistryFileSource, spoolFile: File): Sequence<RawRegistryRecord> = sequence {
+    try {
+        BufferedReader(InputStreamReader(spoolFile.inputStream(), Charsets.UTF_8), TSV_READ_BUFFER_SIZE).use { reader ->
+            while (true) {
+                val line = reader.readLine() ?: break
+                val firstSep = line.indexOf('\t')
+                if (firstSep <= 0) continue
+                val rowNo = line.substring(0, firstSep).toLongOrNull() ?: continue
+                yield(RawRegistryRecord(source = source, rowNumber = rowNo, values = splitTsvValues(line, firstSep + 1)))
+            }
+        }
+    } finally {
+        spoolFile.delete()
+    }
+}
+
+private fun splitTsvValues(line: String, startIndex: Int): List<String> {
+    val values = ArrayList<String>(EXPECTED_RPL_COLUMN_COUNT)
+    var valueStart = startIndex
+    var index = startIndex
+    while (index < line.length) {
+        if (line[index] == '\t') {
+            values += line.substring(valueStart, index)
+            valueStart = index + 1
+        }
+        index += 1
+    }
+    values += line.substring(valueStart)
+    return values
+}
+
+private fun appendTsvSafe(builder: StringBuilder, value: String) {
+    for (char in value) {
+        builder.append(if (char == '\t') ' ' else char)
+    }
+}
+
+private fun ensureSize(values: MutableList<String>, size: Int) {
+    while (values.size < size) values += ""
+}
+
+private const val TSV_READ_BUFFER_SIZE = 64 * 1024
+private const val EXPECTED_RPL_COLUMN_COUNT = 32
+private const val EXPECTED_RA_COLUMN_COUNT = 28
+private const val AVERAGE_CELL_CHARS = 18
+
 private fun parseXlsWorkbookStreaming(source: RegistryFileSource, file: File): ParsedRegistryFile {
     return try {
         val spoolFile = File.createTempFile("ra_stream_", ".tsv")
@@ -274,18 +339,7 @@ private fun parseXlsWorkbookStreaming(source: RegistryFileSource, file: File): P
             handler.flushPendingFormulaString()
         }
 
-        val records = sequence {
-            BufferedReader(InputStreamReader(spoolFile.inputStream(), Charsets.UTF_8)).use { reader ->
-                reader.lineSequence().forEach { line ->
-                    val firstSep = line.indexOf('\t')
-                    if (firstSep <= 0) return@forEach
-                    val rowNo = line.substring(0, firstSep).toLongOrNull() ?: return@forEach
-                    val values = line.substring(firstSep + 1).split('\t')
-                    yield(RawRegistryRecord(source = source, rowNumber = rowNo, values = values))
-                }
-            }
-            spoolFile.delete()
-        }
+        val records = spooledTsvRecords(source, spoolFile)
 
         ParsedRegistryFile(source = source, headers = headers, records = records)
     } catch (exception: Exception) {
@@ -305,7 +359,9 @@ private class XlsSheetEventHandler(
     private var inTargetSheet = false
     private var outputNextStringRecord = false
     private var pendingFormulaStringCol = -1
-    private val rowValues = mutableMapOf<Int, String>()
+    private val formatter = HSSFDataFormatter()
+    private val rowValues = ArrayList<String>(EXPECTED_RA_COLUMN_COUNT)
+    private val lineBuilder = StringBuilder(EXPECTED_RA_COLUMN_COUNT * AVERAGE_CELL_CHARS)
     private var maxCellIndex = -1
 
     override fun processRecord(record: Record) {
@@ -328,7 +384,7 @@ private class XlsSheetEventHandler(
             NumberRecord.sid.toInt() -> {
                 if (!inTargetSheet) return
                 val number = record as NumberRecord
-                putValue(number.row.toInt(), number.column.toInt(), HSSFDataFormatter().formatRawCellContents(number.value, -1, null))
+                putValue(number.row.toInt(), number.column.toInt(), formatter.formatRawCellContents(number.value, -1, null))
             }
             RKRecord.sid.toInt() -> {
                 if (!inTargetSheet) return
@@ -361,7 +417,7 @@ private class XlsSheetEventHandler(
             putValue(
                 record.row.toInt(),
                 record.column.toInt(),
-                HSSFDataFormatter().formatRawCellContents(record.value, -1, null)
+                formatter.formatRawCellContents(record.value, -1, null)
             )
         }
     }
@@ -383,7 +439,8 @@ private class XlsSheetEventHandler(
             currentRow = row
         }
         currentColumn = col
-        rowValues[col] = value.replace("\t", " ")
+        ensureSize(rowValues, col + 1)
+        rowValues[col] = value.replace('\t', ' ')
         if (col > maxCellIndex) maxCellIndex = col
     }
 
@@ -392,10 +449,15 @@ private class XlsSheetEventHandler(
 
         if (rowNum == 0) {
             headers.clear()
-            for (idx in 0..maxCellIndex) headers += rowValues[idx].orEmpty()
+            for (idx in 0..maxCellIndex) headers += rowValues.getOrNull(idx).orEmpty()
         } else {
-            val values = (0..maxCellIndex).joinToString("\t") { idx -> rowValues[idx].orEmpty() }
-            writer.write("$rowNum\t$values")
+            lineBuilder.setLength(0)
+            lineBuilder.append(rowNum)
+            for (idx in 0..maxCellIndex) {
+                lineBuilder.append('\t')
+                appendTsvSafe(lineBuilder, rowValues.getOrNull(idx).orEmpty())
+            }
+            writer.append(lineBuilder)
             writer.newLine()
         }
 
