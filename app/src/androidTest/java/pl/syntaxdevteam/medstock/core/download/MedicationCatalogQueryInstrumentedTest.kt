@@ -37,23 +37,14 @@ class MedicationCatalogQueryInstrumentedTest {
 
         db.rawQuery(
             """
-            SELECT b.snapshot_date_utc,
-                   b.record_count,
-                   r.source_entity_key,
-                   COALESCE(MAX(CASE WHEN c.column_key = 'Nazwa produktu leczniczego' THEN cell.value_text END), ''),
-                   COALESCE(MAX(CASE WHEN c.column_key = 'Nazwa powszechnie stosowana' THEN cell.value_text END), '')
-            FROM registry_import_batch b
-            JOIN registry_rpl_row r ON r.batch_id = b.id
-            JOIN registry_rpl_cell cell ON cell.row_id = r.id
-            JOIN registry_rpl_column_dictionary c ON c.id = cell.column_id
-            WHERE b.source_code IN ('RPL_CSV', 'RPL_XLSX')
-              AND b.snapshot_date_utc = (
-                  SELECT MAX(snapshot_date_utc)
-                  FROM registry_import_batch
-                  WHERE source_code IN ('RPL_CSV', 'RPL_XLSX')
-              )
-            GROUP BY b.snapshot_date_utc, b.record_count, r.id, r.source_entity_key
-            ORDER BY r.source_row_number ASC
+            SELECT data_snapshot,
+                   COUNT(*) OVER () AS record_count,
+                   identyfikator_produktu,
+                   COALESCE(nazwa_produktu, ''),
+                   COALESCE(substancja_czynna, '')
+            FROM rpl
+            WHERE data_snapshot = (SELECT MAX(data_snapshot) FROM rpl)
+            ORDER BY identyfikator_produktu ASC
             LIMIT 200
             """.trimIndent(),
             emptyArray()

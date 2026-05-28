@@ -32,7 +32,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
             val dbHelper = RegistryIngestDatabaseHelper.getInstance(context)
             val lastDbUpdate = dbHelper.readableDatabase.rawQuery(
-                "SELECT MAX(fetched_at_utc) FROM registry_import_batch",
+                "SELECT MAX(data_snapshot) FROM (SELECT data_snapshot FROM rpl UNION ALL SELECT data_snapshot FROM ra UNION ALL SELECT data_snapshot FROM rdg)",
                 null
             ).use { cursor ->
                 if (cursor.moveToFirst()) cursor.getString(0) else null

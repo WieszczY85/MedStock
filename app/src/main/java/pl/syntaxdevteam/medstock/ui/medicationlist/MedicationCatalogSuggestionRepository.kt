@@ -22,13 +22,13 @@ class MedicationCatalogSuggestionRepository(context: Context) {
         val db = dbHelper.readableDatabase
         val sql = """
             SELECT DISTINCT
-                COALESCE(nazwa_produktu_leczniczego, ''),
+                COALESCE(nazwa_produktu, ''),
                 COALESCE(moc, ''),
                 COALESCE(opakowanie, ''),
                 COALESCE(substancja_czynna, '')
-            FROM registry_rpl_snapshot
-            WHERE UPPER(COALESCE(nazwa_produktu_leczniczego, '')) LIKE ?
-            ORDER BY nazwa_produktu_leczniczego COLLATE NOCASE ASC
+            FROM rpl
+            WHERE UPPER(COALESCE(nazwa_produktu, '')) LIKE ?
+            ORDER BY nazwa_produktu COLLATE NOCASE ASC
             LIMIT ?
         """.trimIndent()
 

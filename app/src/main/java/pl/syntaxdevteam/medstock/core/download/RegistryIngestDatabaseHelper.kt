@@ -24,6 +24,7 @@ class RegistryIngestDatabaseHelper(context: Context) :
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         RegistryIngestSchema.statements.forEach(db::execSQL)
+        cleanupLegacyRegistryTables(db)
         if (oldVersion < 5) {
             ensureColumn(db, table = "user_medication", column = "strength", definition = "TEXT NOT NULL DEFAULT ''")
             ensureColumn(db, table = "user_medication", column = "package_description", definition = "TEXT NOT NULL DEFAULT ''")
@@ -44,6 +45,11 @@ class RegistryIngestDatabaseHelper(context: Context) :
                 definition = "TEXT NOT NULL DEFAULT (datetime('now'))"
             )
         }
+    }
+
+    override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        RegistryIngestSchema.statements.forEach(db::execSQL)
+        cleanupLegacyRegistryTables(db)
     }
 
     private fun ensureColumn(db: SQLiteDatabase, table: String, column: String, definition: String) {
@@ -72,5 +78,15 @@ class RegistryIngestDatabaseHelper(context: Context) :
                 instance ?: RegistryIngestDatabaseHelper(context).also { instance = it }
             }
         }
+    }
+
+    private fun cleanupLegacyRegistryTables(db: SQLiteDatabase) {
+        val legacyTables = listOf(
+            "registry_import_batch",
+            "registry_rpl_column_dictionary", "registry_rpl_row", "registry_rpl_cell", "registry_rpl_snapshot",
+            "registry_ra_column_dictionary", "registry_ra_row", "registry_ra_cell", "registry_ra_snapshot",
+            "registry_rdg_column_dictionary", "registry_rdg_row", "registry_rdg_cell"
+        )
+        legacyTables.forEach { db.execSQL("DROP TABLE IF EXISTS $it") }
     }
 }

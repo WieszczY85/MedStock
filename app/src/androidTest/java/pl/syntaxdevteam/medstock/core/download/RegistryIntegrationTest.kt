@@ -2,23 +2,21 @@ package pl.syntaxdevteam.medstock.core.download
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import java.io.File
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 
-@RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE)
+@RunWith(AndroidJUnit4::class)
 class RegistryIntegrationTest {
 
     @Test
-    fun `ingestFile zapisuje batch i nadpisuje ten sam snapshot_date`() {
+    fun `ingestFile nadpisuje ten sam snapshot_date w rpl`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         context.deleteDatabase(RegistryIngestDatabaseHelper.DATABASE_NAME)
 
@@ -39,15 +37,15 @@ class RegistryIntegrationTest {
         orchestrator.ingestFile(RegistryFileSource.RPL_CSV, sampleFile)
         orchestrator.ingestFile(RegistryFileSource.RPL_CSV, sampleFile)
 
-        db.rawQuery("SELECT COUNT(*) FROM registry_import_batch", emptyArray()).use {
+        db.rawQuery("SELECT COUNT(DISTINCT data_snapshot) FROM rpl", emptyArray()).use {
             assertTrue(it.moveToFirst())
             assertEquals(1, it.getInt(0))
         }
-        db.rawQuery("SELECT record_count FROM registry_import_batch", emptyArray()).use {
+        db.rawQuery("SELECT COUNT(*) FROM rpl WHERE data_snapshot = '2026-05-21'", emptyArray()).use {
             assertTrue(it.moveToFirst())
             assertEquals(2, it.getInt(0))
         }
-        db.rawQuery("SELECT COUNT(*) FROM registry_rpl_row", emptyArray()).use {
+        db.rawQuery("SELECT COUNT(*) FROM rpl", emptyArray()).use {
             assertTrue(it.moveToFirst())
             assertEquals(2, it.getInt(0))
         }

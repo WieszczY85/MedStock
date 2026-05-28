@@ -41,8 +41,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private val pageSize = 20
     private var snapshotDate: String? = null
-    private var snapshotBatchId: Long? = null
-    private var recordCount: Int = 0
+        private var recordCount: Int = 0
     private var offset: Int = 0
     private var selectedLetter: String = "#"
     private var searchQuery: String = ""
@@ -82,8 +81,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private fun reloadCatalog() {
         offset = 0
-        snapshotBatchId = null
-        snapshotDate = null
+                snapshotDate = null
         loadedItems.clear()
         _uiState.postValue(MedicationCatalogUiState(summaryResId = R.string.medication_catalog_loading, selectedLetter = selectedLetter))
         loadPage(reset = true)
@@ -101,12 +99,9 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 if (snapshotDate == null || reset) {
                     db.rawQuery(
                     """
-                    SELECT id, snapshot_date_utc
-                    FROM registry_import_batch
-                    WHERE source_code IN ('RPL_CSV', 'RPL_XLSX')
-                    ORDER BY snapshot_date_utc DESC,
-                             CASE WHEN source_code = 'RPL_XLSX' THEN 0 ELSE 1 END,
-                             id DESC
+                    SELECT data_snapshot
+                    FROM rpl
+                    ORDER BY data_snapshot DESC
                     LIMIT 1
                     """.trimIndent(),
                     emptyArray()
@@ -115,26 +110,25 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                             _uiState.postValue(MedicationCatalogUiState(summaryResId = R.string.medication_catalog_empty, selectedLetter = selectedLetter))
                             return@launch
                         }
-                        snapshotBatchId = snapshotCursor.getLong(0)
-                        snapshotDate = snapshotCursor.getString(1)
+                        snapshotDate = snapshotCursor.getString(0)
                         recordCount = scalarInt(
                             db,
-                            "SELECT COUNT(*) FROM registry_rpl_snapshot WHERE batch_id = ${snapshotBatchId ?: -1L}"
+                            "SELECT COUNT(*) FROM rpl WHERE data_snapshot = ?",
+                            arrayOf(snapshotDate ?: "")
                         )
                     }
                 }
 
                 val selectedSnapshotDate = snapshotDate ?: return@launch
-                val selectedBatchId = snapshotBatchId ?: return@launch
-                val clause = buildFilterClause(selectedLetter)
-                val args = mutableListOf<String>(selectedBatchId.toString())
+                                val clause = buildFilterClause(selectedLetter)
+                val args = mutableListOf<String>(selectedSnapshotDate)
                 when (selectedLetter) {
                     "123" -> args += "[0-9]*"
                     "#" -> Unit
                     else -> args += "$selectedLetter%"
                 }
                 if (searchQuery.isNotBlank() && reset) {
-                    searchMode = resolveSearchMode(db, selectedBatchId, selectedLetter, searchQuery)
+                    searchMode = resolveSearchMode(db, selectedSnapshotDate, selectedLetter, searchQuery)
                 }
                 val searchClause = buildSearchClause(searchQuery, searchMode)
                 if (searchQuery.isNotBlank()) {
@@ -146,18 +140,18 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 db.rawQuery(
                 """
                 SELECT s.source_entity_key,
-                       COALESCE(s.nazwa_produktu_leczniczego, ''),
+                       COALESCE(s.nazwa_produktu, ''),
                        COALESCE(s.substancja_czynna, ''),
                        COALESCE(s.moc, ''),
-                       COALESCE(s.droga_podania_gatunek_tkanka_okres_karencji, ''),
+                       COALESCE(s.droga_podania, ''),
                        COALESCE(s.podmiot_odpowiedzialny, ''),
                        COALESCE(s.kod_ean, ''),
                        COALESCE(s.opakowanie, '')
-                FROM registry_rpl_snapshot s
-                WHERE s.batch_id = ?
+                FROM rpl s
+                WHERE s.data_snapshot = ?
                   $clause
                   $searchClause
-                ORDER BY s.nazwa_produktu_leczniczego COLLATE NOCASE ASC
+                ORDER BY s.nazwa_produktu COLLATE NOCASE ASC
                 LIMIT ? OFFSET ?
                 """.trimIndent(),
                 args.toTypedArray()
@@ -201,7 +195,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                         canLoadMore = canLoadMore
                     )
                 )
-                Log.i(tag, "Załadowano listę leków: batch=${entries.size}, totalLoaded=${loadedItems.size}, selectedLetter=$selectedLetter, snapshotDate=$selectedSnapshotDate, snapshotBatchId=$selectedBatchId, recordCount=$recordCount")
+                Log.i(tag, "Załadowano listę leków: batch=${entries.size}, totalLoaded=${loadedItems.size}, selectedLetter=$selectedLetter, snapshotDate=$selectedSnapshotDate, recordCount=$recordCount")
                 }
             } finally {
                 isPageLoading = false
@@ -220,16 +214,16 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private fun buildFilterClause(filter: String): String {
         return when (filter) {
-            "123" -> "AND COALESCE(s.nazwa_produktu_leczniczego, '') GLOB ?"
+            "123" -> "AND COALESCE(s.nazwa_produktu, '') GLOB ?"
             "#" -> ""
-            else -> "AND UPPER(COALESCE(s.nazwa_produktu_leczniczego, '')) LIKE ?"
+            else -> "AND UPPER(COALESCE(s.nazwa_produktu, '')) LIKE ?"
         }
     }
 
     private fun buildSearchClause(query: String, mode: SearchMode): String {
         if (query.isBlank()) return ""
         val targetColumn = when (mode) {
-            SearchMode.NAME -> "nazwa_produktu_leczniczego"
+            SearchMode.NAME -> "nazwa_produktu"
             SearchMode.SUBSTANCE -> "substancja_czynna"
         }
         return """
@@ -253,12 +247,12 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private fun resolveSearchMode(
         db: android.database.sqlite.SQLiteDatabase,
-        batchId: Long,
+        snapshotDate: String,
         letterFilter: String,
         query: String
     ): SearchMode {
         val letterClause = buildFilterClause(letterFilter)
-        val args = mutableListOf<String>(batchId.toString())
+        val args = mutableListOf<String>(snapshotDate)
         when (letterFilter) {
             "123" -> args += "[0-9]*"
             "#" -> Unit
@@ -270,10 +264,10 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
             db,
             """
             SELECT COUNT(*)
-            FROM registry_rpl_snapshot s
-            WHERE s.batch_id = ?
+            FROM rpl s
+            WHERE s.data_snapshot = ?
               $letterClause
-              AND UPPER(COALESCE(s.nazwa_produktu_leczniczego, '')) LIKE ?
+              AND UPPER(COALESCE(s.nazwa_produktu, '')) LIKE ?
             """.trimIndent(),
             args.toTypedArray()
         )
@@ -286,21 +280,19 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
     }
 
     private fun readDiagnostics(db: android.database.sqlite.SQLiteDatabase): String {
-        val totalBatches = scalarInt(db, "SELECT COUNT(*) FROM registry_import_batch")
-        val totalRows = scalarInt(db, "SELECT COUNT(*) FROM registry_rpl_snapshot") +
-            scalarInt(db, "SELECT COUNT(*) FROM registry_ra_snapshot") +
-            scalarInt(db, "SELECT COUNT(*) FROM registry_rdg_row")
-        val rplBatches = scalarInt(db, "SELECT COUNT(*) FROM registry_import_batch WHERE source_code IN ('RPL_CSV','RPL_XLSX')")
+        val totalSnapshots = scalarInt(db, "SELECT COUNT(DISTINCT data_snapshot) FROM rpl")
+        val totalRows = scalarInt(db, "SELECT COUNT(*) FROM rpl") +
+            scalarInt(db, "SELECT COUNT(*) FROM ra") +
+            scalarInt(db, "SELECT COUNT(*) FROM rdg")
+        val rplBatches = scalarInt(db, "SELECT COUNT(DISTINCT data_snapshot) FROM rpl")
         val rplRows = scalarInt(
             db,
             """
             SELECT COUNT(*)
-            FROM registry_rpl_snapshot r
-            JOIN registry_import_batch b ON b.id = r.batch_id
-            WHERE b.source_code IN ('RPL_CSV','RPL_XLSX')
+            FROM rpl r
             """.trimIndent()
         )
-        return "batches=$totalBatches rows=$totalRows rplBatches=$rplBatches rplRows=$rplRows"
+        return "snapshots=$totalSnapshots rows=$totalRows rplSnapshots=$rplBatches rplRows=$rplRows"
     }
 
     private fun scalarInt(db: android.database.sqlite.SQLiteDatabase, sql: String, args: Array<String> = emptyArray()): Int {

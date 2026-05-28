@@ -33,8 +33,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
     private val pageSize = 20
     private val polishLocale = Locale.forLanguageTag("pl-PL")
     private var snapshotDate: String? = null
-    private var snapshotBatchId: Long? = null
-    private var recordCount: Int = 0
+        private var recordCount: Int = 0
     private var offset: Int = 0
     private var selectedLetter: String = "#"
     private var searchQuery: String = ""
@@ -74,8 +73,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
 
     private fun reloadCatalog() {
         offset = 0
-        snapshotBatchId = null
-        snapshotDate = null
+                snapshotDate = null
         loadedItems.clear()
         _uiState.postValue(PharmacyCatalogUiState(summaryResId = R.string.pharmacy_catalog_loading, selectedLetter = selectedLetter))
         loadPage(reset = true)
@@ -90,12 +88,9 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                 if (snapshotDate == null || reset) {
                     db.rawQuery(
                         """
-                        SELECT id, snapshot_date_utc
-                        FROM registry_import_batch
-                        WHERE source_code IN ('RA_CSV', 'RA_XLS')
-                        ORDER BY snapshot_date_utc DESC,
-                                 CASE WHEN source_code = 'RA_XLS' THEN 0 ELSE 1 END,
-                                 id DESC
+                        SELECT data_snapshot
+                        FROM ra
+                        ORDER BY data_snapshot DESC
                         LIMIT 1
                         """.trimIndent(),
                         emptyArray()
@@ -104,19 +99,18 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                             _uiState.postValue(PharmacyCatalogUiState(summaryResId = R.string.pharmacy_catalog_empty, selectedLetter = selectedLetter))
                             return@launch
                         }
-                        snapshotBatchId = snapshotCursor.getLong(0)
-                        snapshotDate = snapshotCursor.getString(1)
+                        snapshotDate = snapshotCursor.getString(0)
                         recordCount = scalarInt(
                             db,
-                            "SELECT COUNT(*) FROM registry_ra_snapshot WHERE batch_id = ${snapshotBatchId ?: -1L}"
+                            "SELECT COUNT(*) FROM ra WHERE data_snapshot = ?",
+                            arrayOf(snapshotDate ?: "")
                         )
                     }
                 }
 
                 val selectedSnapshotDate = snapshotDate ?: return@launch
-                val selectedBatchId = snapshotBatchId ?: return@launch
-                val clause = buildFilterClause(selectedLetter)
-                val args = mutableListOf<String>(selectedBatchId.toString())
+                                val clause = buildFilterClause(selectedLetter)
+                val args = mutableListOf<String>(selectedSnapshotDate)
                 when (selectedLetter) {
                     "123" -> args += "[0-9]*"
                     "#" -> Unit
@@ -124,7 +118,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                 }
 
                 if (searchQuery.isNotBlank() && reset) {
-                    searchMode = resolveSearchMode(db, selectedBatchId, selectedLetter, searchQuery)
+                    searchMode = resolveSearchMode(db, selectedSnapshotDate, selectedLetter, searchQuery)
                 }
                 val searchClause = buildSearchClause(searchQuery, searchMode)
                 if (searchQuery.isNotBlank()) args += buildSearchPatterns(searchQuery)
@@ -140,8 +134,8 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                            TRIM(COALESCE(s.typ_ulicy, '') || ' ' || COALESCE(s.nazwa_ulicy, '')),
                            COALESCE(s.numer_budynku, ''),
                            COALESCE(s.numer_lokalu, '')
-                    FROM registry_ra_snapshot s
-                    WHERE s.batch_id = ?
+                    FROM ra s
+                    WHERE s.data_snapshot = ?
                       $clause
                       $searchClause
                     ORDER BY COALESCE(s.miejscowosc, '') COLLATE NOCASE ASC,
@@ -239,12 +233,12 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
 
     private fun resolveSearchMode(
         db: android.database.sqlite.SQLiteDatabase,
-        batchId: Long,
+        snapshotDate: String,
         letterFilter: String,
         query: String
     ): SearchMode {
         val letterClause = buildFilterClause(letterFilter)
-        val args = mutableListOf<String>(batchId.toString())
+        val args = mutableListOf<String>(snapshotDate)
         when (letterFilter) {
             "123" -> args += "[0-9]*"
             "#" -> Unit
@@ -256,8 +250,8 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
             db,
             """
             SELECT COUNT(*)
-            FROM registry_ra_snapshot s
-            WHERE s.batch_id = ?
+            FROM ra s
+            WHERE s.data_snapshot = ?
               $letterClause
               AND (
                   COALESCE(s.miejscowosc, '') LIKE ?
