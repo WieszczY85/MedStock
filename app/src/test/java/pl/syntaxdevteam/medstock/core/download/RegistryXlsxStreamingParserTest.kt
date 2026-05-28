@@ -4,6 +4,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.File
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 class RegistryXlsxStreamingParserTest {
 
@@ -29,6 +31,27 @@ class RegistryXlsxStreamingParserTest {
         assertEquals(listOf("1002", "Lek B", "Substancja B"), records[1].values)
     }
 
+    @Test
+    fun `streaming parser reads inline strings and sparse cells from rpl-style xlsx`() {
+        val file = createInlineStringXlsx()
+
+        val parsed = parser.parse(RegistryFileSource.RPL_XLSX, file)
+        val records = parsed.records.toList()
+
+        assertEquals(
+            listOf(
+                "Identyfikator Produktu Leczniczego",
+                "Nazwa Produktu Leczniczego",
+                "Nazwa powszechnie stosowana",
+                "Opakowanie"
+            ),
+            parsed.headers
+        )
+        assertEquals(2, records.size)
+        assertEquals(listOf("2001", "Lek C", "", "30 tabl."), records[0].values)
+        assertEquals(listOf("2002", "Lek D", "Substancja D"), records[1].values)
+    }
+
     private fun createSampleXlsx(): File {
         val workbook = XSSFWorkbook()
         val sheet = workbook.createSheet("RPL")
@@ -51,5 +74,54 @@ class RegistryXlsxStreamingParserTest {
         file.outputStream().use { workbook.write(it) }
         workbook.close()
         return file
+    }
+
+    private fun createInlineStringXlsx(): File {
+        val file = File.createTempFile("rpl_inline_streaming_", ".xlsx")
+        ZipOutputStream(file.outputStream()).use { zip ->
+            zip.writestr(
+                "[Content_Types].xml",
+                """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+                    <Default Extension="xml" ContentType="application/xml"/>
+                    <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+                </Types>
+                """.trimIndent()
+            )
+            zip.writestr(
+                "xl/worksheets/sheet1.xml",
+                """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+                    <sheetData>
+                        <row r="1">
+                            <c r="A1" t="inlineStr"><is><t>Identyfikator Produktu Leczniczego</t></is></c>
+                            <c r="B1" t="inlineStr"><is><t>Nazwa Produktu Leczniczego</t></is></c>
+                            <c r="C1" t="inlineStr"><is><t>Nazwa powszechnie stosowana</t></is></c>
+                            <c r="D1" t="inlineStr"><is><t>Opakowanie</t></is></c>
+                        </row>
+                        <row r="2">
+                            <c r="A2" t="inlineStr"><is><t>2001</t></is></c>
+                            <c r="B2" t="inlineStr"><is><t>Lek C</t></is></c>
+                            <c r="D2" t="inlineStr"><is><t>30 tabl.</t></is></c>
+                        </row>
+                        <row r="3">
+                            <c r="A3" t="inlineStr"><is><t>2002</t></is></c>
+                            <c r="B3" t="inlineStr"><is><t>Lek D</t></is></c>
+                            <c r="C3" t="inlineStr"><is><t>Substancja D</t></is></c>
+                        </row>
+                    </sheetData>
+                </worksheet>
+                """.trimIndent()
+            )
+        }
+        return file
+    }
+
+    private fun ZipOutputStream.writestr(name: String, content: String) {
+        putNextEntry(ZipEntry(name))
+        write(content.toByteArray(Charsets.UTF_8))
+        closeEntry()
     }
 }
