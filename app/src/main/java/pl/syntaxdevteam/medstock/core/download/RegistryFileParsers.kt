@@ -16,15 +16,9 @@ import org.apache.poi.hssf.record.SSTRecord
 import org.apache.poi.hssf.record.StringRecord
 import org.apache.poi.hssf.record.FormulaRecord
 import org.apache.poi.hssf.usermodel.HSSFDataFormatter
-import org.apache.poi.openxml4j.opc.OPCPackage
-import org.apache.poi.ss.usermodel.DataFormatter
-import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
-import org.apache.poi.xssf.eventusermodel.XSSFReader
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
-import org.apache.poi.xssf.model.StylesTable
-import org.apache.poi.xssf.usermodel.XSSFComment
+import org.xml.sax.Attributes
 import org.xml.sax.InputSource
-import org.xml.sax.XMLReader
+import org.xml.sax.helpers.DefaultHandler
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.BufferedReader
@@ -33,6 +27,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.util.zip.ZipFile
 import javax.xml.parsers.SAXParserFactory
 
 class RegistryFileParsers(
@@ -193,27 +188,14 @@ private fun parseWorkbookStreaming(source: RegistryFileSource, file: File): Pars
         val spoolFile = File.createTempFile("rpl_stream_", ".tsv")
         val headers = mutableListOf<String>()
 
-        OPCPackage.open(file).use { pkg ->
-            val strings = ReadOnlySharedStringsTable(pkg)
-            val reader = XSSFReader(pkg)
-            val styles: StylesTable = reader.stylesTable
-            val formatter = DataFormatter()
+        ZipFile(file).use { zip ->
+            val sharedStrings = readXlsxSharedStrings(zip)
+            val sheetEntry = findFirstWorksheetEntry(zip)
+                ?: return ParsedRegistryFile(source, emptyList(), emptySequence())
 
-            BufferedWriter(OutputStreamWriter(spoolFile.outputStream(), Charsets.UTF_8)).use { writer ->
-                val sheetIterator = reader.sheetsData
-                if (!sheetIterator.hasNext()) {
-                    return ParsedRegistryFile(source, emptyList(), emptySequence())
-                }
-
-                sheetIterator.next().use { sheetInput ->
-                    val handler = StreamingSheetHandler(headers, writer)
-                    val xmlHandler = XSSFSheetXMLHandler(styles, null, strings, handler, formatter, false)
-                    val parserFactory = SAXParserFactory.newInstance().apply {
-                        isNamespaceAware = true
-                    }
-                    val parser: XMLReader = parserFactory.newSAXParser().xmlReader
-                    parser.contentHandler = xmlHandler
-                    parser.parse(InputSource(sheetInput))
+            BufferedWriter(OutputStreamWriter(spoolFile.outputStream(), Charsets.UTF_8), TSV_READ_BUFFER_SIZE).use { writer ->
+                zip.getInputStream(sheetEntry).use { input ->
+                    parseXlsxSheet(input.reader(Charsets.UTF_8), sharedStrings, headers, writer)
                 }
             }
         }
@@ -226,56 +208,173 @@ private fun parseWorkbookStreaming(source: RegistryFileSource, file: File): Pars
     }
 }
 
-private class StreamingSheetHandler(
-    private val headers: MutableList<String>,
-    private val writer: BufferedWriter
-) : XSSFSheetXMLHandler.SheetContentsHandler {
-    private val currentRow = ArrayList<String>(EXPECTED_RPL_COLUMN_COUNT)
-    private val lineBuilder = StringBuilder(EXPECTED_RPL_COLUMN_COUNT * AVERAGE_CELL_CHARS)
-    private var maxCellIndex = -1
+private fun readXlsxSharedStrings(zip: ZipFile): List<String> {
+    val entry = zip.getEntry(XLSX_SHARED_STRINGS_ENTRY) ?: return emptyList()
+    val handler = SharedStringsHandler()
+    zip.getInputStream(entry).use { input ->
+        newSaxParser().parse(InputSource(input), handler)
+    }
+    return handler.strings
+}
 
-    override fun startRow(rowNum: Int) {
-        currentRow.clear()
-        maxCellIndex = -1
+private class SharedStringsHandler : DefaultHandler() {
+    val strings = ArrayList<String>()
+    private val current = StringBuilder()
+    private var insideSharedString = false
+    private var insideText = false
+
+    override fun startElement(uri: String?, localName: String?, qName: String?, attributes: Attributes?) {
+        when (xmlName(localName, qName)) {
+            "si" -> {
+                current.setLength(0)
+                insideSharedString = true
+            }
+            "t" -> if (insideSharedString) insideText = true
+        }
     }
 
-    override fun endRow(rowNum: Int) {
-        if (maxCellIndex < 0) return
-        if (rowNum == 0) {
-            headers.clear()
-            for (index in 0..maxCellIndex) headers += currentRow.getOrNull(index).orEmpty()
-            return
-        }
-
-        lineBuilder.setLength(0)
-        lineBuilder.append(rowNum)
-        for (index in 0..maxCellIndex) {
-            lineBuilder.append('\t')
-            appendTsvSafe(lineBuilder, currentRow.getOrNull(index).orEmpty())
-        }
-        writer.append(lineBuilder)
-        writer.newLine()
+    override fun characters(ch: CharArray, start: Int, length: Int) {
+        if (insideText) current.append(ch, start, length)
     }
 
-    override fun cell(cellReference: String?, formattedValue: String?, comment: XSSFComment?) {
-        val index = columnIndex(cellReference)
-        ensureSize(currentRow, index + 1)
-        currentRow[index] = formattedValue.orEmpty()
-        if (index > maxCellIndex) maxCellIndex = index
-    }
-
-    override fun headerFooter(text: String?, isHeader: Boolean, tagName: String?) = Unit
-
-    private fun columnIndex(ref: String?): Int {
-        if (ref.isNullOrBlank()) return 0
-        var result = 0
-        for (ch in ref) {
-            if (!ch.isLetter()) break
-            result = result * 26 + (ch.uppercaseChar() - 'A' + 1)
+    override fun endElement(uri: String?, localName: String?, qName: String?) {
+        when (xmlName(localName, qName)) {
+            "t" -> insideText = false
+            "si" -> {
+                strings += current.toString()
+                insideSharedString = false
+            }
         }
-        return (result - 1).coerceAtLeast(0)
     }
 }
+
+private fun findFirstWorksheetEntry(zip: ZipFile) =
+    zip.getEntry(XLSX_FIRST_WORKSHEET_ENTRY) ?: run {
+        val entries = zip.entries()
+        var fallback: java.util.zip.ZipEntry? = null
+        while (entries.hasMoreElements()) {
+            val entry = entries.nextElement()
+            if (!entry.isDirectory && entry.name.startsWith(XLSX_WORKSHEET_PREFIX) && entry.name.endsWith(".xml")) {
+                if (fallback == null || entry.name < fallback.name) fallback = entry
+            }
+        }
+        fallback
+    }
+
+private fun parseXlsxSheet(
+    reader: java.io.Reader,
+    sharedStrings: List<String>,
+    headers: MutableList<String>,
+    writer: BufferedWriter
+) {
+    val handler = XlsxSheetHandler(sharedStrings, headers, writer)
+    newSaxParser().parse(InputSource(reader), handler)
+}
+
+private class XlsxSheetHandler(
+    private val sharedStrings: List<String>,
+    private val headers: MutableList<String>,
+    private val writer: BufferedWriter
+) : DefaultHandler() {
+    private val currentRow = ArrayList<String>(EXPECTED_RPL_COLUMN_COUNT)
+    private val cellValue = StringBuilder(AVERAGE_CELL_CHARS)
+    private val lineBuilder = StringBuilder(EXPECTED_RPL_COLUMN_COUNT * AVERAGE_CELL_CHARS)
+    private var rowNumber = 0
+    private var currentCellIndex = 0
+    private var maxCellIndex = -1
+    private var cellType: String? = null
+    private var insideCell = false
+    private var insideValue = false
+    private var insideInlineText = false
+
+    override fun startElement(uri: String?, localName: String?, qName: String?, attributes: Attributes?) {
+        when (xmlName(localName, qName)) {
+            "row" -> {
+                currentRow.clear()
+                maxCellIndex = -1
+                rowNumber = attributes?.getValue("r")?.toIntOrNull() ?: (rowNumber + 1)
+            }
+            "c" -> {
+                insideCell = true
+                cellValue.setLength(0)
+                cellType = attributes?.getValue("t")
+                currentCellIndex = columnIndexFromCellReference(attributes?.getValue("r"))
+            }
+            "v" -> if (insideCell) insideValue = true
+            "t" -> if (insideCell && cellType == "inlineStr") insideInlineText = true
+        }
+    }
+
+    override fun characters(ch: CharArray, start: Int, length: Int) {
+        if (insideValue || insideInlineText) cellValue.append(ch, start, length)
+    }
+
+    override fun endElement(uri: String?, localName: String?, qName: String?) {
+        when (xmlName(localName, qName)) {
+            "v" -> insideValue = false
+            "t" -> insideInlineText = false
+            "c" -> {
+                ensureSize(currentRow, currentCellIndex + 1)
+                currentRow[currentCellIndex] = resolveXlsxCellValue(cellType, cellValue.toString(), sharedStrings)
+                if (currentCellIndex > maxCellIndex) maxCellIndex = currentCellIndex
+                insideCell = false
+                cellType = null
+            }
+            "row" -> writeXlsxRow(rowNumber, maxCellIndex, currentRow, headers, lineBuilder, writer)
+        }
+    }
+}
+
+private fun writeXlsxRow(
+    rowNumber: Int,
+    maxCellIndex: Int,
+    currentRow: List<String>,
+    headers: MutableList<String>,
+    lineBuilder: StringBuilder,
+    writer: BufferedWriter
+) {
+    if (maxCellIndex < 0) return
+    if (rowNumber == 1) {
+        headers.clear()
+        for (index in 0..maxCellIndex) headers += currentRow.getOrNull(index).orEmpty()
+        return
+    }
+
+    lineBuilder.setLength(0)
+    lineBuilder.append(rowNumber - 1)
+    for (index in 0..maxCellIndex) {
+        lineBuilder.append('\t')
+        appendTsvSafe(lineBuilder, currentRow.getOrNull(index).orEmpty())
+    }
+    writer.append(lineBuilder)
+    writer.newLine()
+}
+
+private fun resolveXlsxCellValue(cellType: String?, rawValue: String, sharedStrings: List<String>): String =
+    when (cellType) {
+        "s" -> rawValue.toIntOrNull()?.let { sharedStrings.getOrNull(it) }.orEmpty()
+        "b" -> when (rawValue) {
+            "1" -> "TRUE"
+            "0" -> "FALSE"
+            else -> rawValue
+        }
+        else -> rawValue
+    }
+
+private fun columnIndexFromCellReference(ref: String?): Int {
+    if (ref.isNullOrBlank()) return 0
+    var result = 0
+    for (ch in ref) {
+        if (!ch.isLetter()) break
+        result = result * 26 + (ch.uppercaseChar() - 'A' + 1)
+    }
+    return (result - 1).coerceAtLeast(0)
+}
+
+private fun newSaxParser() = SAXParserFactory.newInstance().apply { isNamespaceAware = false }.newSAXParser()
+
+private fun xmlName(localName: String?, qName: String?): String =
+    (localName?.takeIf { it.isNotBlank() } ?: qName.orEmpty()).substringAfter(':')
 
 private fun spooledTsvRecords(source: RegistryFileSource, spoolFile: File): Sequence<RawRegistryRecord> = sequence {
     try {
@@ -319,6 +418,9 @@ private fun ensureSize(values: MutableList<String>, size: Int) {
 }
 
 private const val TSV_READ_BUFFER_SIZE = 64 * 1024
+private const val XLSX_SHARED_STRINGS_ENTRY = "xl/sharedStrings.xml"
+private const val XLSX_FIRST_WORKSHEET_ENTRY = "xl/worksheets/sheet1.xml"
+private const val XLSX_WORKSHEET_PREFIX = "xl/worksheets/sheet"
 private const val EXPECTED_RPL_COLUMN_COUNT = 32
 private const val EXPECTED_RA_COLUMN_COUNT = 28
 private const val AVERAGE_CELL_CHARS = 18
