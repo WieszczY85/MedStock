@@ -139,7 +139,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
                 db.rawQuery(
                 """
-                SELECT s.source_entity_key,
+                SELECT COALESCE(s.identyfikator_produktu, ''),
                        COALESCE(s.nazwa_produktu, ''),
                        COALESCE(s.substancja_czynna, ''),
                        COALESCE(s.moc, ''),
