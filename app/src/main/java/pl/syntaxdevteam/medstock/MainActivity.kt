@@ -1,6 +1,7 @@
 package pl.syntaxdevteam.medstock
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -195,30 +196,50 @@ class MainActivity : AppCompatActivity() {
                 var latestState: pl.syntaxdevteam.medstock.core.download.StartupProgress? = null
                 var displayedPercent = 0
                 var targetPercent = 0
+                var stateUpdatedAt = SystemClock.uptimeMillis()
+                var lastSyntheticProgressAt = 0L
                 var animationJob: Job? = null
                 runCatching {
                     animationJob = launch {
                         while (true) {
                             val state = latestState
                             if (state != null) {
+                                val now = SystemClock.uptimeMillis()
                                 if (displayedPercent < targetPercent) {
-                                    val step = (targetPercent - displayedPercent).coerceAtMost(2)
+                                    val step = (targetPercent - displayedPercent).coerceAtMost(PRELOADER_REAL_PROGRESS_STEP)
                                     displayedPercent += step
-                                    progress.progress = displayedPercent.coerceIn(0, 100)
+                                } else if (
+                                    state.isLongRunning &&
+                                    displayedPercent < PRELOADER_SYNTHETIC_PROGRESS_LIMIT &&
+                                    now - stateUpdatedAt >= PRELOADER_LONG_RUNNING_NOTICE_DELAY_MS &&
+                                    now - lastSyntheticProgressAt >= PRELOADER_SYNTHETIC_PROGRESS_INTERVAL_MS
+                                ) {
+                                    displayedPercent++
+                                    lastSyntheticProgressAt = now
+                                }
+                                progress.progress = displayedPercent.coerceIn(0, 100)
+                                val message = if (
+                                    state.isLongRunning &&
+                                    now - stateUpdatedAt >= PRELOADER_LONG_RUNNING_NOTICE_DELAY_MS
+                                ) {
+                                    getString(R.string.preloader_status_long_running, state.message)
+                                } else {
+                                    state.message
                                 }
                                 status.text = getString(
                                     R.string.preloader_status_with_progress,
                                     displayedPercent,
                                     state.currentTask,
                                     state.totalTasks,
-                                    state.message
+                                    message
                                 )
                             }
-                            delay(120)
+                            delay(PRELOADER_ANIMATION_FRAME_MS)
                         }
                     }
                     StartupIngestionRunner(applicationContext).run(force = true).collect { state ->
                         latestState = state
+                        stateUpdatedAt = SystemClock.uptimeMillis()
                         targetPercent = maxOf(targetPercent, state.progressPercent)
                     }
                 }.onFailure {
@@ -254,4 +275,12 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+    companion object {
+        private const val PRELOADER_ANIMATION_FRAME_MS = 120L
+        private const val PRELOADER_REAL_PROGRESS_STEP = 2
+        private const val PRELOADER_LONG_RUNNING_NOTICE_DELAY_MS = 2_500L
+        private const val PRELOADER_SYNTHETIC_PROGRESS_INTERVAL_MS = 900L
+        private const val PRELOADER_SYNTHETIC_PROGRESS_LIMIT = 95
+    }
+
 }

@@ -14,7 +14,8 @@ data class StartupProgress(
     val progressPercent: Int,
     val message: String,
     val currentTask: Int,
-    val totalTasks: Int
+    val totalTasks: Int,
+    val isLongRunning: Boolean = false
 )
 
 class StartupIngestionRunner(private val context: Context) {
@@ -36,9 +37,9 @@ class StartupIngestionRunner(private val context: Context) {
         var completedTasks = 0
 
         fun percent(): Int = ((completedTasks * 100f) / totalTasks).toInt().coerceIn(0, 100)
-        suspend fun emitProgress(message: String) {
+        suspend fun emitProgress(message: String, isLongRunning: Boolean = false) {
             val currentTask = (completedTasks + 1).coerceAtMost(totalTasks)
-            emit(StartupProgress(percent(), message, currentTask, totalTasks))
+            emit(StartupProgress(percent(), message, currentTask, totalTasks, isLongRunning))
         }
 
         val dbHelper = RegistryIngestDatabaseHelper.getInstance(context)
@@ -63,7 +64,10 @@ class StartupIngestionRunner(private val context: Context) {
                     val downloaded = downloader.download(source)
                     Log.i(tag, "Downloaded source=${source.name} file=${downloaded.file.absolutePath} size=${downloaded.file.length()}")
                     completedTasks++
-                    emitProgress(context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_parse, source.name))
+                    emitProgress(
+                        context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_parse, source.name),
+                        isLongRunning = source == RegistryFileSource.RPL_XLSX
+                    )
                     val parsed = parsers.parse(source, downloaded.file)
                     completedTasks++
                     emitProgress(context.getString(pl.syntaxdevteam.medstock.R.string.preloader_status_save, source.name))
