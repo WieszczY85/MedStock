@@ -2,6 +2,7 @@ package pl.syntaxdevteam.medstock.ui.medicationlist
 
 import android.content.Context
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
+import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationPackageParser
 
 data class MedicationCatalogSuggestion(
     val displayName: String,
@@ -53,6 +54,7 @@ class MedicationCatalogSuggestionRepository(context: Context) {
                     packageDescription = packageDescription,
                     pharmaceuticalForm = pharmaceuticalForm,
                     activeSubstance = activeSubstance,
+                    matchedPackageCode = null,
                 )
             }
             return items
@@ -87,6 +89,7 @@ class MedicationCatalogSuggestionRepository(context: Context) {
                 packageDescription = cursor.getString(2).orEmpty().trim(),
                 pharmaceuticalForm = cursor.getString(3).orEmpty().trim(),
                 activeSubstance = cursor.getString(4).orEmpty().trim(),
+                matchedPackageCode = normalizedCode,
             )
         }
     }
@@ -97,8 +100,9 @@ class MedicationCatalogSuggestionRepository(context: Context) {
         packageDescription: String,
         pharmaceuticalForm: String,
         activeSubstance: String,
+        matchedPackageCode: String?,
     ): MedicationCatalogSuggestion {
-        val packageInfo = extractPackageInfo(packageDescription)
+        val packageInfo = extractPackageInfo(packageDescription, matchedPackageCode)
         return MedicationCatalogSuggestion(
             displayName = buildDisplayName(medicationName, strength, packageInfo.displayPackage),
             medicationName = medicationName,
@@ -121,18 +125,40 @@ class MedicationCatalogSuggestionRepository(context: Context) {
             return if (details.isBlank()) name else "$name ($details)"
         }
 
-        internal fun extractPackageInfo(packageDescription: String): PackageInfo {
-            val normalized = packageDescription
-                .substringBefore('|')
+        internal fun extractPackageInfo(packageDescription: String, matchedPackageCode: String? = null): PackageInfo {
+            val selectedQuantity = selectPackageQuantity(packageDescription, matchedPackageCode)
+            val normalized = selectedQuantity
                 .replace(Regex("\\s+"), " ")
-                .trim(' ', '.', ';', ',')
-            val match = Regex("""(?i)(\d+(?:[,.]\d+)?)\s*([\p{L}.]+(?:\s+[\p{L}.]+)?)?""").find(normalized)
+                .trim(' ', ';', ',')
+            val match = Regex("""(?i)(\d+(?:[,.]\d+)?)\s*([\p{L}.]+\.?(?:\s+[\p{L}.]+\.?)?)?""").find(normalized)
             val size = match?.groupValues?.getOrNull(1).orEmpty().replace(',', '.').trim()
-            val unit = match?.groupValues?.getOrNull(2).orEmpty().trim()
-            val displayPackage = listOf(size, unit)
-                .filter { it.isNotBlank() }
-                .joinToString(separator = " ")
+            val unit = match?.groupValues?.getOrNull(2).orEmpty().trim(' ', ';', ',')
+            val displayPackage = when {
+                size.isNotBlank() -> listOf(size, unit)
+                    .filter { it.isNotBlank() }
+                    .joinToString(separator = " ")
+                else -> normalized
+            }
             return PackageInfo(size = size, unit = unit, displayPackage = displayPackage)
+        }
+
+        private fun selectPackageQuantity(packageDescription: String, matchedPackageCode: String?): String {
+            val packages = MedicationPackageParser.parse(
+                kodEan = "",
+                opakowanie = packageDescription,
+                unknownPackageLabel = "",
+            )
+            if (packages.isEmpty()) return packageDescription
+
+            val normalizedMatchedCode = matchedPackageCode.orEmpty().filter(Char::isDigit)
+            val selected = if (normalizedMatchedCode.isNotBlank()) {
+                packages.firstOrNull { item -> item.ean.filter(Char::isDigit) == normalizedMatchedCode }
+                    ?: packages.firstOrNull { item -> item.ean.filter(Char::isDigit).contains(normalizedMatchedCode) }
+            } else {
+                packages.firstOrNull { item -> item.quantity.isNotBlank() }
+            }
+
+            return selected?.quantity.orEmpty().ifBlank { packages.first().quantity }
         }
     }
 }
