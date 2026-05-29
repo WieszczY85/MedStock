@@ -40,7 +40,7 @@
         android:imeOptions="actionNext"
         android:inputType="textCapSentences" />
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/edit_text_medication_unit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,14 +58,41 @@
         android:imeOptions="actionNext"
         android:inputType="number" />
 
-    <EditText
-        android:id="@+id/edit_text_medication_dosage"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="@string/medication_dosage_hint"
-        android:imeOptions="actionNext"
-        android:inputType="textCapSentences" />
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/edit_text_medication_dosage_morning"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/medication_dosage_morning_hint"
+            android:imeOptions="actionNext"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/edit_text_medication_dosage_noon"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:hint="@string/medication_dosage_noon_hint"
+            android:imeOptions="actionNext"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/edit_text_medication_dosage_evening"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:hint="@string/medication_dosage_evening_hint"
+            android:imeOptions="actionNext"
+            android:inputType="numberDecimal" />
+    </LinearLayout>
 
     <EditText
         android:id="@+id/edit_text_medication_alert_days"
