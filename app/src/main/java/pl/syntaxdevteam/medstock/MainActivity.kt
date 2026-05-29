@@ -16,17 +16,13 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.gms.common.moduleinstall.ModuleInstall
-import com.google.android.gms.common.moduleinstall.ModuleInstallRequest
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
-import com.google.mlkit.vision.barcode.common.Barcode
+import kotlinx.coroutines.launch
+import pl.syntaxdevteam.medstock.core.barcode.MedicationPackageScanner
 import pl.syntaxdevteam.medstock.core.download.StartupIngestionRunner
 import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
-import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment
 import pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationEditorFragment
@@ -184,30 +180,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startMedicationPackageScanner(onPackageCodeScanned: (String) -> Unit) {
-        val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_EAN_8, Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E)
-            .enableAutoZoom()
-            .build()
-        val scanner = GmsBarcodeScanning.getClient(this, options)
-        val moduleInstallClient = ModuleInstall.getClient(this)
-        val moduleInstallRequest = ModuleInstallRequest.newBuilder()
-            .addApi(scanner)
-            .build()
-
-        moduleInstallClient
-            .installModules(moduleInstallRequest)
-            .continueWithTask { scanner.startScan() }
-            .addOnSuccessListener { barcode ->
-                val code = barcode.rawValue.orEmpty()
-                if (code.isBlank()) {
-                    showLongToast(getString(R.string.medication_scan_empty_result))
-                } else {
-                    onPackageCodeScanned(code)
-                }
-            }
-            .addOnFailureListener {
-                showLongToast(getString(R.string.medication_scan_failed))
-            }
+        MedicationPackageScanner(this).start(
+            onPackageCodeScanned = onPackageCodeScanned,
+            onEmptyResult = { showLongToast(getString(R.string.medication_scan_empty_result)) },
+            onFailure = { showLongToast(getString(R.string.medication_scan_failed)) },
+        )
     }
 
     private fun showLongToast(message: String) {
