@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_medication_add_manual"
+        android:title="@string/medication_add_manual" />
+    <item
+        android:id="@+id/nav_medication_add_scan"
+        android:title="@string/medication_add_scan" />
+</menu>
