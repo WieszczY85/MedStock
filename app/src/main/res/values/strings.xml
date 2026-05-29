@@ -114,6 +114,17 @@
     <string name="medication_editor_delete">Delete medication</string>
     <string name="medication_editor_required">Medication name is required.</string>
     <string name="medication_editor_invalid_numbers">Current stock and alert days must be valid numbers.</string>
+    <string name="medication_duplicate_title">Same active substance detected</string>
+    <string name="medication_duplicate_message">Active substance: %1$s
+New medication: %2$s
+Stock to add: %3$s
+
+Select an existing medication to update, or add this as a separate list entry.</string>
+    <string name="medication_duplicate_existing_item">%1$s • %2$s • stock: %3$d %4$s</string>
+    <string name="medication_duplicate_strength_missing">no strength</string>
+    <string name="medication_duplicate_update_existing">Update selected stock</string>
+    <string name="medication_duplicate_add_separate">Add separately</string>
+    <string name="medication_duplicate_cancel">Cancel</string>
     <string name="medication_add_manual">Manual entry</string>
     <string name="medication_add_scan">Scan code</string>
     <string name="medication_scan_failed">Could not scan the package code.</string>

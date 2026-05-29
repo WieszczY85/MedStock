@@ -108,6 +108,17 @@ class MedicationListViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    fun matchingActiveSubstanceMedications(rawActiveSubstance: String): List<UserMedication> {
+        return ActiveSubstanceGrouping.findMatches(rawActiveSubstance, medications.value.orEmpty())
+    }
+
+    fun addStockToExistingMedication(id: Long, addedStock: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.addToStock(id, addedStock.coerceAtLeast(0))
+            refreshMedications()
+        }
+    }
+
     fun deleteMedication(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.delete(id)
