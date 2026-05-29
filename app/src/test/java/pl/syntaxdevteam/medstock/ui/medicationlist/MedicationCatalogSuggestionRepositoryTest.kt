@@ -48,4 +48,17 @@ class MedicationCatalogSuggestionRepositoryTest {
         assertEquals("tabl.", packageInfo.unit)
         assertEquals("60 tabl.", packageInfo.displayPackage)
     }
+
+    @Test
+    fun extractPackageInfoDoesNotExposeEanWhenQuantityIsMissing() {
+        val packageInfo = MedicationCatalogSuggestionRepository.extractPackageInfo("05909991129422")
+
+        assertEquals("", packageInfo.size)
+        assertEquals("", packageInfo.unit)
+        assertEquals("", packageInfo.displayPackage)
+        assertEquals(
+            "Zofenil 30 (30 mg)",
+            MedicationCatalogSuggestionRepository.buildDisplayName("Zofenil 30", "30 mg", packageInfo.displayPackage)
+        )
+    }
 }
