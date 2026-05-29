@@ -2,11 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_baza_leki"
+        android:icon="@drawable/ic_medication_black_24dp"
         android:title="@string/menu_baza_leki" />
     <item
         android:id="@+id/nav_baza_scan_find"
+        android:icon="@drawable/ic_qr_code_scanner_black_24dp"
         android:title="@string/menu_baza_scan_find" />
     <item
         android:id="@+id/nav_baza_apteki"
+        android:icon="@drawable/ic_local_pharmacy_black_24dp"
         android:title="@string/menu_baza_apteki" />
 </menu>

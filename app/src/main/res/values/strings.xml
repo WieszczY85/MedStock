@@ -56,7 +56,6 @@
     <string name="preloader_status_no_fallback">No working fallback source in this group.</string>
     <string name="preloader_status_partial_completion">Startup sync incomplete — will retry at next app start.</string>
     <string name="preloader_status_with_progress">%1$d%% (%2$d/%3$d) %4$s</string>
-    <string name="preloader_status_long_running">%1$s \n - this step may take longer. \nThe app is still working, please wait…</string>
     <string name="common_unknown_error">unknown error</string>
 
     <string name="medication_catalog_loading">Loading medication catalog from local database…</string>

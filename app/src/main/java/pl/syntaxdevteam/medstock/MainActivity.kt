@@ -167,6 +167,7 @@ class MainActivity : AppCompatActivity() {
     private fun showMedicationAddSubMenu(anchor: View, navController: NavController) {
         val popupMenu = PopupMenu(this, anchor)
         popupMenu.menuInflater.inflate(R.menu.medication_add_submenu, popupMenu.menu)
+        popupMenu.setForceShowIcon(true)
         popupMenu.setOnMenuItemClickListener { selected ->
             when (selected.itemId) {
                 R.id.nav_medication_add_manual -> navController.navigate(R.id.nav_medication_editor)
@@ -216,6 +217,7 @@ class MainActivity : AppCompatActivity() {
     private fun showBottomSubMenu(anchor: View, menuRes: Int, navController: NavController) {
         val popupMenu = PopupMenu(this, anchor)
         popupMenu.menuInflater.inflate(menuRes, popupMenu.menu)
+        popupMenu.setForceShowIcon(true)
         popupMenu.setOnMenuItemClickListener { selected ->
             when (selected.itemId) {
                 R.id.nav_baza_leki -> navigateTopLevel(navController, R.id.nav_baza_leki_screen)
@@ -286,20 +288,12 @@ class MainActivity : AppCompatActivity() {
                                     lastSyntheticProgressAt = now
                                 }
                                 progress.progress = displayedPercent.coerceIn(0, 100)
-                                val message = if (
-                                    state.isLongRunning &&
-                                    now - stateUpdatedAt >= PRELOADER_LONG_RUNNING_NOTICE_DELAY_MS
-                                ) {
-                                    getString(R.string.preloader_status_long_running, state.message)
-                                } else {
-                                    state.message
-                                }
                                 status.text = getString(
                                     R.string.preloader_status_with_progress,
                                     displayedPercent,
                                     state.currentTask,
                                     state.totalTasks,
-                                    message
+                                    state.message
                                 )
                             }
                             delay(PRELOADER_ANIMATION_FRAME_MS)

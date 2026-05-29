@@ -16,9 +16,11 @@
             <menu>
                 <item
                     android:id="@+id/nav_baza_leki_screen"
+                    android:icon="@drawable/ic_medication_black_24dp"
                     android:title="@string/menu_baza_leki" />
                 <item
                     android:id="@+id/nav_baza_apteki_screen"
+                    android:icon="@drawable/ic_local_pharmacy_black_24dp"
                     android:title="@string/menu_baza_apteki" />
             </menu>
         </item>
@@ -30,9 +32,11 @@
             <menu>
                 <item
                     android:id="@+id/nav_alerty_lista_screen"
+                    android:icon="@drawable/ic_notifications_black_24dp"
                     android:title="@string/menu_alerty_lista" />
                 <item
                     android:id="@+id/nav_alerty_przypomnienia_screen"
+                    android:icon="@drawable/ic_alarm_black_24dp"
                     android:title="@string/menu_alerty_przypomnienia" />
             </menu>
         </item>
