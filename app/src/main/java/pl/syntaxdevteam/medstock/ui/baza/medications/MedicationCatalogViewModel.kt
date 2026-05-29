@@ -18,12 +18,21 @@ data class MedicationCatalogEntry(
     val commonName: String,
     val dose: String,
     val route: String,
+    val pharmaceuticalForm: String,
     val responsibleEntity: String,
-    val packages: List<MedicationPackageInfo>
-)
+    val manufacturerCountry: String,
+    val packages: List<MedicationPackageInfo>,
+    val leafletUrl: String,
+    val characteristicsUrl: String
+) {
+    val primaryAvailabilityCode: String = packages
+        .firstNotNullOfOrNull { it.availabilityCode.takeIf(String::isNotBlank) }
+        .orEmpty()
+}
 
 data class MedicationPackageInfo(
     val ean: String,
+    val availabilityCode: String,
     val quantity: String
 )
 
@@ -144,8 +153,12 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                        COALESCE(s.substancja_czynna, ''),
                        COALESCE(s.moc, ''),
                        COALESCE(s.droga_podania, ''),
+                       COALESCE(s.postac_farmaceutyczna, ''),
                        COALESCE(s.podmiot_odpowiedzialny, ''),
-                       COALESCE(s.opakowanie, '')
+                       COALESCE(s.kraj_wytworcy, ''),
+                       COALESCE(s.opakowanie, ''),
+                       COALESCE(s.ulotka, ''),
+                       COALESCE(s.charakterystyka, '')
                 FROM rpl s
                 WHERE s.data_snapshot = ?
                   $clause
@@ -173,11 +186,15 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                         commonName = cursor.getString(2).orEmpty(),
                         dose = cursor.getString(3).orEmpty(),
                         route = cursor.getString(4).orEmpty(),
-                        responsibleEntity = cursor.getString(5).orEmpty(),
+                        pharmaceuticalForm = cursor.getString(5).orEmpty(),
+                        responsibleEntity = cursor.getString(6).orEmpty(),
+                        manufacturerCountry = cursor.getString(7).orEmpty(),
                         packages = parsePackageInfo(
                             kodEan = "",
-                            opakowanie = cursor.getString(6).orEmpty()
-                        )
+                            opakowanie = cursor.getString(8).orEmpty()
+                        ),
+                        leafletUrl = cursor.getString(9).orEmpty(),
+                        characteristicsUrl = cursor.getString(10).orEmpty()
                     )
                 } while (cursor.moveToNext())
 
@@ -312,6 +329,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 internal object MedicationPackageParser {
     private val eanRegex = Regex("\\d{8,14}")
     private val strictEanLineRegex = Regex("^\\s*(\\d{8,14})\\s*(?:¦.*)?$")
+    private val availabilityCodeRegex = Regex("(?i)^(OTC|Rpz|Rpw|Rp|Lz)$")
     private const val packageUnitPattern = "tabl\\.?|tabletki|kaps\\.?|kapsuł\\w*|amp\\.?|fiol\\.?|saszet\\w*|ml|g|mg|szt\\.?|j\\.?|jedn\\w*|op\\.?|opak\\w*|but\\.?|butel\\w*|flak\\w*|czop\\w*|glob\\w*|draż\\w*"
     private val packageUnitsRegex = Regex("(?i)($packageUnitPattern)")
     private val quantityOnlyRegex = Regex(
@@ -330,29 +348,37 @@ internal object MedicationPackageParser {
         if (lines.size == 1 && eanRegex.findAll(compactInput).count() > 1) {
             // Dla jednowierszowych danych z wieloma EAN zostawiamy parsowanie fallbackowi segmentowemu.
         } else {
-        var index = 0
-        while (index < lines.size) {
-            val line = lines[index]
-            val eanFromLine = strictEanLineRegex.find(line)?.groupValues?.get(1)
-            if (!eanFromLine.isNullOrBlank()) {
-                val inlineQuantity = extractInlineQuantity(line)
-                if (inlineQuantity != null) {
-                    packages += MedicationPackageInfo(ean = eanFromLine, quantity = inlineQuantity)
-                    index++
-                    continue
-                }
-                val nextLine = lines.getOrNull(index + 1)
-                if (!nextLine.isNullOrBlank()) {
-                    val quantityCandidate = nextLine.substringBefore("¦").trim()
-                    if (isPlausibleQuantity(quantityCandidate)) {
-                        packages += MedicationPackageInfo(ean = eanFromLine, quantity = quantityCandidate)
-                        index += 2
+            var index = 0
+            while (index < lines.size) {
+                val line = lines[index]
+                val eanFromLine = strictEanLineRegex.find(line)?.groupValues?.get(1)
+                if (!eanFromLine.isNullOrBlank()) {
+                    val inlineQuantity = extractInlineQuantity(line)
+                    if (inlineQuantity != null) {
+                        packages += MedicationPackageInfo(
+                            ean = eanFromLine,
+                            availabilityCode = extractAvailabilityCode(line),
+                            quantity = inlineQuantity
+                        )
+                        index++
                         continue
                     }
+                    val nextLine = lines.getOrNull(index + 1)
+                    if (!nextLine.isNullOrBlank()) {
+                        val quantityCandidate = nextLine.substringBefore("¦").trim()
+                        if (isPlausibleQuantity(quantityCandidate)) {
+                            packages += MedicationPackageInfo(
+                                ean = eanFromLine,
+                                availabilityCode = extractAvailabilityCode(line),
+                                quantity = quantityCandidate
+                            )
+                            index += 2
+                            continue
+                        }
+                    }
                 }
+                index++
             }
-            index++
-        }
         }
         if (packages.isEmpty() && normalizedPackaging.isNotBlank()) {
             val compact = compactInput
@@ -364,7 +390,11 @@ internal object MedicationPackageParser {
                 val segment = compact.substring(segmentStart, segmentEnd)
                 val quantity = quantityOnlyRegex.find(segment)?.groupValues?.get(1)?.trim()
                 if (!quantity.isNullOrBlank()) {
-                    packages += MedicationPackageInfo(ean = ean, quantity = quantity)
+                    packages += MedicationPackageInfo(
+                        ean = ean,
+                        availabilityCode = extractAvailabilityCode(segment),
+                        quantity = quantity
+                    )
                 }
             }
         }
@@ -379,14 +409,23 @@ internal object MedicationPackageParser {
                     else -> ""
                 }
                 if (fallbackQuantity.isNotBlank()) {
-                    return listOf(MedicationPackageInfo(ean = "-", quantity = fallbackQuantity))
+                    return listOf(MedicationPackageInfo(ean = "-", availabilityCode = "", quantity = fallbackQuantity))
                 }
             }
         }
         if (packages.isEmpty() && kodEan.isNotBlank()) {
-            return listOf(MedicationPackageInfo(ean = kodEan.trim(), quantity = unknownPackageLabel))
+            return listOf(MedicationPackageInfo(ean = kodEan.trim(), availabilityCode = "", quantity = unknownPackageLabel))
         }
         return packages
+    }
+
+    private fun extractAvailabilityCode(value: String): String {
+        return value.split("¦")
+            .asSequence()
+            .map { it.trim() }
+            .mapNotNull { availabilityCodeRegex.find(it)?.value }
+            .firstOrNull()
+            .orEmpty()
     }
 
     private fun extractInlineQuantity(line: String): String? {

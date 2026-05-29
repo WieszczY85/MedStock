@@ -20,9 +20,9 @@ class MedicationPackageParserTest {
         val result = MedicationPackageParser.parse("", input, "Brak danych")
 
         assertEquals(3, result.size)
-        assertEquals(MedicationPackageInfo("05909990991914", "30 tabl."), result[0])
-        assertEquals(MedicationPackageInfo("05909990419173", "90 tabl."), result[1])
-        assertEquals(MedicationPackageInfo("05909991013806", "60 tabl."), result[2])
+        assertEquals(MedicationPackageInfo("05909990991914", "Rp", "30 tabl."), result[0])
+        assertEquals(MedicationPackageInfo("05909990419173", "Rp", "90 tabl."), result[1])
+        assertEquals(MedicationPackageInfo("05909991013806", "Rp", "60 tabl."), result[2])
     }
 
     @Test
@@ -56,8 +56,8 @@ class MedicationPackageParserTest {
         val result = MedicationPackageParser.parse("", input, "Brak danych")
 
         assertEquals(2, result.size)
-        assertEquals(MedicationPackageInfo("05909990991914", "30 tabl."), result[0])
-        assertEquals(MedicationPackageInfo("05909990419173", "90 tabl."), result[1])
+        assertEquals(MedicationPackageInfo("05909990991914", "Rp", "30 tabl."), result[0])
+        assertEquals(MedicationPackageInfo("05909990419173", "Rp", "90 tabl."), result[1])
     }
 
     @Test
@@ -92,12 +92,23 @@ class MedicationPackageParserTest {
         val result = MedicationPackageParser.parse("", input, "Brak danych")
 
         assertEquals(6, result.size)
-        assertEquals(MedicationPackageInfo("05909991023782", "10 tabl."), result[0])
-        assertEquals(MedicationPackageInfo("05909991023799", "20 tabl."), result[1])
-        assertEquals(MedicationPackageInfo("05909991023805", "30 tabl."), result[2])
-        assertEquals(MedicationPackageInfo("05909991023829", "50 tabl."), result[3])
-        assertEquals(MedicationPackageInfo("05909991023836", "60 tabl."), result[4])
-        assertEquals(MedicationPackageInfo("05909991066185", "40 tabl."), result[5])
+        assertEquals(MedicationPackageInfo("05909991023782", "Rp", "10 tabl."), result[0])
+        assertEquals(MedicationPackageInfo("05909991023799", "Rp", "20 tabl."), result[1])
+        assertEquals(MedicationPackageInfo("05909991023805", "Rp", "30 tabl."), result[2])
+        assertEquals(MedicationPackageInfo("05909991023829", "Rp", "50 tabl."), result[3])
+        assertEquals(MedicationPackageInfo("05909991023836", "Rp", "60 tabl."), result[4])
+        assertEquals(MedicationPackageInfo("05909991066185", "Rp", "40 tabl."), result[5])
+    }
+
+    @Test
+    fun `parsuje kategorie dostepnosci z opakowania`() {
+        val input = "05909990991914 ¦ OTC ¦ 20505\n30 tabl."
+
+        val result = MedicationPackageParser.parse("", input, "Brak danych")
+
+        assertEquals(1, result.size)
+        assertEquals("OTC", result.first().availabilityCode)
+        assertEquals("30 tabl.", result.first().quantity)
     }
 
 }

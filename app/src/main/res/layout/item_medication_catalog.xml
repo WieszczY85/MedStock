@@ -41,10 +41,37 @@
             android:id="@+id/text_medication_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_1"
+            android:layout_marginTop="@dimen/space_2"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
             android:textColor="@color/text_primary"
             android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_2"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_medication_leaflet"
+                style="@style/Widget.MedStock.Button.CtaSupport"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/space_1"
+                android:layout_weight="1"
+                android:text="@string/medication_catalog_download_leaflet"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_medication_characteristics"
+                style="@style/Widget.MedStock.Button.CtaSupport"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_1"
+                android:layout_weight="1"
+                android:text="@string/medication_catalog_download_characteristics"
+                android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

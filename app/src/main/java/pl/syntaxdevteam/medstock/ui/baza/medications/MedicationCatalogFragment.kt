@@ -1,15 +1,20 @@
 package pl.syntaxdevteam.medstock.ui.baza.medications
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
+import java.util.Locale
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import pl.syntaxdevteam.medstock.R
 import pl.syntaxdevteam.medstock.databinding.FragmentMedicationCatalogBinding
 
@@ -96,6 +101,7 @@ private class MedicationCatalogAdapter : RecyclerView.Adapter<MedicationCatalogV
     fun submitList(data: List<MedicationCatalogEntry>) {
         items.clear()
         items.addAll(data)
+        expandedKeys.retainAll(data.mapTo(mutableSetOf()) { it.entityKey })
         notifyDataSetChanged()
     }
 
@@ -123,6 +129,8 @@ private class MedicationCatalogViewHolder(view: View) : RecyclerView.ViewHolder(
     private val subtitle: TextView = view.findViewById(R.id.text_medication_common_name)
     private val collapsedHint: TextView = view.findViewById(R.id.text_medication_collapsed_hint)
     private val details: TextView = view.findViewById(R.id.text_medication_details)
+    private val leafletButton: MaterialButton = view.findViewById(R.id.button_medication_leaflet)
+    private val characteristicsButton: MaterialButton = view.findViewById(R.id.button_medication_characteristics)
 
     fun bind(item: MedicationCatalogEntry, expanded: Boolean, onClick: () -> Unit) {
         val context = itemView.context
@@ -132,25 +140,34 @@ private class MedicationCatalogViewHolder(view: View) : RecyclerView.ViewHolder(
         val commonName = item.commonName.ifBlank {
             context.getString(R.string.medication_catalog_missing_common_name)
         }
-        title.text = medicationName
-        subtitle.text = if (expanded) {
-            context.getString(
-                R.string.medication_catalog_expanded_subtitle,
-                commonName,
-                item.dose.ifBlank { "—" },
-                item.route.ifBlank { "—" }
-            )
+        val primaryAvailability = availabilityLabel(item.primaryAvailabilityCode, title)
+        title.text = if (primaryAvailability.isBlank()) {
+            listOf(medicationName, item.dose).filter(String::isNotBlank).joinToString("  ")
         } else {
             context.getString(
-                R.string.medication_catalog_collapsed_subtitle,
-                commonName,
-                item.dose.ifBlank { "—" }
+                R.string.medication_catalog_title_with_availability,
+                medicationName,
+                item.dose.ifBlank { "—" },
+                primaryAvailability
             )
         }
+        subtitle.text = context.getString(
+            R.string.medication_catalog_collapsed_subtitle,
+            commonName,
+            item.pharmaceuticalForm.ifBlank { item.route.ifBlank { "—" } }
+        )
         collapsedHint.visibility = if (expanded) View.GONE else View.VISIBLE
         details.visibility = if (expanded) View.VISIBLE else View.GONE
+        leafletButton.visibility = if (expanded) View.VISIBLE else View.GONE
+        characteristicsButton.visibility = if (expanded) View.VISIBLE else View.GONE
         details.text = buildString {
-            append(context.getString(R.string.medication_catalog_responsible_entity, item.responsibleEntity.ifBlank { "—" }))
+            append(context.getString(R.string.medication_catalog_responsible_entity_label))
+            append("\n")
+            append(item.responsibleEntity.ifBlank { "—" })
+            if (item.manufacturerCountry.isNotBlank()) {
+                append(" • ")
+                append(item.manufacturerCountry)
+            }
             append("\n")
             append(context.getString(R.string.medication_catalog_packages_header))
             if (item.packages.isEmpty()) {
@@ -158,12 +175,42 @@ private class MedicationCatalogViewHolder(view: View) : RecyclerView.ViewHolder(
                 append(context.getString(R.string.medication_catalog_package_unknown))
             } else {
                 item.packages.forEach { pkg ->
-                    append("\n• ")
+                    append("\n")
                     append(context.getString(R.string.medication_catalog_package_row, pkg.ean, pkg.quantity))
                 }
             }
         }
+        bindDocumentButton(leafletButton, item.leafletUrl)
+        bindDocumentButton(characteristicsButton, item.characteristicsUrl)
         itemView.setOnClickListener { onClick() }
+    }
+
+    private fun bindDocumentButton(button: MaterialButton, url: String) {
+        val context = button.context
+        val normalizedUrl = url.trim()
+        button.isEnabled = normalizedUrl.isNotBlank()
+        button.setOnClickListener {
+            if (normalizedUrl.isBlank()) return@setOnClickListener
+            val uri = Uri.parse(normalizedUrl)
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            if (intent.resolveActivity(context.packageManager) != null) {
+                context.startActivity(intent)
+            } else {
+                Toast.makeText(context, R.string.medication_catalog_document_unavailable, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun availabilityLabel(code: String, labelView: TextView): String {
+        val resId = when (code.trim().uppercase(Locale.ROOT)) {
+            "RP" -> R.string.medication_availability_rp
+            "RPZ" -> R.string.medication_availability_rpz
+            "RPW" -> R.string.medication_availability_rpw
+            "OTC" -> R.string.medication_availability_otc
+            "LZ" -> R.string.medication_availability_lz
+            else -> null
+        }
+        return resId?.let(labelView.context::getString).orEmpty()
     }
 }
 
