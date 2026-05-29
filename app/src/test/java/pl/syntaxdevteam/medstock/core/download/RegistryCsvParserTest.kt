@@ -50,6 +50,33 @@ class RegistryCsvParserTest {
         assertEquals(listOf("1002", "Lek B", "20mg"), iterator.next().values)
     }
 
+
+    @Test
+    fun `RPL CSV parser keeps columns after multiline quoted package field`() {
+        val file = createTempCsv(
+            "Identyfikator Produktu Leczniczego;Opakowanie;Kraj wytwórcy;Ulotka;Charakterystyka\n" +
+                "1001;\"0590 ¦ Rp ¦ 1\n1 fiol. 5 ml\";Polska;https://example.test/leaflet;https://example.test/characteristic\n" +
+                "1002;\"Lek \"\"B\"\"\";Czechy;https://example.test/leaflet-b;https://example.test/characteristic-b\n"
+        )
+
+        val parsed = parser.parse(RegistryFileSource.RPL_CSV, file)
+        val records = parsed.records.toList()
+
+        assertEquals(5, parsed.headers.size)
+        assertEquals(2, records.size)
+        assertEquals(
+            listOf(
+                "1001",
+                "0590 ¦ Rp ¦ 1\n1 fiol. 5 ml",
+                "Polska",
+                "https://example.test/leaflet",
+                "https://example.test/characteristic"
+            ),
+            records[0].values
+        )
+        assertEquals("https://example.test/characteristic-b", records[1].values[4])
+    }
+
     private fun createTempCsv(content: String): File {
         val file = File.createTempFile("registry_", ".csv")
         file.writeText(content)

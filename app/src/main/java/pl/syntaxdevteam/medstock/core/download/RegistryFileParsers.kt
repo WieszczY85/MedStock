@@ -16,17 +16,17 @@ import org.apache.poi.hssf.record.SSTRecord
 import org.apache.poi.hssf.record.StringRecord
 import org.apache.poi.hssf.record.FormulaRecord
 import org.apache.poi.hssf.usermodel.HSSFDataFormatter
+import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.xml.sax.Attributes
 import org.xml.sax.InputSource
 import org.xml.sax.helpers.DefaultHandler
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.io.Reader
 import java.util.zip.ZipFile
 import javax.xml.parsers.SAXParserFactory
 
@@ -54,7 +54,7 @@ class CsvRegistryFileParser : RegistryFileParser {
         val delimiter = delimiterFor(source)
         val headers = try {
             BufferedReader(InputStreamReader(file.inputStream(), Charsets.UTF_8), CSV_READ_BUFFER_SIZE).use { reader ->
-                reader.readLine()?.let { splitCsvLine(it, delimiter) }.orEmpty()
+                readCsvRecord(reader, delimiter)?.values.orEmpty()
             }
         } catch (exception: Exception) {
             throw RegistryFileParsingException(source, "Nie udało się odczytać nagłówków CSV", exception)
@@ -63,18 +63,24 @@ class CsvRegistryFileParser : RegistryFileParser {
         return ParsedRegistryFile(
             source = source,
             headers = headers,
-            records = streamCsvRecords(source, file, delimiter)
+            records = streamCsvRecords(source, file, delimiter, headers.size)
         )
     }
 
-    private fun streamCsvRecords(source: RegistryFileSource, file: File, delimiter: Char): Sequence<RawRegistryRecord> = sequence {
+    private fun streamCsvRecords(source: RegistryFileSource, file: File, delimiter: Char, expectedColumnCount: Int): Sequence<RawRegistryRecord> = sequence {
         try {
             BufferedReader(InputStreamReader(file.inputStream(), Charsets.UTF_8), CSV_READ_BUFFER_SIZE).use { reader ->
-                reader.readLine() ?: return@use
+                readCsvRecord(reader, delimiter) ?: return@use
                 var rowNumber = 1L
                 while (true) {
-                    val line = reader.readLine() ?: break
-                    yield(RawRegistryRecord(source = source, rowNumber = rowNumber, values = splitCsvLine(line, delimiter)))
+                    val record = readCsvRecord(reader, delimiter) ?: break
+                    yield(
+                        RawRegistryRecord(
+                            source = source,
+                            rowNumber = rowNumber,
+                            values = alignRecordValues(record.values, expectedColumnCount)
+                        )
+                    )
                     rowNumber += 1L
                 }
             }
@@ -90,31 +96,52 @@ class CsvRegistryFileParser : RegistryFileParser {
             else -> ','
         }
 
-    private fun splitCsvLine(line: String, delimiter: Char): List<String> {
-        val result = ArrayList<String>(line.count { it == delimiter } + 1)
+    private data class CsvRecord(val values: List<String>)
+
+    private fun readCsvRecord(reader: Reader, delimiter: Char): CsvRecord? {
+        val result = ArrayList<String>()
         val current = StringBuilder()
         var inQuotes = false
-        var index = 0
+        var readAny = false
 
-        while (index < line.length) {
-            val char = line[index]
+        while (true) {
+            val next = reader.read()
+            if (next == -1) {
+                if (!readAny && current.isEmpty() && result.isEmpty()) return null
+                result += normalizeCsvValue(current)
+                return CsvRecord(result)
+            }
+
+            readAny = true
+            val char = next.toChar()
             when {
-                char == '"' && inQuotes && index + 1 < line.length && line[index + 1] == '"' -> {
-                    current.append('"')
-                    index += 1
+                char == '"' && inQuotes -> {
+                    reader.mark(1)
+                    val escaped = reader.read()
+                    if (escaped == '"'.code) {
+                        current.append('"')
+                    } else {
+                        inQuotes = false
+                        if (escaped != -1) reader.reset()
+                    }
                 }
-                char == '"' -> inQuotes = !inQuotes
+                char == '"' -> inQuotes = true
                 char == delimiter && !inQuotes -> {
                     result += normalizeCsvValue(current)
                     current.clear()
                 }
+                (char == '\n' || char == '\r') && !inQuotes -> {
+                    if (char == '\r') {
+                        reader.mark(1)
+                        val maybeLf = reader.read()
+                        if (maybeLf != '\n'.code && maybeLf != -1) reader.reset()
+                    }
+                    result += normalizeCsvValue(current)
+                    return CsvRecord(result)
+                }
                 else -> current.append(char)
             }
-            index += 1
         }
-
-        result += normalizeCsvValue(current)
-        return result
     }
 
     private fun normalizeCsvValue(value: StringBuilder): String = value.toString().trim().removePrefix("\uFEFF")
@@ -129,44 +156,49 @@ class XmlRegistryFileParser : RegistryFileParser {
 
     override fun parse(source: RegistryFileSource, file: File): ParsedRegistryFile {
         return try {
-            val parser = XmlPullParserFactory.newInstance().newPullParser()
+            val handler = RegistryXmlSaxHandler(source)
             FileInputStream(file).use { input ->
-                parser.setInput(InputStreamReader(input, Charsets.UTF_8))
-                parseXmlDocument(source, parser)
+                newSaxParser().parse(InputSource(input), handler)
             }
+            ParsedRegistryFile(source = source, headers = listOf("tag", "value"), records = handler.records.asSequence())
         } catch (exception: Exception) {
             throw RegistryFileParsingException(source, "Nie udało się sparsować XML", exception)
         }
     }
+}
 
-    private fun parseXmlDocument(source: RegistryFileSource, parser: XmlPullParser): ParsedRegistryFile {
-        val records = mutableListOf<RawRegistryRecord>()
-        var rowCounter = 0L
-        val rootName = mutableListOf<String>()
-        var eventType = parser.eventType
+private class RegistryXmlSaxHandler(
+    private val source: RegistryFileSource
+) : DefaultHandler() {
+    val records = mutableListOf<RawRegistryRecord>()
+    private val tagStack = ArrayList<String>()
+    private val text = StringBuilder()
+    private var rowCounter = 0L
 
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            when (eventType) {
-                XmlPullParser.START_TAG -> rootName += parser.name
-                XmlPullParser.END_TAG -> if (rootName.isNotEmpty()) rootName.removeAt(rootName.lastIndex)
-                XmlPullParser.TEXT -> {
-                    val text = parser.text?.trim().orEmpty()
-                    if (text.isNotEmpty()) {
-                        rowCounter += 1
-                        records += RawRegistryRecord(
-                            source = source,
-                            rowNumber = rowCounter,
-                            values = listOf(rootName.lastOrNull().orEmpty(), text)
-                        )
-                    }
-                }
-            }
-            eventType = parser.next()
+    override fun startElement(uri: String?, localName: String?, qName: String?, attributes: Attributes?) {
+        tagStack += xmlName(localName, qName)
+        text.setLength(0)
+    }
+
+    override fun characters(ch: CharArray, start: Int, length: Int) {
+        text.append(ch, start, length)
+    }
+
+    override fun endElement(uri: String?, localName: String?, qName: String?) {
+        val value = text.toString().trim()
+        if (value.isNotEmpty()) {
+            rowCounter += 1
+            records += RawRegistryRecord(
+                source = source,
+                rowNumber = rowCounter,
+                values = listOf(tagStack.lastOrNull().orEmpty(), value)
+            )
         }
-
-        return ParsedRegistryFile(source = source, headers = listOf("tag", "value"), records = records.asSequence())
+        if (tagStack.isNotEmpty()) tagStack.removeAt(tagStack.lastIndex)
+        text.setLength(0)
     }
 }
+
 
 class XlsRegistryFileParser : RegistryFileParser {
     override fun supports(source: RegistryFileSource): Boolean = source == RegistryFileSource.RA_XLS
@@ -200,7 +232,7 @@ private fun parseWorkbookStreaming(source: RegistryFileSource, file: File): Pars
             }
         }
 
-        val records = spooledTsvRecords(source, spoolFile)
+        val records = spooledTsvRecords(source, spoolFile, headers.size)
 
         ParsedRegistryFile(source = source, headers = headers, records = records)
     } catch (exception: Exception) {
@@ -376,7 +408,7 @@ private fun newSaxParser() = SAXParserFactory.newInstance().apply { isNamespaceA
 private fun xmlName(localName: String?, qName: String?): String =
     (localName?.takeIf { it.isNotBlank() } ?: qName.orEmpty()).substringAfter(':')
 
-private fun spooledTsvRecords(source: RegistryFileSource, spoolFile: File): Sequence<RawRegistryRecord> = sequence {
+private fun spooledTsvRecords(source: RegistryFileSource, spoolFile: File, expectedColumnCount: Int): Sequence<RawRegistryRecord> = sequence {
     try {
         BufferedReader(InputStreamReader(spoolFile.inputStream(), Charsets.UTF_8), TSV_READ_BUFFER_SIZE).use { reader ->
             while (true) {
@@ -384,7 +416,7 @@ private fun spooledTsvRecords(source: RegistryFileSource, spoolFile: File): Sequ
                 val firstSep = line.indexOf('\t')
                 if (firstSep <= 0) continue
                 val rowNo = line.substring(0, firstSep).toLongOrNull() ?: continue
-                yield(RawRegistryRecord(source = source, rowNumber = rowNo, values = splitTsvValues(line, firstSep + 1)))
+                yield(RawRegistryRecord(source = source, rowNumber = rowNo, values = alignRecordValues(splitTsvValues(line, firstSep + 1), expectedColumnCount)))
             }
         }
     } finally {
@@ -398,18 +430,44 @@ private fun splitTsvValues(line: String, startIndex: Int): List<String> {
     var index = startIndex
     while (index < line.length) {
         if (line[index] == '\t') {
-            values += line.substring(valueStart, index)
+            values += decodeTsvValue(line.substring(valueStart, index))
             valueStart = index + 1
         }
         index += 1
     }
-    values += line.substring(valueStart)
+    values += decodeTsvValue(line.substring(valueStart))
     return values
 }
 
 private fun appendTsvSafe(builder: StringBuilder, value: String) {
     for (char in value) {
-        builder.append(if (char == '\t') ' ' else char)
+        when (char) {
+            '\\' -> builder.append("\\\\")
+            '\t' -> builder.append("\\t")
+            '\n' -> builder.append("\\n")
+            '\r' -> builder.append("\\r")
+            else -> builder.append(char)
+        }
+    }
+}
+
+private fun decodeTsvValue(value: String): String = buildString(value.length) {
+    var index = 0
+    while (index < value.length) {
+        val char = value[index]
+        if (char == '\\' && index + 1 < value.length) {
+            when (value[index + 1]) {
+                '\\' -> append('\\')
+                't' -> append('\t')
+                'n' -> append('\n')
+                'r' -> append('\r')
+                else -> append(value[index + 1])
+            }
+            index += 2
+        } else {
+            append(char)
+            index += 1
+        }
     }
 }
 
@@ -425,6 +483,13 @@ private const val EXPECTED_RPL_COLUMN_COUNT = 32
 private const val EXPECTED_RA_COLUMN_COUNT = 28
 private const val AVERAGE_CELL_CHARS = 18
 
+private fun alignRecordValues(values: List<String>, expectedColumnCount: Int): List<String> = when {
+    expectedColumnCount <= 0 -> values
+    values.size == expectedColumnCount -> values
+    values.size > expectedColumnCount -> values.take(expectedColumnCount)
+    else -> values + List(expectedColumnCount - values.size) { "" }
+}
+
 private fun parseXlsWorkbookStreaming(source: RegistryFileSource, file: File): ParsedRegistryFile {
     return try {
         val spoolFile = File.createTempFile("ra_stream_", ".tsv")
@@ -436,12 +501,14 @@ private fun parseXlsWorkbookStreaming(source: RegistryFileSource, file: File): P
             val formatListener = FormatTrackingHSSFListener(handler)
             request.addListenerForAllRecords(MissingRecordAwareHSSFListener(formatListener))
             FileInputStream(file).use { input ->
-                HSSFEventFactory().processEvents(request, input)
+                POIFSFileSystem(input).use { poifs ->
+                    HSSFEventFactory().processWorkbookEvents(request, poifs)
+                }
             }
             handler.flushPendingFormulaString()
         }
 
-        val records = spooledTsvRecords(source, spoolFile)
+        val records = spooledTsvRecords(source, spoolFile, headers.size)
 
         ParsedRegistryFile(source = source, headers = headers, records = records)
     } catch (exception: Exception) {

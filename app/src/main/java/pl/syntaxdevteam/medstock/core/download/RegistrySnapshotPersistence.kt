@@ -29,7 +29,9 @@ class RegistrySnapshotPersistence(
             when (source) {
                 RegistryFileSource.RPL_CSV, RegistryFileSource.RPL_XLSX -> {
                     database.delete("rpl", "data_snapshot = ?", arrayOf(snapshotDateUtc))
-                    val projection = prepareProjection(resolveHeaders(parsed.headers).map(::canonicalizeHeader), rplHeaderMap)
+                    val canonicalHeaders = resolveHeaders(parsed.headers).map(::canonicalizeHeader)
+                    val projection = prepareProjection(canonicalHeaders, rplHeaderMap)
+                    logMissingProjection(source, canonicalHeaders, projection, CRITICAL_RPL_COLUMNS)
                     var savedRows = 0
                     val insertStatement = database.compileStatement(RPL_INSERT_SQL)
                     try {
@@ -45,7 +47,9 @@ class RegistrySnapshotPersistence(
                 }
                 RegistryFileSource.RA_CSV, RegistryFileSource.RA_XLS -> {
                     database.delete("ra", "data_snapshot = ?", arrayOf(snapshotDateUtc))
-                    val projection = prepareProjection(resolveHeaders(parsed.headers).map(::canonicalizeHeader), raHeaderMap)
+                    val canonicalHeaders = resolveHeaders(parsed.headers).map(::canonicalizeHeader)
+                    val projection = prepareProjection(canonicalHeaders, raHeaderMap)
+                    logMissingProjection(source, canonicalHeaders, projection, CRITICAL_RA_COLUMNS)
                     var savedRows = 0
                     val insertStatement = database.compileStatement(RA_INSERT_SQL)
                     try {
@@ -203,6 +207,8 @@ class RegistrySnapshotPersistence(
         """
         const val RDG_INSERT_SQL =
             "INSERT OR REPLACE INTO rdg(data_snapshot,source_row_number,source_entity_key,raw_payload) VALUES(?,?,?,?)"
+        val CRITICAL_RPL_COLUMNS = setOf("identyfikator_produktu_leczniczego", "kraj_wytworcy", "ulotka", "charakterystyka")
+        val CRITICAL_RA_COLUMNS = setOf("nazwa_apteki", "wojewodztwo", "miejscowosc")
         val rplHeaderMap = linkedMapOf(
             "identyfikator_produktu_leczniczego" to listOf("identyfikator_produktu_leczniczego"),
             "nazwa_produktu_leczniczego" to listOf("nazwa_produktu_leczniczego"),
@@ -226,6 +232,21 @@ class RegistrySnapshotPersistence(
             "godziny_otwarcia_sroda" to listOf("godziny_otwarcia_sroda"), "godziny_otwarcia_czwartek" to listOf("godziny_otwarcia_czwartek"),
             "godziny_otwarcia_piatek" to listOf("godziny_otwarcia_piatek"), "godziny_otwarcia_sobota" to listOf("godziny_otwarcia_sobota"),
             "godziny_otwarcia_niedziela_handlowa" to listOf("godziny_otwarcia_niedziela_handlowa"), "godziny_otwarcia_niedziela_niehandlowa" to listOf("godziny_otwarcia_niedziela_niehandlowa")
+        )
+    }
+}
+
+private fun logMissingProjection(
+    source: RegistryFileSource,
+    canonicalHeaders: List<String>,
+    projection: Map<String, Int>,
+    requiredColumns: Set<String>
+) {
+    val missingColumns = requiredColumns.filterNot { it in projection }
+    if (missingColumns.isNotEmpty()) {
+        Log.w(
+            "RegistryPersistence",
+            "Missing expected columns for source=${source.name}: ${missingColumns.joinToString()} headers=${canonicalHeaders.joinToString()}"
         )
     }
 }

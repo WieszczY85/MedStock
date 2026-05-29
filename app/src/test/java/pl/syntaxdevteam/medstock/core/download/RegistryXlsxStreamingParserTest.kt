@@ -49,7 +49,23 @@ class RegistryXlsxStreamingParserTest {
         )
         assertEquals(2, records.size)
         assertEquals(listOf("2001", "Lek C", "", "30 tabl."), records[0].values)
-        assertEquals(listOf("2002", "Lek D", "Substancja D"), records[1].values)
+        assertEquals(listOf("2002", "Lek D", "Substancja D", ""), records[1].values)
+    }
+
+
+    @Test
+    fun `streaming parser pads sparse RPL rows to header width for document columns`() {
+        val file = createDocumentInlineStringXlsx()
+
+        val parsed = parser.parse(RegistryFileSource.RPL_XLSX, file)
+        val records = parsed.records.toList()
+
+        assertEquals(2, records.size)
+        assertEquals(5, records[0].values.size)
+        assertEquals("Austria", records[0].values[2])
+        assertEquals("https://example.test/leaflet", records[0].values[3])
+        assertEquals("https://example.test/characteristic", records[0].values[4])
+        assertEquals(listOf("3002", "", "", "", ""), records[1].values)
     }
 
     private fun createSampleXlsx(): File {
@@ -110,6 +126,52 @@ class RegistryXlsxStreamingParserTest {
                             <c r="A3" t="inlineStr"><is><t>2002</t></is></c>
                             <c r="B3" t="inlineStr"><is><t>Lek D</t></is></c>
                             <c r="C3" t="inlineStr"><is><t>Substancja D</t></is></c>
+                        </row>
+                    </sheetData>
+                </worksheet>
+                """.trimIndent()
+            )
+        }
+        return file
+    }
+
+
+    private fun createDocumentInlineStringXlsx(): File {
+        val file = File.createTempFile("rpl_documents_inline_", ".xlsx")
+        ZipOutputStream(file.outputStream()).use { zip ->
+            zip.writestr(
+                "[Content_Types].xml",
+                """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+                    <Default Extension="xml" ContentType="application/xml"/>
+                    <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+                </Types>
+                """.trimIndent()
+            )
+            zip.writestr(
+                "xl/worksheets/sheet1.xml",
+                """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+                    <sheetData>
+                        <row r="1">
+                            <c r="A1" t="inlineStr"><is><t>Identyfikator Produktu Leczniczego</t></is></c>
+                            <c r="B1" t="inlineStr"><is><t>Opakowanie</t></is></c>
+                            <c r="C1" t="inlineStr"><is><t>Kraj wytwórcy</t></is></c>
+                            <c r="D1" t="inlineStr"><is><t>Ulotka</t></is></c>
+                            <c r="E1" t="inlineStr"><is><t>Charakterystyka</t></is></c>
+                        </row>
+                        <row r="2">
+                            <c r="A2" t="inlineStr"><is><t>3001</t></is></c>
+                            <c r="B2" t="inlineStr"><is><t>1 fiol.
+                            5 ml</t></is></c>
+                            <c r="C2" t="inlineStr"><is><t>Austria</t></is></c>
+                            <c r="D2" t="inlineStr"><is><t>https://example.test/leaflet</t></is></c>
+                            <c r="E2" t="inlineStr"><is><t>https://example.test/characteristic</t></is></c>
+                        </row>
+                        <row r="3">
+                            <c r="A3" t="inlineStr"><is><t>3002</t></is></c>
                         </row>
                     </sheetData>
                 </worksheet>
