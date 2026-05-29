@@ -49,7 +49,7 @@ class MedicationCatalogSuggestionRepository(context: Context) {
                 val activeSubstance = cursor.getString(4).orEmpty().trim()
                 if (medicationName.isBlank()) continue
 
-                val suggestion = createSuggestion(
+                val suggestions = createSuggestions(
                     medicationName = medicationName,
                     strength = strength,
                     packageDescription = packageDescription,
@@ -57,9 +57,12 @@ class MedicationCatalogSuggestionRepository(context: Context) {
                     activeSubstance = activeSubstance,
                     matchedPackageCode = null,
                 )
-                if (suggestion.packageSize.isBlank() && containsPackageCode(packageDescription)) continue
-                if (items.none { item -> item.displayName == suggestion.displayName }) {
-                    items += suggestion
+                for (suggestion in suggestions) {
+                    if (suggestion.packageSize.isBlank() && containsPackageCode(packageDescription)) continue
+                    if (items.none { item -> item.displayName == suggestion.displayName }) {
+                        items += suggestion
+                    }
+                    if (items.size >= limit) break
                 }
                 if (items.size >= limit) break
             }
@@ -93,7 +96,7 @@ class MedicationCatalogSuggestionRepository(context: Context) {
             val packageDescription = cursor.getString(2).orEmpty().trim()
             val pharmaceuticalForm = cursor.getString(3).orEmpty().trim()
             val activeSubstance = cursor.getString(4).orEmpty().trim()
-            return createSuggestion(
+            return createSuggestions(
                 medicationName = medicationName,
                 strength = strength,
                 packageDescription = readCombinedPackageDescription(
@@ -107,7 +110,7 @@ class MedicationCatalogSuggestionRepository(context: Context) {
                 pharmaceuticalForm = pharmaceuticalForm,
                 activeSubstance = activeSubstance,
                 matchedPackageCode = normalizedCode,
-            )
+            ).firstOrNull()
         }
     }
 
@@ -138,25 +141,27 @@ class MedicationCatalogSuggestionRepository(context: Context) {
         }
     }
 
-    private fun createSuggestion(
+    private fun createSuggestions(
         medicationName: String,
         strength: String,
         packageDescription: String,
         pharmaceuticalForm: String,
         activeSubstance: String,
         matchedPackageCode: String?,
-    ): MedicationCatalogSuggestion {
-        val packageInfo = extractPackageInfo(packageDescription, matchedPackageCode)
-        return MedicationCatalogSuggestion(
-            displayName = buildDisplayName(medicationName, strength, packageInfo.displayPackage),
-            medicationName = medicationName,
-            strength = strength,
-            packageSize = packageInfo.size,
-            packageUnit = pharmaceuticalForm.ifBlank { packageInfo.unit },
-            packageDescription = packageDescription,
-            pharmaceuticalForm = pharmaceuticalForm,
-            activeSubstance = activeSubstance,
-        )
+    ): List<MedicationCatalogSuggestion> {
+        return extractPackageInfos(packageDescription, matchedPackageCode)
+            .map { packageInfo ->
+                MedicationCatalogSuggestion(
+                    displayName = buildDisplayName(medicationName, strength, packageInfo.displayPackage),
+                    medicationName = medicationName,
+                    strength = strength,
+                    packageSize = packageInfo.size,
+                    packageUnit = pharmaceuticalForm.ifBlank { packageInfo.unit },
+                    packageDescription = packageDescription,
+                    pharmaceuticalForm = pharmaceuticalForm,
+                    activeSubstance = activeSubstance,
+                )
+            }
     }
 
     companion object {
@@ -171,8 +176,19 @@ class MedicationCatalogSuggestionRepository(context: Context) {
         }
 
         internal fun extractPackageInfo(packageDescription: String, matchedPackageCode: String? = null): PackageInfo {
-            val selectedQuantity = selectPackageQuantity(packageDescription, matchedPackageCode)
-            val normalized = selectedQuantity
+            return extractPackageInfos(packageDescription, matchedPackageCode).first()
+        }
+
+        internal fun extractPackageInfos(packageDescription: String, matchedPackageCode: String? = null): List<PackageInfo> {
+            val packageInfos = selectPackageQuantities(packageDescription, matchedPackageCode)
+                .map(::parsePackageInfo)
+                .filter { it.displayPackage.isNotBlank() }
+                .distinctBy { it.displayPackage }
+            return packageInfos.ifEmpty { listOf(PackageInfo(size = "", unit = "", displayPackage = "")) }
+        }
+
+        private fun parsePackageInfo(quantity: String): PackageInfo {
+            val normalized = quantity
                 .replace(Regex("\\s+"), " ")
                 .trim(' ', ';', ',')
             val match = Regex("""(?i)(\d+(?:[,.]\d+)?)\s*([\p{L}.]+\.?(?:\s+[\p{L}.]+\.?)?)?""").find(normalized)
@@ -187,28 +203,29 @@ class MedicationCatalogSuggestionRepository(context: Context) {
             return PackageInfo(size = size, unit = unit, displayPackage = displayPackage)
         }
 
-        private fun selectPackageQuantity(packageDescription: String, matchedPackageCode: String?): String {
+        private fun selectPackageQuantities(packageDescription: String, matchedPackageCode: String?): List<String> {
             val packages = MedicationPackageParser.parse(
                 kodEan = "",
                 opakowanie = packageDescription,
                 unknownPackageLabel = "",
             )
             if (packages.isEmpty()) {
-                return packageDescription.takeUnless { containsPackageCode(it) }.orEmpty()
+                return listOfNotNull(packageDescription.takeUnless { containsPackageCode(it) || it.isBlank() })
             }
 
             val normalizedMatchedCode = matchedPackageCode.orEmpty().filter(Char::isDigit)
             val selected = if (normalizedMatchedCode.isNotBlank()) {
-                packages.firstOrNull { item -> item.ean.filter(Char::isDigit) == normalizedMatchedCode }
-                    ?: packages.firstOrNull { item -> item.ean.filter(Char::isDigit).contains(normalizedMatchedCode) }
+                packages.filter { item -> item.ean.filter(Char::isDigit) == normalizedMatchedCode }
+                    .ifEmpty { packages.filter { item -> item.ean.filter(Char::isDigit).contains(normalizedMatchedCode) } }
+                    .ifEmpty { packages }
             } else {
-                packages.firstOrNull { item -> item.quantity.isNotBlank() }
+                packages
             }
 
-            return selected?.quantity.orEmpty()
-                .ifBlank { packages.firstOrNull { item -> item.quantity.isNotBlank() }?.quantity.orEmpty() }
-                .takeUnless { containsPackageCode(it) }
-                .orEmpty()
+            return selected
+                .map { item -> item.quantity.trim() }
+                .filter { it.isNotBlank() && !containsPackageCode(it) }
+                .distinct()
         }
 
         internal fun containsPackageCode(value: String): Boolean {
