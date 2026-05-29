@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -87,43 +88,32 @@ class MedicationEditorFragment : Fragment() {
         }
 
         binding.buttonSaveMedication.setOnClickListener {
-            val dosage = buildDosageFromFields()
+            val form = readMedicationForm()
+            if (!validateMedicationForm(form)) {
+                return@setOnClickListener
+            }
+
             if (isEdit) {
                 viewModel.updateMedication(
                     medicationId,
-                    binding.editTextMedicationName.text.toString(),
-                    binding.editTextMedicationStrength.text.toString(),
-                    binding.editTextMedicationSubstance.text.toString(),
-                    binding.editTextMedicationPackageSize.text.toString(),
-                    binding.editTextMedicationUnit.text.toString(),
-                    binding.editTextMedicationCurrentStock.text.toString(),
-                    dosage,
-                    binding.editTextMedicationAlertDays.text.toString()
+                    form.name,
+                    form.strength,
+                    form.activeSubstance,
+                    form.packageSize,
+                    form.unit,
+                    form.currentStock,
+                    form.dosage,
+                    form.alertDays
                 )
-            } else {
-                viewModel.addMedication(
-                    binding.editTextMedicationName.text.toString(),
-                    binding.editTextMedicationStrength.text.toString(),
-                    binding.editTextMedicationSubstance.text.toString(),
-                    binding.editTextMedicationPackageSize.text.toString(),
-                    binding.editTextMedicationUnit.text.toString(),
-                    binding.editTextMedicationCurrentStock.text.toString(),
-                    dosage,
-                    binding.editTextMedicationAlertDays.text.toString()
-                )
+                findNavController().navigateUp()
+                return@setOnClickListener
             }
 
-            val stockRaw = binding.editTextMedicationCurrentStock.text.toString().trim()
-            val alertRaw = binding.editTextMedicationAlertDays.text.toString().trim()
-            val invalidNumeric = (stockRaw.isNotBlank() && stockRaw.toIntOrNull() == null) ||
-                (alertRaw.isNotBlank() && alertRaw.toIntOrNull() == null)
-
-            if (binding.editTextMedicationName.text.toString().trim().isBlank()) {
-                Toast.makeText(requireContext(), getString(R.string.medication_editor_required), Toast.LENGTH_SHORT).show()
-            } else if (invalidNumeric) {
-                Toast.makeText(requireContext(), getString(R.string.medication_editor_invalid_numbers), Toast.LENGTH_SHORT).show()
+            val matchingMedications = viewModel.matchingActiveSubstanceMedications(form.activeSubstance)
+            if (matchingMedications.isEmpty()) {
+                addMedicationAsSeparateEntry(form)
             } else {
-                findNavController().navigateUp()
+                showActiveSubstanceDuplicateDialog(form, matchingMedications)
             }
         }
         binding.buttonDeleteMedication.setOnClickListener {
@@ -133,6 +123,95 @@ class MedicationEditorFragment : Fragment() {
         binding.buttonDeleteMedication.visibility = if (isEdit) View.VISIBLE else View.GONE
 
         return binding.root
+    }
+
+    private fun readMedicationForm(): MedicationEditorForm {
+        return MedicationEditorForm(
+            name = binding.editTextMedicationName.text.toString(),
+            strength = binding.editTextMedicationStrength.text.toString(),
+            activeSubstance = binding.editTextMedicationSubstance.text.toString(),
+            packageSize = binding.editTextMedicationPackageSize.text.toString(),
+            unit = binding.editTextMedicationUnit.text.toString(),
+            currentStock = binding.editTextMedicationCurrentStock.text.toString(),
+            dosage = buildDosageFromFields(),
+            alertDays = binding.editTextMedicationAlertDays.text.toString()
+        )
+    }
+
+    private fun validateMedicationForm(form: MedicationEditorForm): Boolean {
+        val stockRaw = form.currentStock.trim()
+        val alertRaw = form.alertDays.trim()
+        val invalidNumeric = (stockRaw.isNotBlank() && stockRaw.toIntOrNull() == null) ||
+            (alertRaw.isNotBlank() && alertRaw.toIntOrNull() == null)
+
+        return when {
+            form.name.trim().isBlank() -> {
+                Toast.makeText(requireContext(), getString(R.string.medication_editor_required), Toast.LENGTH_SHORT).show()
+                false
+            }
+            invalidNumeric -> {
+                Toast.makeText(requireContext(), getString(R.string.medication_editor_invalid_numbers), Toast.LENGTH_SHORT).show()
+                false
+            }
+            else -> true
+        }
+    }
+
+    private fun showActiveSubstanceDuplicateDialog(
+        form: MedicationEditorForm,
+        matchingMedications: List<UserMedication>
+    ) {
+        var selectedIndex = 0
+        val items = matchingMedications.map { medication ->
+            getString(
+                R.string.medication_duplicate_existing_item,
+                medication.name,
+                medication.strength.ifBlank { getString(R.string.medication_duplicate_strength_missing) },
+                medication.currentStock,
+                medication.unit.ifBlank { getString(R.string.medication_default_unit) }
+            )
+        }.toTypedArray()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.medication_duplicate_title)
+            .setMessage(
+                getString(
+                    R.string.medication_duplicate_message,
+                    form.activeSubstance.trim(),
+                    form.name.trim(),
+                    form.currentStock.trim().ifBlank { "0" }
+                )
+            )
+            .setSingleChoiceItems(items, selectedIndex) { _, which ->
+                selectedIndex = which
+            }
+            .setPositiveButton(R.string.medication_duplicate_update_existing) { _, _ ->
+                val selectedMedication = matchingMedications[selectedIndex]
+                viewModel.addStockToExistingMedication(
+                    selectedMedication.id,
+                    form.currentStock.trim().toIntOrNull() ?: 0
+                )
+                findNavController().navigateUp()
+            }
+            .setNegativeButton(R.string.medication_duplicate_add_separate) { _, _ ->
+                addMedicationAsSeparateEntry(form)
+            }
+            .setNeutralButton(R.string.medication_duplicate_cancel, null)
+            .show()
+    }
+
+    private fun addMedicationAsSeparateEntry(form: MedicationEditorForm) {
+        viewModel.addMedication(
+            form.name,
+            form.strength,
+            form.activeSubstance,
+            form.packageSize,
+            form.unit,
+            form.currentStock,
+            form.dosage,
+            form.alertDays
+        )
+        findNavController().navigateUp()
     }
 
     override fun onDestroyView() {
@@ -209,4 +288,15 @@ class MedicationEditorFragment : Fragment() {
         private const val DOSAGE_SEPARATOR = "|"
         private const val DOSAGE_PARTS = 3
     }
+
+    private data class MedicationEditorForm(
+        val name: String,
+        val strength: String,
+        val activeSubstance: String,
+        val packageSize: String,
+        val unit: String,
+        val currentStock: String,
+        val dosage: String,
+        val alertDays: String
+    )
 }

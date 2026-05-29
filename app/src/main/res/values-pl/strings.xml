@@ -113,6 +113,17 @@
     <string name="medication_editor_delete">Usuń lek</string>
     <string name="medication_editor_required">Nazwa leku jest wymagana.</string>
     <string name="medication_editor_invalid_numbers">Aktualny stan i alert dni muszą być poprawnymi liczbami.</string>
+    <string name="medication_duplicate_title">Wykryto tę samą substancję czynną</string>
+    <string name="medication_duplicate_message">Substancja czynna: %1$s
+Dodawany lek: %2$s
+Stan do dopisania: %3$s
+
+Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</string>
+    <string name="medication_duplicate_existing_item">%1$s • %2$s • stan: %3$d %4$s</string>
+    <string name="medication_duplicate_strength_missing">brak mocy</string>
+    <string name="medication_duplicate_update_existing">Aktualizuj wybrany stan</string>
+    <string name="medication_duplicate_add_separate">Dodaj osobno</string>
+    <string name="medication_duplicate_cancel">Anuluj</string>
     <string name="medication_add_manual">Wpis ręczny</string>
     <string name="medication_add_scan">Skanuj kod</string>
     <string name="medication_scan_failed">Nie udało się zeskanować kodu opakowania.</string>

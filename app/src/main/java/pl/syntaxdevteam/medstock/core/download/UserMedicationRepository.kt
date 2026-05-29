@@ -88,6 +88,25 @@ class UserMedicationRepository(context: Context) {
         return db.update("user_medication", values, "id = ?", arrayOf(id.toString()))
     }
 
+    fun addToStock(id: Long, addedStock: Int): Int {
+        val db = dbHelper.writableDatabase
+        val now = currentUtcDateTime()
+        val statement = """
+            UPDATE user_medication
+            SET current_stock = current_stock + ?,
+                last_stock_update_utc = ?,
+                updated_at_utc = ?
+            WHERE id = ?
+        """.trimIndent()
+        return db.compileStatement(statement).use { compiled ->
+            compiled.bindLong(1, addedStock.toLong())
+            compiled.bindString(2, now)
+            compiled.bindString(3, now)
+            compiled.bindLong(4, id)
+            compiled.executeUpdateDelete()
+        }
+    }
+
     fun delete(id: Long): Int {
         return dbHelper.writableDatabase.delete("user_medication", "id = ?", arrayOf(id.toString()))
     }
