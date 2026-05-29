@@ -16,13 +16,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/navigation_drawer" />
 
-    <include
-        android:id="@+id/brand_strip"
-        layout="@layout/view_brand_strip"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/nav_view"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -45,6 +38,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/nav_view"
-        app:layout_constraintTop_toBottomOf="@id/brand_strip"
+        app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/mobile_navigation" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -64,9 +64,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.navView?.let {
             appBarConfiguration = AppBarConfiguration(
-                setOf(
-                    R.id.nav_medication_list, R.id.nav_baza_leki_screen, R.id.nav_alerty_lista_screen, R.id.nav_settings, R.id.nav_account
-                ),
+                topLevelDestinations(),
                 binding.drawerLayout
             )
             setupActionBarWithNavController(navController, appBarConfiguration)
@@ -132,9 +130,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.appBarMain.contentMain.bottomNavView?.let {
             appBarConfiguration = AppBarConfiguration(
-                setOf(
-                    R.id.nav_medication_list, R.id.nav_baza_leki_screen, R.id.nav_alerty_lista_screen, R.id.nav_account
-                )
+                topLevelDestinations()
             )
             setupActionBarWithNavController(navController, appBarConfiguration)
             it.setOnItemSelectedListener { item ->
@@ -157,6 +153,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun topLevelDestinations(): Set<Int> = setOf(
+        R.id.nav_medication_list,
+        R.id.nav_baza_leki_screen,
+        R.id.nav_baza_apteki_screen,
+        R.id.nav_alerty_lista_screen,
+        R.id.nav_alerty_przypomnienia_screen,
+        R.id.nav_account,
+        R.id.nav_settings,
+    )
 
     private fun showMedicationAddSubMenu(anchor: View, navController: NavController) {
         val popupMenu = PopupMenu(this, anchor)
