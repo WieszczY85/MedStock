@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="green_200">#FFB8F1AA</color>
+    <color name="brand_med_red">#FFFF8A80</color>
+    <color name="green_500">#FF72E84D</color>
+    <color name="green_700">#FF9AEF82</color>
+    <color name="green_900">#FF102D13</color>
+    <color name="surface_light">#FF071409</color>
+    <color name="surface_card">#FF102D13</color>
+    <color name="surface_card_soft">#FF183D1B</color>
+    <color name="cta_support_bg">#FF183D1B</color>
+    <color name="cta_danger_bg">#FF3C1717</color>
+    <color name="cta_danger_text">#FFFFB3B3</color>
+    <color name="alert_pastel_red_stroke">#FFFF8A80</color>
+    <color name="alert_pastel_red_background">#FF321515</color>
+    <color name="text_primary">#FFEFFFEA</color>
+    <color name="text_secondary">#FFC1DDBA</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

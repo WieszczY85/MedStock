@@ -147,6 +147,12 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="settings_db_date_value">Last update: </string>
     <string name="settings_unknown_value">No data</string>
     <string name="settings_database_size_value">Database size: %1$s (modified: %2$s)</string>
+    <string name="settings_theme_title">Dark theme</string>
+    <string name="settings_theme_summary">Choose whether the app follows the system theme or always uses dark/light mode.</string>
+    <string name="settings_theme_auto">Auto</string>
+    <string name="settings_theme_on">On</string>
+    <string name="settings_theme_off">Off</string>
+    <string name="settings_theme_icon_description">Dark theme switch icon</string>
     <string name="settings_force_update_button">Force catalog update</string>
     <string name="settings_export_database_button">Database dump</string>
     <string name="settings_export_database_default_filename">medstock-database-export.db</string>
