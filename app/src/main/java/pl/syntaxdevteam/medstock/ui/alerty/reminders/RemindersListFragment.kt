@@ -2,14 +2,16 @@ package pl.syntaxdevteam.medstock.ui.alerty.reminders
 
 import android.Manifest
 import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -27,10 +29,6 @@ class RemindersListFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: RemindersViewModel by activityViewModels()
     private lateinit var scheduler: ReminderScheduler
-
-    private val notificationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { updatePermissionCard() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -90,12 +88,31 @@ class RemindersListFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            openPermissionSettings(notificationSettingsIntent())
             return
         }
-        scheduler.exactAlarmSettingsIntent()?.let { intent ->
-            runCatching { startActivity(intent) }
-                .onFailure { if (it is ActivityNotFoundException) binding.cardReminderPermissions.visibility = View.GONE }
+        scheduler.exactAlarmSettingsIntent()?.let(::openPermissionSettings)
+    }
+
+    private fun openPermissionSettings(intent: Intent) {
+        runCatching { startActivity(intent) }
+            .onFailure {
+                if (it is ActivityNotFoundException) {
+                    runCatching { startActivity(appDetailsSettingsIntent()) }
+                        .onFailure { binding.cardReminderPermissions.visibility = View.GONE }
+                }
+            }
+    }
+
+    private fun notificationSettingsIntent(): Intent {
+        return Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, requireContext().packageName)
+        }
+    }
+
+    private fun appDetailsSettingsIntent(): Intent {
+        return Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", requireContext().packageName, null)
         }
     }
 
