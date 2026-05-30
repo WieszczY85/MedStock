@@ -106,7 +106,7 @@ private class MedicationListViewHolder(view: View) : RecyclerView.ViewHolder(vie
         note.text = itemView.context.getString(
             R.string.medication_list_stock_and_days,
             item.currentStock,
-            item.unit.ifBlank { itemView.context.getString(R.string.medication_default_unit) },
+            MedicationUnitFormatter.abbreviate(item.unit).ifBlank { itemView.context.getString(R.string.medication_default_unit) },
             daysSupply,
             status
         )

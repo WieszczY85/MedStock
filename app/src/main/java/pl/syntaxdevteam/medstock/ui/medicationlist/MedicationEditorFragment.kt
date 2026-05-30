@@ -168,7 +168,7 @@ class MedicationEditorFragment : Fragment() {
                 medication.name,
                 medication.strength.ifBlank { getString(R.string.medication_duplicate_strength_missing) },
                 medication.currentStock,
-                medication.unit.ifBlank { getString(R.string.medication_default_unit) }
+                MedicationUnitFormatter.abbreviate(medication.unit).ifBlank { getString(R.string.medication_default_unit) }
             )
         }.toTypedArray()
 
