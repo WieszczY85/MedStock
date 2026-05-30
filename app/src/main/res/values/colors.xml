@@ -8,6 +8,14 @@
     <color name="surface_light">#FFF8FFF6</color>
     <color name="surface_card">#FFFFFFFF</color>
     <color name="surface_card_soft">#FFEFFFF0</color>
+    <color name="top_app_bar_background">#FFFFFFFF</color>
+    <color name="top_app_bar_content">#FF1D6A20</color>
+    <color name="title_bar_background">#2A9B23</color>
+    <color name="title_bar_text">#FFFFFFFF</color>
+    <color name="bottom_nav_background">#FFFFFFFF</color>
+    <color name="bottom_nav_selected">#2A9B23</color>
+    <color name="bottom_nav_unselected">#FF19321C</color>
+    <color name="brand_stock_text">#2A9B23</color>
     <color name="cta_support_bg">#FFD8F7D1</color>
     <color name="cta_danger_bg">#FFFFE0E0</color>
     <color name="cta_danger_text">#FFAA1F1F</color>

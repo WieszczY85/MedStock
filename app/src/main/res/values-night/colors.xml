@@ -2,12 +2,20 @@
 <resources>
     <color name="green_200">#FFB8F1AA</color>
     <color name="brand_med_red">#FFFF8A80</color>
-    <color name="green_500">#FF72E84D</color>
-    <color name="green_700">#FF9AEF82</color>
-    <color name="green_900">#FF102D13</color>
+    <color name="green_500">#FF5FCF47</color>
+    <color name="green_700">#FF2F7D32</color>
+    <color name="green_900">#FF061B08</color>
     <color name="surface_light">#FF071409</color>
     <color name="surface_card">#FF102D13</color>
     <color name="surface_card_soft">#FF183D1B</color>
+    <color name="top_app_bar_background">#FF071409</color>
+    <color name="top_app_bar_content">#FFEFFFEA</color>
+    <color name="title_bar_background">#FF173D1B</color>
+    <color name="title_bar_text">#FFEFFFEA</color>
+    <color name="bottom_nav_background">#FF102D13</color>
+    <color name="bottom_nav_selected">#FF92E77A</color>
+    <color name="bottom_nav_unselected">#FFC1DDBA</color>
+    <color name="brand_stock_text">#FF92E77A</color>
     <color name="cta_support_bg">#FF183D1B</color>
     <color name="cta_danger_bg">#FF3C1717</color>
     <color name="cta_danger_text">#FFFFB3B3</color>

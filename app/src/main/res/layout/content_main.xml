@@ -28,8 +28,8 @@
         android:layout_gravity="bottom"
         android:background="@drawable/bg_bottom_nav"
         android:elevation="12dp"
-        app:itemIconTint="@color/green_700"
-        app:itemTextColor="@color/green_900"
+        app:itemIconTint="@color/bottom_nav_item_tint"
+        app:itemTextColor="@color/bottom_nav_item_tint"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_navigation" />
 </LinearLayout>
