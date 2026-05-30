@@ -20,6 +20,13 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="Theme.MedStock.Ringing" parent="Theme.MedStock.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:showWhenLocked">true</item>
+        <item name="android:turnScreenOn">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <style name="Theme.MedStock.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="colorControlNormal">@color/top_app_bar_content</item>
     </style>

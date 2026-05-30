@@ -98,6 +98,39 @@ class MedicationReminderRepository(context: Context) {
         return dbHelper.writableDatabase.delete("medication_reminder", "id = ?", arrayOf(id.toString()))
     }
 
+    fun addDoseEvent(reminder: MedicationReminder, action: String): Long {
+        return dbHelper.writableDatabase.insertOrThrow("medication_reminder_dose_event", null, ContentValues().apply {
+            put("reminder_id", reminder.id)
+            put("action", action)
+            put("medication_summary", reminder.medications.joinToString { it.name }.ifBlank { reminder.label })
+        })
+    }
+
+    fun getDoseHistory(reminderId: Long, limit: Int = 8): List<ReminderDoseEvent> {
+        val events = mutableListOf<ReminderDoseEvent>()
+        dbHelper.readableDatabase.rawQuery(
+            """
+            SELECT id, reminder_id, action, medication_summary, occurred_at_utc
+            FROM medication_reminder_dose_event
+            WHERE reminder_id = ?
+            ORDER BY id DESC
+            LIMIT ?
+            """.trimIndent(),
+            arrayOf(reminderId.toString(), limit.coerceIn(1, 50).toString())
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                events += ReminderDoseEvent(
+                    id = cursor.getLong(0),
+                    reminderId = cursor.getLong(1),
+                    action = cursor.getString(2),
+                    medicationSummary = cursor.getString(3).orEmpty(),
+                    occurredAtUtc = cursor.getString(4).orEmpty()
+                )
+            }
+        }
+        return events
+    }
+
     private fun replaceMedications(reminderId: Long, medicationIds: List<Long>) {
         val db = dbHelper.writableDatabase
         db.delete("medication_reminder_medication", "reminder_id = ?", arrayOf(reminderId.toString()))

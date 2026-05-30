@@ -202,5 +202,18 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="reminder_notification_message">Take: %1$s</string>
     <string name="reminder_notification_no_medications">selected medicines</string>
 
+    <string name="reminder_action_taken">Taken</string>
+    <string name="reminder_action_snooze">Snooze</string>
+    <string name="reminder_action_snooze_minutes">Snooze %1$d min</string>
+    <string name="reminder_action_skip">Skip dose</string>
+    <string name="reminder_ringing_title">Medicine alarm</string>
+    <string name="reminder_ringing_message">Confirm the dose or snooze the alarm.</string>
+    <string name="reminder_ringing_medications_header">Medicines to take now</string>
+    <string name="reminder_history_title">Dose history</string>
+    <string name="reminder_history_empty">No confirmations yet for this alarm.</string>
+    <string name="reminder_history_taken">taken</string>
+    <string name="reminder_history_snoozed">snoozed</string>
+    <string name="reminder_history_skipped">skipped</string>
+    <string name="reminder_history_row">%1$s — %2$s — %3$s</string>
 
 </resources>

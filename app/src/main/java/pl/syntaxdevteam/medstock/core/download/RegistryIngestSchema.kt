@@ -1,7 +1,7 @@
 package pl.syntaxdevteam.medstock.core.download
 
 internal object RegistryIngestSchema {
-    const val VERSION = 3
+    const val VERSION = 4
 
     val statements: List<String> = listOf(
         """
@@ -118,6 +118,18 @@ internal object RegistryIngestSchema {
             FOREIGN KEY(medication_id) REFERENCES user_medication(id) ON DELETE CASCADE
         )
         """.trimIndent(),
-        "CREATE INDEX IF NOT EXISTS ix_medication_reminder_medication_medication ON medication_reminder_medication(medication_id)"
+        "CREATE INDEX IF NOT EXISTS ix_medication_reminder_medication_medication ON medication_reminder_medication(medication_id)",
+
+        """
+        CREATE TABLE IF NOT EXISTS medication_reminder_dose_event (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            reminder_id INTEGER NOT NULL,
+            action TEXT NOT NULL,
+            medication_summary TEXT NOT NULL DEFAULT '',
+            occurred_at_utc TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY(reminder_id) REFERENCES medication_reminder(id) ON DELETE CASCADE
+        )
+        """.trimIndent(),
+        "CREATE INDEX IF NOT EXISTS ix_medication_reminder_dose_event_reminder ON medication_reminder_dose_event(reminder_id, occurred_at_utc)"
     )
 }

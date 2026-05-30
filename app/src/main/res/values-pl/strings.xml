@@ -202,5 +202,18 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="reminder_notification_message">Przyjmij: %1$s</string>
     <string name="reminder_notification_no_medications">wybrane leki</string>
 
+    <string name="reminder_action_taken">Przyjęto dawkę</string>
+    <string name="reminder_action_snooze">Drzemka</string>
+    <string name="reminder_action_snooze_minutes">Drzemka %1$d min</string>
+    <string name="reminder_action_skip">Pomiń dawkę</string>
+    <string name="reminder_ringing_title">Alarm leku</string>
+    <string name="reminder_ringing_message">Potwierdź dawkę albo włącz drzemkę alarmu.</string>
+    <string name="reminder_ringing_medications_header">Leki do przyjęcia teraz</string>
+    <string name="reminder_history_title">Historia przyjęć</string>
+    <string name="reminder_history_empty">Ten alarm nie ma jeszcze potwierdzeń.</string>
+    <string name="reminder_history_taken">przyjęto</string>
+    <string name="reminder_history_snoozed">drzemka</string>
+    <string name="reminder_history_skipped">pominięto</string>
+    <string name="reminder_history_row">%1$s — %2$s — %3$s</string>
 
 </resources>

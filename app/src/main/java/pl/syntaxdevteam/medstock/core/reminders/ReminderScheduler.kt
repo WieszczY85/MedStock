@@ -33,11 +33,39 @@ class ReminderScheduler(private val context: Context) {
         }
     }
 
-    fun cancel(reminderId: Long) {
+    fun scheduleSnooze(reminderId: Long, minutes: Int = SNOOZE_MINUTES) {
+        val triggerAtMillis = System.currentTimeMillis() + minutes.coerceAtLeast(1) * 60_000L
         val intent = PendingIntent.getBroadcast(
             context,
-            reminderId.toInt(),
-            Intent(context, ReminderAlarmReceiver::class.java).apply { action = ACTION_FIRE_REMINDER },
+            snoozeRequestCode(reminderId),
+            Intent(context, ReminderAlarmReceiver::class.java).apply {
+                action = ACTION_FIRE_REMINDER
+                putExtra(EXTRA_REMINDER_ID, reminderId)
+                putExtra(EXTRA_IS_SNOOZE, true)
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, intent)
+        } else {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, intent)
+        }
+    }
+
+    fun cancel(reminderId: Long) {
+        cancelPending(reminderId.toInt(), ACTION_FIRE_REMINDER)
+        cancelSnooze(reminderId)
+    }
+
+    fun cancelSnooze(reminderId: Long) {
+        cancelPending(snoozeRequestCode(reminderId), ACTION_FIRE_REMINDER)
+    }
+
+    private fun cancelPending(requestCode: Int, action: String) {
+        val intent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            Intent(context, ReminderAlarmReceiver::class.java).apply { this.action = action },
             PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
         )
         if (intent != null) {
@@ -92,7 +120,14 @@ class ReminderScheduler(private val context: Context) {
 
     companion object {
         const val ACTION_FIRE_REMINDER = "pl.syntaxdevteam.medstock.action.FIRE_MEDICATION_REMINDER"
+        const val ACTION_TAKE_DOSE = "pl.syntaxdevteam.medstock.action.TAKE_MEDICATION_DOSE"
+        const val ACTION_SNOOZE_REMINDER = "pl.syntaxdevteam.medstock.action.SNOOZE_MEDICATION_REMINDER"
+        const val ACTION_SKIP_DOSE = "pl.syntaxdevteam.medstock.action.SKIP_MEDICATION_DOSE"
         const val EXTRA_REMINDER_ID = "extra_reminder_id"
+        const val EXTRA_IS_SNOOZE = "extra_is_snooze"
+        const val SNOOZE_MINUTES = 10
         private const val DAYS_IN_WEEK = 7
+
+        fun snoozeRequestCode(reminderId: Long): Int = reminderId.toInt() xor 0x5A5A0000
     }
 }
