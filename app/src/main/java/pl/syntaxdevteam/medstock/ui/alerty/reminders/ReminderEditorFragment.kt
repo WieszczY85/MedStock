@@ -70,7 +70,7 @@ class ReminderEditorFragment : Fragment() {
 
     private fun setupDayChips() {
         val labels = reminderDayShortLabels(requireContext())
-        val checkedBackground = ContextCompat.getColor(requireContext(), R.color.green_200)
+        val checkedBackground = ContextCompat.getColor(requireContext(), R.color.green_500)
         val uncheckedBackground = ContextCompat.getColor(requireContext(), R.color.surface_card_soft)
         val checkedText = ContextCompat.getColor(requireContext(), R.color.green_900)
         val uncheckedText = ContextCompat.getColor(requireContext(), R.color.text_primary)
@@ -209,9 +209,26 @@ private class ReminderMedicationViewHolder(
 
     fun bind(medication: UserMedication) {
         val strength = medication.strength.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty()
+        val checked = selectedMedicationIds.contains(medication.id)
         checkbox.setOnCheckedChangeListener(null)
         checkbox.text = itemView.context.getString(R.string.medication_list_title_with_strength, medication.name, strength)
-        checkbox.isChecked = selectedMedicationIds.contains(medication.id)
-        checkbox.setOnCheckedChangeListener { _, checked -> onCheckedChanged(medication.id, checked) }
+        checkbox.isChecked = checked
+        applySelectionStyle(checked)
+        checkbox.setOnCheckedChangeListener { _, isChecked ->
+            applySelectionStyle(isChecked)
+            onCheckedChanged(medication.id, isChecked)
+        }
+    }
+
+    private fun applySelectionStyle(checked: Boolean) {
+        val context = itemView.context
+        val checkedColor = ContextCompat.getColor(context, R.color.green_700)
+        val uncheckedColor = ContextCompat.getColor(context, R.color.text_secondary)
+        val selectedBackground = ContextCompat.getColor(context, R.color.green_200)
+        val transparentBackground = ContextCompat.getColor(context, android.R.color.transparent)
+        val states = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
+        checkbox.buttonTintList = ColorStateList(states, intArrayOf(checkedColor, uncheckedColor))
+        checkbox.setTextColor(ContextCompat.getColor(context, R.color.text_primary))
+        checkbox.setBackgroundColor(if (checked) selectedBackground else transparentBackground)
     }
 }
