@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pl.syntaxdevteam.medstock.R
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
+import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
 import pl.syntaxdevteam.medstock.databinding.FragmentSettingsBinding
 import java.io.FileInputStream
 
@@ -44,6 +45,18 @@ class SettingsFragment : Fragment() {
             binding.settingsVersionValue.text = state.version
             binding.settingsLastUpdateValue.text = state.lastDatabaseUpdate
             binding.settingsDbSizeValue.text = state.databaseSize
+            setCheckedThemeMode(state.themeMode)
+        }
+
+        binding.settingsThemeModeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val themeMode = when (checkedId) {
+                R.id.settings_theme_auto_button -> AppThemeMode.AUTO
+                R.id.settings_theme_on_button -> AppThemeMode.ON
+                R.id.settings_theme_off_button -> AppThemeMode.OFF
+                else -> return@addOnButtonCheckedListener
+            }
+            settingsViewModel.setThemeMode(themeMode)
         }
 
         binding.settingsForceUpdateButton.setOnClickListener {
@@ -55,6 +68,17 @@ class SettingsFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun setCheckedThemeMode(themeMode: AppThemeMode) {
+        val checkedButtonId = when (themeMode) {
+            AppThemeMode.AUTO -> R.id.settings_theme_auto_button
+            AppThemeMode.ON -> R.id.settings_theme_on_button
+            AppThemeMode.OFF -> R.id.settings_theme_off_button
+        }
+        if (binding.settingsThemeModeGroup.checkedButtonId != checkedButtonId) {
+            binding.settingsThemeModeGroup.check(checkedButtonId)
+        }
     }
 
     override fun onDestroyView() {

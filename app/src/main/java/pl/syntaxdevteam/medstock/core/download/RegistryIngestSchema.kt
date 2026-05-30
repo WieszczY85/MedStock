@@ -1,7 +1,7 @@
 package pl.syntaxdevteam.medstock.core.download
 
 internal object RegistryIngestSchema {
-    const val VERSION = 2
+    const val VERSION = 3
 
     val statements: List<String> = listOf(
         """
@@ -93,6 +93,31 @@ internal object RegistryIngestSchema {
             updated_at_utc TEXT NOT NULL DEFAULT (datetime('now'))
         )
         """.trimIndent(),
-        "CREATE INDEX IF NOT EXISTS ix_user_medication_name ON user_medication(name)"
+        "CREATE INDEX IF NOT EXISTS ix_user_medication_name ON user_medication(name)",
+
+        """
+        CREATE TABLE IF NOT EXISTS medication_reminder (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            hour INTEGER NOT NULL,
+            minute INTEGER NOT NULL,
+            day_mask INTEGER NOT NULL DEFAULT 0,
+            enabled INTEGER NOT NULL DEFAULT 1,
+            label TEXT NOT NULL DEFAULT '',
+            created_at_utc TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at_utc TEXT NOT NULL DEFAULT (datetime('now'))
+        )
+        """.trimIndent(),
+        "CREATE INDEX IF NOT EXISTS ix_medication_reminder_time ON medication_reminder(hour, minute)",
+
+        """
+        CREATE TABLE IF NOT EXISTS medication_reminder_medication (
+            reminder_id INTEGER NOT NULL,
+            medication_id INTEGER NOT NULL,
+            PRIMARY KEY (reminder_id, medication_id),
+            FOREIGN KEY(reminder_id) REFERENCES medication_reminder(id) ON DELETE CASCADE,
+            FOREIGN KEY(medication_id) REFERENCES user_medication(id) ON DELETE CASCADE
+        )
+        """.trimIndent(),
+        "CREATE INDEX IF NOT EXISTS ix_medication_reminder_medication_medication ON medication_reminder_medication(medication_id)"
     )
 }

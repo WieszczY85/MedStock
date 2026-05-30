@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.core.barcode.MedicationPackageScanner
 import pl.syntaxdevteam.medstock.core.download.StartupIngestionRunner
 import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
+import pl.syntaxdevteam.medstock.ui.alerty.reminders.RemindersListFragment
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment
 import pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationEditorFragment
@@ -52,6 +53,8 @@ class MainActivity : AppCompatActivity() {
                 currentFragment.toggleSearch()
             } else if (currentFragment is MedicationListFragment) {
                 showMedicationAddSubMenu(it, navController)
+            } else if (currentFragment is RemindersListFragment) {
+                navController.navigate(R.id.nav_reminder_editor)
             }
         }
 
@@ -94,6 +97,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_alerty_przypomnienia_screen -> {
                     titleToolbar.title = getString(R.string.menu_alerty)
                     titleToolbar.subtitle = getString(R.string.menu_alerty_przypomnienia)
+                    binding.appBarMain.fab?.setImageResource(android.R.drawable.ic_input_add)
+                    binding.appBarMain.fab?.contentDescription = getString(R.string.fab_add_reminder_content_description)
                 }
 
                 R.id.nav_medication_list -> {
@@ -109,6 +114,12 @@ class MainActivity : AppCompatActivity() {
                     binding.appBarMain.fab?.hide()
                 }
 
+                R.id.nav_reminder_editor -> {
+                    titleToolbar.title = getString(R.string.reminder_editor_title)
+                    titleToolbar.subtitle = getString(R.string.menu_alerty_przypomnienia)
+                    binding.appBarMain.fab?.hide()
+                }
+
                 else -> {
                     titleToolbar.title = destination.label ?: getString(R.string.app_name)
                     titleToolbar.subtitle = null
@@ -119,7 +130,7 @@ class MainActivity : AppCompatActivity() {
 
             syncNavigationSelection(destination.id)
 
-            if (destination.id != R.id.nav_medication_editor) {
+            if (destination.id != R.id.nav_medication_editor && destination.id != R.id.nav_reminder_editor) {
                 binding.appBarMain.fab?.show()
             }
         }

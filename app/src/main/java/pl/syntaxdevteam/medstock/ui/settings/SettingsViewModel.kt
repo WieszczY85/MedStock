@@ -9,6 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.R
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
+import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
+import pl.syntaxdevteam.medstock.core.theme.ThemeManager
 import java.io.File
 import java.text.DateFormat
 import java.util.Date
@@ -20,6 +22,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     init {
         loadSettingsInfo()
+    }
+
+    fun setThemeMode(themeMode: AppThemeMode) {
+        val context = getApplication<Application>()
+        ThemeManager.setThemeMode(context, themeMode)
+        _uiState.value = _uiState.value?.copy(themeMode = themeMode)
     }
 
     private fun loadSettingsInfo() {
@@ -52,7 +60,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     author = author,
                     version = version,
                     lastDatabaseUpdate = lastDbUpdateValue,
-                    databaseSize = dbSizeValue
+                    databaseSize = dbSizeValue,
+                    themeMode = ThemeManager.getThemeMode(context)
                 )
             )
         }
@@ -76,5 +85,6 @@ data class SettingsUiState(
     val author: String,
     val version: String,
     val lastDatabaseUpdate: String,
-    val databaseSize: String
+    val databaseSize: String,
+    val themeMode: AppThemeMode
 )

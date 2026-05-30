@@ -49,6 +49,9 @@ class RegistryIngestDatabaseHelper(context: Context) :
                 definition = "TEXT NOT NULL DEFAULT (datetime('now'))"
             )
         }
+        if (oldVersion < 9) {
+            RegistryIngestSchema.statements.forEach(db::execSQL)
+        }
     }
 
     override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
