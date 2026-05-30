@@ -1,5 +1,5 @@
 <resources>
-    <dimen name="fragment_horizontal_margin">48dp</dimen>
+    <dimen name="fragment_horizontal_margin">24dp</dimen>
     <dimen name="fab_margin">48dp</dimen>
     <dimen name="item_medication_list_entry_image_length">142dp</dimen>
 </resources>
