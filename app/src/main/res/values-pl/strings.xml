@@ -170,7 +170,6 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="fab_add_reminder_content_description">Dodaj przypomnienie o leku</string>
     <string name="reminder_editor_title">Alarm leku</string>
     <string name="reminder_editor_header">Ustaw alarm leku</string>
-    <string name="reminder_time_picker_hint">Dotknij animowanej tarczy, aby wybrać godzinę</string>
     <string name="reminder_time_picker_title">Wybierz godzinę przypomnienia</string>
     <string name="reminder_label_hint">Etykieta alarmu, np. Poranna dawka</string>
     <string name="reminder_days_header">Dni powtarzania</string>
@@ -178,7 +177,9 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="reminder_medications_empty">Najpierw dodaj leki do „Mojej listy leków”, a potem wybierz je tutaj.</string>
     <string name="reminder_save">Zapisz alarm</string>
     <string name="reminder_delete">Usuń</string>
-    <string name="reminder_validation_medication_required">Wybierz przynajmniej jeden lek dla tego alarmu.</string>
+    <string name="reminder_no_medications_warning_title">Nie wybrano leku</string>
+    <string name="reminder_no_medications_warning_message">Ten alarm zostanie zapisany jako ogólne przypomnienie bez przypisanego leku.</string>
+    <string name="reminder_save_without_medications">Zapisz bez leku</string>
     <string name="reminder_no_medications_selected">Nie wybrano leków</string>
     <string name="reminder_once">Jednorazowo</string>
     <string name="reminder_every_day">Codziennie</string>
@@ -200,7 +201,7 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="reminder_notification_channel_description">Powiadomienia alarmowe przypominające o przyjęciu wybranych leków.</string>
     <string name="reminder_notification_title">Czas na lek</string>
     <string name="reminder_notification_message">Przyjmij: %1$s</string>
-    <string name="reminder_notification_no_medications">wybrane leki</string>
+    <string name="reminder_notification_no_medications">ogólne przypomnienie</string>
 
     <string name="reminder_action_taken">Przyjęto dawkę</string>
     <string name="reminder_action_snooze">Drzemka</string>

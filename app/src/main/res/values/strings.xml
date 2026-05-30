@@ -170,7 +170,6 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="fab_add_reminder_content_description">Add medicine reminder</string>
     <string name="reminder_editor_title">Medicine alarm</string>
     <string name="reminder_editor_header">Set medicine alarm</string>
-    <string name="reminder_time_picker_hint">Tap the animated clock to choose time</string>
     <string name="reminder_time_picker_title">Choose reminder time</string>
     <string name="reminder_label_hint">Alarm label, e.g. Morning dose</string>
     <string name="reminder_days_header">Repeat days</string>
@@ -178,7 +177,9 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="reminder_medications_empty">Add medicines to “My medicines” first, then choose them here.</string>
     <string name="reminder_save">Save alarm</string>
     <string name="reminder_delete">Delete</string>
-    <string name="reminder_validation_medication_required">Choose at least one medicine for this alarm.</string>
+    <string name="reminder_no_medications_warning_title">No medicine selected</string>
+    <string name="reminder_no_medications_warning_message">This alarm will be saved as a general reminder without a linked medicine.</string>
+    <string name="reminder_save_without_medications">Save without medicine</string>
     <string name="reminder_no_medications_selected">No medicines selected</string>
     <string name="reminder_once">Once</string>
     <string name="reminder_every_day">Every day</string>
@@ -200,7 +201,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="reminder_notification_channel_description">Alarm notifications reminding you to take selected medicines.</string>
     <string name="reminder_notification_title">Time for medicine</string>
     <string name="reminder_notification_message">Take: %1$s</string>
-    <string name="reminder_notification_no_medications">selected medicines</string>
+    <string name="reminder_notification_no_medications">general reminder</string>
 
     <string name="reminder_action_taken">Taken</string>
     <string name="reminder_action_snooze">Snooze</string>

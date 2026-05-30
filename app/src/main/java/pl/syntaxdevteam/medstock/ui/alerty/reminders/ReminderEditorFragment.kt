@@ -1,10 +1,11 @@
 package pl.syntaxdevteam.medstock.ui.alerty.reminders
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.chip.Chip
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import pl.syntaxdevteam.medstock.R
@@ -68,10 +70,18 @@ class ReminderEditorFragment : Fragment() {
 
     private fun setupDayChips() {
         val labels = reminderDayShortLabels(requireContext())
+        val checkedBackground = ContextCompat.getColor(requireContext(), R.color.green_200)
+        val uncheckedBackground = ContextCompat.getColor(requireContext(), R.color.surface_card_soft)
+        val checkedText = ContextCompat.getColor(requireContext(), R.color.green_900)
+        val uncheckedText = ContextCompat.getColor(requireContext(), R.color.text_primary)
+        val states = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
         labels.forEachIndexed { index, label ->
             val chip = Chip(requireContext()).apply {
                 text = label
                 isCheckable = true
+                isCheckedIconVisible = false
+                chipBackgroundColor = ColorStateList(states, intArrayOf(checkedBackground, uncheckedBackground))
+                setTextColor(ColorStateList(states, intArrayOf(checkedText, uncheckedText)))
                 minWidth = resources.getDimensionPixelSize(R.dimen.reminder_day_chip_size)
                 minHeight = resources.getDimensionPixelSize(R.dimen.reminder_day_chip_size)
                 textAlignment = View.TEXT_ALIGNMENT_CENTER
@@ -99,6 +109,7 @@ class ReminderEditorFragment : Fragment() {
     private fun showTimePicker() {
         MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_24H)
+            .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
             .setHour(selectedHour)
             .setMinute(selectedMinute)
             .setTitleText(R.string.reminder_time_picker_title)
@@ -115,9 +126,18 @@ class ReminderEditorFragment : Fragment() {
 
     private fun saveReminder() {
         if (selectedMedicationIds.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.reminder_validation_medication_required, Toast.LENGTH_LONG).show()
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.reminder_no_medications_warning_title)
+                .setMessage(R.string.reminder_no_medications_warning_message)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.reminder_save_without_medications) { _, _ -> persistReminder() }
+                .show()
             return
         }
+        persistReminder()
+    }
+
+    private fun persistReminder() {
         viewModel.saveReminder(
             id = reminderId,
             hour = selectedHour,
@@ -193,6 +213,5 @@ private class ReminderMedicationViewHolder(
         checkbox.text = itemView.context.getString(R.string.medication_list_title_with_strength, medication.name, strength)
         checkbox.isChecked = selectedMedicationIds.contains(medication.id)
         checkbox.setOnCheckedChangeListener { _, checked -> onCheckedChanged(medication.id, checked) }
-        itemView.setOnClickListener { checkbox.isChecked = !checkbox.isChecked }
     }
 }
