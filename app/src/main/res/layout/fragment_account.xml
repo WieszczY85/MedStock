@@ -148,7 +148,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_3"
-                    android:text="@string/account_drive_backup_now_button" />
+                    android:text="@string/account_drive_backup_now_button"
+                    android:textColor="@color/text_primary" />
 
                 <ProgressBar
                     android:id="@+id/account_progress"
