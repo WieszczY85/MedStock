@@ -133,7 +133,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="medication_editor_autofill_strength">Strength: %1$s</string>
     <string name="medication_editor_autofill_package">Package: %1$s</string>
     <string name="medication_list_title_with_strength">%1$s%2$s</string>
-    <string name="medication_list_stock_and_days">Stock: %1$d %2$s | Days left: %3$d\nStatus: %4$s</string>
+    <string name="medication_list_stock_and_days">Stock: %1$d %2$s | Days left: %3$s\nStatus: %4$s</string>
     <string name="medication_stock_status_ok">OK</string>
     <string name="medication_stock_status_low">Running low</string>
     <string name="medication_stock_status_empty">Empty</string>
@@ -220,4 +220,15 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="reminder_history_skipped">skipped</string>
     <string name="reminder_history_row">%1$s — %2$s — %3$s</string>
 
+
+    <string name="medication_stock_days_unknown">not set</string>
+    <string name="stock_alerts_empty">No stock alerts. Medications with OK stock are hidden here.</string>
+    <string name="stock_alert_item_title">%1$s — %2$s</string>
+    <string name="stock_alert_item_message">Stock: %1$d %2$s | Days left: %3$s</string>
+    <string name="stock_alert_dismiss">Dismiss</string>
+    <string name="stock_alert_notification_channel_name">Medication stock alerts</string>
+    <string name="stock_alert_notification_channel_description">Notifications when a medication stock is low or empty.</string>
+    <string name="stock_alert_notification_low_title">Medication is running low</string>
+    <string name="stock_alert_notification_empty_title">Medication stock is empty</string>
+    <string name="stock_alert_notification_message">%1$s: %2$d %3$s left, supply for %4$d days.</string>
 </resources>

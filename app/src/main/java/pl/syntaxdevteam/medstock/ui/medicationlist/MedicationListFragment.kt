@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import pl.syntaxdevteam.medstock.R
+import pl.syntaxdevteam.medstock.core.stock.MedicationStockCalculator
+import pl.syntaxdevteam.medstock.core.stock.MedicationStockStatus
 import pl.syntaxdevteam.medstock.databinding.FragmentMedicationListBinding
 
 class MedicationListFragment : Fragment() {
@@ -81,25 +83,37 @@ private class MedicationListViewHolder(view: View) : RecyclerView.ViewHolder(vie
     fun bind(item: UserMedication, onClick: () -> Unit) {
         val card = itemView as MaterialCardView
         val strengthSuffix = item.strength.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty()
-        val dosagePerDay = parseDailyDosage(item.dosage)
-        val daysSupply = if (item.currentStock > 0 && dosagePerDay > 0.0) {
-            kotlin.math.floor(item.currentStock / dosagePerDay).toInt()
-        } else {
-            0
-        }
-        val status = when {
-            daysSupply == 0 -> {
-                applyAlertCardStyle(card)
+        val stockInfo = MedicationStockCalculator.calculate(item)
+        val status = when (stockInfo.status) {
+            MedicationStockStatus.EMPTY -> {
+                applyStatusCardStyle(
+                    card = card,
+                    strokeColor = R.color.stock_status_empty_stroke,
+                    backgroundColor = R.color.stock_status_empty_background
+                )
                 itemView.context.getString(R.string.medication_stock_status_empty)
             }
-            daysSupply < item.alertDays -> {
-                applyAlertCardStyle(card)
+            MedicationStockStatus.LOW -> {
+                applyStatusCardStyle(
+                    card = card,
+                    strokeColor = R.color.stock_status_low_stroke,
+                    backgroundColor = R.color.stock_status_low_background
+                )
                 itemView.context.getString(R.string.medication_stock_status_low)
             }
-            else -> {
-                applyDefaultCardStyle(card)
+            MedicationStockStatus.OK -> {
+                applyStatusCardStyle(
+                    card = card,
+                    strokeColor = R.color.stock_status_ok_stroke,
+                    backgroundColor = R.color.stock_status_ok_background
+                )
                 itemView.context.getString(R.string.medication_stock_status_ok)
             }
+        }
+        val daysSupplyText = if (stockInfo.daysSupply == Int.MAX_VALUE) {
+            itemView.context.getString(R.string.medication_stock_days_unknown)
+        } else {
+            stockInfo.daysSupply.toString()
         }
 
         name.text = itemView.context.getString(R.string.medication_list_title_with_strength, item.name, strengthSuffix)
@@ -107,29 +121,16 @@ private class MedicationListViewHolder(view: View) : RecyclerView.ViewHolder(vie
             R.string.medication_list_stock_and_days,
             item.currentStock,
             MedicationUnitFormatter.abbreviate(item.unit).ifBlank { itemView.context.getString(R.string.medication_default_unit) },
-            daysSupply,
+            daysSupplyText,
             status
         )
         itemView.setOnClickListener { onClick() }
     }
 
-    private fun parseDailyDosage(rawDosage: String): Double {
-        val normalized = rawDosage.replace(',', '.')
-        val match = Regex("""\d+(?:\.\d+)?""").find(normalized) ?: return 0.0
-        return match.value.toDoubleOrNull()?.takeIf { it > 0.0 } ?: 0.0
-    }
-
-    private fun applyAlertCardStyle(card: MaterialCardView) {
+    private fun applyStatusCardStyle(card: MaterialCardView, strokeColor: Int, backgroundColor: Int) {
         val context = card.context
         card.strokeWidth = context.resources.getDimensionPixelSize(R.dimen.space_1)
-        card.strokeColor = ContextCompat.getColor(context, R.color.alert_pastel_red_stroke)
-        card.setCardBackgroundColor(ContextCompat.getColor(context, R.color.alert_pastel_red_background))
-    }
-
-    private fun applyDefaultCardStyle(card: MaterialCardView) {
-        val context = card.context
-        card.strokeWidth = context.resources.getDimensionPixelSize(R.dimen.card_stroke)
-        card.strokeColor = ContextCompat.getColor(context, R.color.green_200)
-        card.setCardBackgroundColor(ContextCompat.getColor(context, R.color.surface_card))
+        card.strokeColor = ContextCompat.getColor(context, strokeColor)
+        card.setCardBackgroundColor(ContextCompat.getColor(context, backgroundColor))
     }
 }

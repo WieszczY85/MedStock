@@ -133,7 +133,7 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="medication_editor_autofill_strength">Moc: %1$s</string>
     <string name="medication_editor_autofill_package">Opakowanie: %1$s</string>
     <string name="medication_list_title_with_strength">%1$s%2$s</string>
-    <string name="medication_list_stock_and_days">Stan: %1$d %2$s | Dni zapasu: %3$d\nStatus: %4$s</string>
+    <string name="medication_list_stock_and_days">Stan: %1$d %2$s | Dni zapasu: %3$s\nStatus: %4$s</string>
     <string name="medication_stock_status_ok">Ok</string>
     <string name="medication_stock_status_low">Kończy się</string>
     <string name="medication_stock_status_empty">Brak</string>
@@ -220,4 +220,15 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="reminder_history_skipped">pominięto</string>
     <string name="reminder_history_row">%1$s — %2$s — %3$s</string>
 
+
+    <string name="medication_stock_days_unknown">nie ustawiono</string>
+    <string name="stock_alerts_empty">Brak alertów zapasu. Leki ze statusem Ok są tutaj ukryte.</string>
+    <string name="stock_alert_item_title">%1$s — %2$s</string>
+    <string name="stock_alert_item_message">Stan: %1$d %2$s | Dni zapasu: %3$s</string>
+    <string name="stock_alert_dismiss">Oddal</string>
+    <string name="stock_alert_notification_channel_name">Alerty zapasu leków</string>
+    <string name="stock_alert_notification_channel_description">Powiadomienia, gdy zapas leku kończy się albo jest pusty.</string>
+    <string name="stock_alert_notification_low_title">Lek kończy się</string>
+    <string name="stock_alert_notification_empty_title">Brak zapasu leku</string>
+    <string name="stock_alert_notification_message">%1$s: zostało %2$d %3$s, zapas na %4$d dni.</string>
 </resources>

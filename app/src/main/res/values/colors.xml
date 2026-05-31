@@ -25,4 +25,11 @@
     <color name="text_secondary">#FF446647</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="stock_status_ok_stroke">#FF72E84D</color>
+    <color name="stock_status_ok_background">#FFEFFFF0</color>
+    <color name="stock_status_low_stroke">#FFFFC857</color>
+    <color name="stock_status_low_background">#FFFFF8E1</color>
+    <color name="stock_status_empty_stroke">#FFFF8A80</color>
+    <color name="stock_status_empty_background">#FFFFF3F3</color>
 </resources>

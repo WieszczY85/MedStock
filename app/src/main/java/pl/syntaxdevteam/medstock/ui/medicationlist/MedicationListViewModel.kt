@@ -8,10 +8,14 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.core.download.UserMedicationRepository
+import pl.syntaxdevteam.medstock.core.stock.StockAlertDismissalStore
+import pl.syntaxdevteam.medstock.core.stock.StockAlertNotifier
 
 class MedicationListViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = UserMedicationRepository(getApplication())
+    private val alertDismissalStore = StockAlertDismissalStore(getApplication())
+    private val stockAlertNotifier = StockAlertNotifier(getApplication())
 
     private val _medications = MutableLiveData<List<UserMedication>>()
     val medications: LiveData<List<UserMedication>> = _medications
@@ -22,7 +26,9 @@ class MedicationListViewModel(application: Application) : AndroidViewModel(appli
 
     fun refreshMedications() {
         viewModelScope.launch(Dispatchers.IO) {
-            _medications.postValue(repository.getAll())
+            val currentMedications = repository.getAll()
+            stockAlertNotifier.showCurrentStockAlerts(currentMedications)
+            _medications.postValue(currentMedications)
         }
     }
 
@@ -104,6 +110,8 @@ class MedicationListViewModel(application: Application) : AndroidViewModel(appli
                 dosage = normalizedDosage,
                 alertDays = alert ?: 0
             )
+            alertDismissalStore.clear(id)
+            stockAlertNotifier.clearNotificationState(id)
             refreshMedications()
         }
     }
@@ -115,6 +123,8 @@ class MedicationListViewModel(application: Application) : AndroidViewModel(appli
     fun addStockToExistingMedication(id: Long, addedStock: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.addToStock(id, addedStock.coerceAtLeast(0))
+            alertDismissalStore.clear(id)
+            stockAlertNotifier.clearNotificationState(id)
             refreshMedications()
         }
     }

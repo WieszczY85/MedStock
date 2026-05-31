@@ -3,6 +3,7 @@ package pl.syntaxdevteam.medstock.core.download
 import android.content.ContentValues
 import android.content.Context
 import kotlin.math.floor
+import pl.syntaxdevteam.medstock.core.stock.MedicationStockCalculator
 import pl.syntaxdevteam.medstock.ui.medicationlist.UserMedication
 
 class UserMedicationRepository(context: Context) {
@@ -126,7 +127,7 @@ class UserMedicationRepository(context: Context) {
                 val lastStockUpdateUtc = cursor.getString(3).orEmpty()
                 val daysElapsed = fullDaysSince(lastStockUpdateUtc)
                 if (daysElapsed <= 0) continue
-                val dosagePerDay = parseDailyDosage(dosage)
+                val dosagePerDay = MedicationStockCalculator.parseDailyUsage(dosage)
                 if (dosagePerDay <= 0.0) continue
                 val depletion = floor(dosagePerDay * daysElapsed).toInt()
                 val updatedStock = (currentStock - depletion).coerceAtLeast(0)
@@ -138,12 +139,6 @@ class UserMedicationRepository(context: Context) {
                 db.update("user_medication", values, "id = ?", arrayOf(id.toString()))
             }
         }
-    }
-
-    private fun parseDailyDosage(rawDosage: String): Double {
-        val normalized = rawDosage.replace(',', '.')
-        val match = Regex("""\d+(?:\.\d+)?""").find(normalized) ?: return 0.0
-        return match.value.toDoubleOrNull()?.takeIf { it > 0.0 } ?: 0.0
     }
 
     private fun fullDaysSince(lastStockUpdateUtc: String): Long {
