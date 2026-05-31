@@ -259,15 +259,21 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="account_disconnect_dialog_message">Kopia w Drive zostanie wyłączona, a lokalne dane połączenia konta zostaną usunięte.</string>
     <string name="account_disconnect_dialog_confirm">Odłącz</string>
     <string name="account_drive_title">Kopia w Google Drive</string>
-    <string name="account_drive_summary">Włączając zapis kopii leków masz dostęp do nich z każdego urządzenia, na którym się zalogujesz do swojego konta poprzez MedStock.</string>
-    <string name="account_drive_switch_label">Zapisuj kopię leków w Google Drive</string>
+    <string name="account_drive_summary">Włączając kopię zapasową, możesz przywrócić leki, alarmy i preferencje aplikacji na urządzeniach, na których zalogujesz się w MedStock.</string>
+    <string name="account_drive_switch_label">Zapisuj kopię danych aplikacji w Google Drive</string>
     <string name="account_drive_backup_now_button">Utwórz kopię danych teraz</string>
     <string name="account_drive_requires_google">Najpierw połącz konto Google.</string>
     <string name="account_drive_disabled_message">Kopia w Google Drive została wyłączona.</string>
-    <string name="account_drive_snapshot_created_message">Kopia danych leków została przygotowana.</string>
-    <string name="account_drive_snapshot_failed_message">Nie udało się przygotować zapisu kopii leków.</string>
+    <string name="account_drive_snapshot_created_message">Kopia leków, alarmów i ustawień została przygotowana.</string>
+    <string name="account_drive_snapshot_failed_message">Nie udało się przygotować kopii danych aplikacji.</string>
     <string name="account_drive_status_connect_first">Kopia w Google Drive będzie dostępna po połączeniu konta Google.</string>
-    <string name="account_drive_status_enabled">Kopia w Google Drive jest włączona. Dane leków zostaną przygotowane do synchronizacji.</string>
+    <string name="account_drive_status_enabled">Kopia w Google Drive jest włączona. Dane leków, alarmów i ustawień zostaną przygotowane do synchronizacji.</string>
     <string name="account_drive_status_enabled_with_date">Kopia w Google Drive jest włączona. \nOstatnia kopia danych: %1$s.</string>
     <string name="account_drive_status_disabled">Kopia w Google Drive jest wyłączona.</string>
+    <string name="account_drive_restore_dialog_title">Przywrócić wykrytą kopię?</string>
+    <string name="account_drive_restore_dialog_message">Znaleziono kopię z %1$s. Zawiera %2$d leków i %3$d alarmów. Przywrócenie zastąpi lokalne leki i alarmy oraz zastosuje zapisane ustawienia.</string>
+    <string name="account_drive_restore_dialog_confirm">Przywróć kopię</string>
+    <string name="account_drive_restore_dialog_skip">Nie teraz</string>
+    <string name="account_drive_restore_success_message">Kopia została przywrócona.</string>
+    <string name="account_drive_restore_failed_message">Nie udało się przywrócić kopii.</string>
 </resources>

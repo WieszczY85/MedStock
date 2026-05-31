@@ -2,7 +2,6 @@ package pl.syntaxdevteam.medstock.ui.account
 
 import android.accounts.AccountManager
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -70,11 +69,32 @@ class AccountFragment : Fragment() {
             binding.accountDriveStatusValue.text = state.driveStatusText
             binding.accountProgress.visibility = if (state.isBusy) View.VISIBLE else View.GONE
 
+            state.restorePrompt?.let { prompt ->
+                showRestorePrompt(prompt)
+            }
+
             state.transientMessageRes?.let { messageRes ->
                 Toast.makeText(requireContext(), messageRes, Toast.LENGTH_LONG).show()
                 viewModel.messageShown()
             }
         }
+    }
+
+    private fun showRestorePrompt(prompt: AccountRestorePrompt) {
+        viewModel.dismissRestorePrompt()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.account_drive_restore_dialog_title)
+            .setMessage(
+                getString(
+                    R.string.account_drive_restore_dialog_message,
+                    prompt.createdAtText,
+                    prompt.medicationCount,
+                    prompt.reminderCount,
+                )
+            )
+            .setPositiveButton(R.string.account_drive_restore_dialog_confirm) { _, _ -> viewModel.restoreBackupSnapshot() }
+            .setNegativeButton(R.string.account_drive_restore_dialog_skip, null)
+            .show()
     }
 
     private fun openGoogleAccountPicker() {

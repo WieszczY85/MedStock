@@ -1,22 +1,33 @@
 package pl.syntaxdevteam.medstock.core.account
 
+import android.content.ContentValues
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
+import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
 import pl.syntaxdevteam.medstock.core.download.UserMedicationRepository
+import pl.syntaxdevteam.medstock.core.reminders.MedicationReminderRepository
+import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
+import pl.syntaxdevteam.medstock.core.theme.ThemeManager
 import java.io.File
 
 class DriveBackupSnapshotRepository(context: Context) {
 
     private val appContext = context.applicationContext
     private val medicationRepository = UserMedicationRepository(appContext)
+    private val reminderRepository = MedicationReminderRepository(appContext)
+    private val dbHelper = RegistryIngestDatabaseHelper.getInstance(appContext)
 
     fun createSnapshotFile(accountEmail: String): File {
         val medications = medicationRepository.getAll()
+        val reminders = reminderRepository.getAll()
         val payload = JSONObject().apply {
             put("format", SNAPSHOT_FORMAT)
             put("accountEmail", accountEmail)
             put("createdAtUtc", System.currentTimeMillis())
+            put("preferences", JSONObject().apply {
+                put("themeMode", ThemeManager.getThemeMode(appContext).preferenceValue)
+            })
             put("medications", JSONArray().apply {
                 medications.forEach { medication ->
                     put(JSONObject().apply {
@@ -32,6 +43,22 @@ class DriveBackupSnapshotRepository(context: Context) {
                     })
                 }
             })
+            put("reminders", JSONArray().apply {
+                reminders.forEach { reminder ->
+                    put(JSONObject().apply {
+                        put("id", reminder.id)
+                        put("hour", reminder.hour)
+                        put("minute", reminder.minute)
+                        put("dayMask", reminder.dayMask)
+                        put("enabled", reminder.enabled)
+                        put("label", reminder.label)
+                        put("soundName", reminder.soundName)
+                        put("medicationIds", JSONArray().apply {
+                            reminder.medicationIds.forEach { medicationId -> put(medicationId) }
+                        })
+                    })
+                }
+            })
         }
 
         val directory = File(appContext.filesDir, BACKUP_DIRECTORY).apply { mkdirs() }
@@ -40,9 +67,105 @@ class DriveBackupSnapshotRepository(context: Context) {
         }
     }
 
+    fun findRestorableSnapshot(accountEmail: String): BackupSnapshotMetadata? {
+        val snapshot = snapshotFile().takeIf { it.isFile } ?: return null
+        val payload = runCatching { JSONObject(snapshot.readText()) }.getOrNull() ?: return null
+        val snapshotAccountEmail = payload.optString("accountEmail")
+        if (snapshotAccountEmail.isNotBlank() && !snapshotAccountEmail.equals(accountEmail, ignoreCase = true)) {
+            return null
+        }
+        return BackupSnapshotMetadata(
+            createdAtUtc = payload.optLong("createdAtUtc", snapshot.lastModified()),
+            medicationCount = payload.optJSONArray("medications")?.length() ?: 0,
+            reminderCount = payload.optJSONArray("reminders")?.length() ?: 0,
+        )
+    }
+
+    fun restoreLatestSnapshot(accountEmail: String): BackupRestoreResult {
+        findRestorableSnapshot(accountEmail) ?: error("No restorable backup snapshot for $accountEmail")
+        val payload = JSONObject(snapshotFile().readText())
+        val medicationIdMap = mutableMapOf<Long, Long>()
+        val db = dbHelper.writableDatabase
+        db.beginTransaction()
+        try {
+            db.delete("medication_reminder_dose_event", null, null)
+            db.delete("medication_reminder_medication", null, null)
+            db.delete("medication_reminder", null, null)
+            db.delete("user_medication", null, null)
+
+            val medications = payload.optJSONArray("medications") ?: JSONArray()
+            for (index in 0 until medications.length()) {
+                val medication = medications.optJSONObject(index) ?: continue
+                val snapshotId = medication.optLong("id", 0L).takeIf { it > 0L }
+                val restoredId = db.insertOrThrow("user_medication", null, ContentValues().apply {
+                    snapshotId?.let { put("id", it) }
+                    put("name", medication.optString("name"))
+                    put("strength", medication.optString("strength"))
+                    put("active_substance", medication.optString("activeSubstance"))
+                    put("package_size", medication.optString("packageSize"))
+                    put("unit", medication.optString("unit"))
+                    put("current_stock", medication.optInt("currentStock", 0))
+                    put("dosage", medication.optString("dosage"))
+                    put("alert_days", medication.optInt("alertDays", 0))
+                })
+                snapshotId?.let { medicationIdMap[it] = restoredId }
+            }
+
+            val reminders = payload.optJSONArray("reminders") ?: JSONArray()
+            for (index in 0 until reminders.length()) {
+                val reminder = reminders.optJSONObject(index) ?: continue
+                val restoredReminderId = db.insertOrThrow("medication_reminder", null, ContentValues().apply {
+                    put("hour", reminder.optInt("hour", 8).coerceIn(0, 23))
+                    put("minute", reminder.optInt("minute", 0).coerceIn(0, 59))
+                    put("day_mask", reminder.optInt("dayMask", 0))
+                    put("enabled", if (reminder.optBoolean("enabled", true)) 1 else 0)
+                    put("label", reminder.optString("label"))
+                    put("sound_name", reminder.optString("soundName", DEFAULT_REMINDER_SOUND))
+                })
+                val medicationIds = reminder.optJSONArray("medicationIds") ?: JSONArray()
+                for (medicationIndex in 0 until medicationIds.length()) {
+                    val restoredMedicationId = medicationIdMap[medicationIds.optLong(medicationIndex)] ?: continue
+                    db.insertOrThrow("medication_reminder_medication", null, ContentValues().apply {
+                        put("reminder_id", restoredReminderId)
+                        put("medication_id", restoredMedicationId)
+                    })
+                }
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+
+        restorePreferences(payload.optJSONObject("preferences"))
+        return BackupRestoreResult(
+            medicationCount = payload.optJSONArray("medications")?.length() ?: 0,
+            reminderCount = payload.optJSONArray("reminders")?.length() ?: 0,
+        )
+    }
+
+    private fun restorePreferences(preferences: JSONObject?) {
+        preferences ?: return
+        val themeMode = AppThemeMode.fromPreferenceValue(preferences.optString("themeMode"))
+        ThemeManager.setThemeMode(appContext, themeMode)
+    }
+
+    private fun snapshotFile(): File = File(File(appContext.filesDir, BACKUP_DIRECTORY), BACKUP_FILE_NAME)
+
     companion object {
-        const val SNAPSHOT_FORMAT = "medstock-user-medications-v1"
+        const val SNAPSHOT_FORMAT = "medstock-user-data-v2"
         private const val BACKUP_DIRECTORY = "drive_backup"
         private const val BACKUP_FILE_NAME = "medstock_medications_backup.json"
+        private const val DEFAULT_REMINDER_SOUND = "dzwonki"
     }
 }
+
+data class BackupSnapshotMetadata(
+    val createdAtUtc: Long,
+    val medicationCount: Int,
+    val reminderCount: Int,
+)
+
+data class BackupRestoreResult(
+    val medicationCount: Int,
+    val reminderCount: Int,
+)
