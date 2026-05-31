@@ -35,6 +35,8 @@ import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogDetailFrag
 import pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationEditorFragment
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationListFragment
+import androidx.core.view.size
+import androidx.core.view.get
 
 class MainActivity : AppCompatActivity() {
 
@@ -58,14 +60,22 @@ class MainActivity : AppCompatActivity() {
             val currentFragment = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as? NavHostFragment)
                 ?.childFragmentManager
                 ?.primaryNavigationFragment
-            if (currentFragment is MedicationCatalogFragment) {
-                currentFragment.toggleSearch()
-            } else if (currentFragment is PharmacyCatalogFragment) {
-                currentFragment.toggleSearch()
-            } else if (currentFragment is MedicationListFragment) {
-                showMedicationAddSubMenu(it, navController)
-            } else if (currentFragment is RemindersListFragment) {
-                navController.navigate(R.id.nav_reminder_editor)
+            when (currentFragment) {
+                is MedicationCatalogFragment -> {
+                    currentFragment.toggleSearch()
+                }
+
+                is PharmacyCatalogFragment -> {
+                    currentFragment.toggleSearch()
+                }
+
+                is MedicationListFragment -> {
+                    showMedicationAddSubMenu(it, navController)
+                }
+
+                is RemindersListFragment -> {
+                    navController.navigate(R.id.nav_reminder_editor)
+                }
             }
         }
 
@@ -237,8 +247,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun tintPopupMenuIcons(menu: Menu) {
         val iconTint = ContextCompat.getColor(this, R.color.text_primary)
-        for (index in 0 until menu.size()) {
-            menu.getItem(index).icon?.mutate()?.setTint(iconTint)
+        for (index in 0 until menu.size) {
+            menu[index].icon?.mutate()?.setTint(iconTint)
         }
     }
 
@@ -357,8 +367,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun clearCheckedItems(menu: Menu) {
-        for (index in 0 until menu.size()) {
-            val item = menu.getItem(index)
+        for (index in 0 until menu.size) {
+            val item = menu[index]
             item.isChecked = false
             item.subMenu?.let(::clearCheckedItems)
         }
