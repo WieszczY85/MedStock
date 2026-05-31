@@ -43,7 +43,7 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
         }
         publishState(
             state = state,
-            transientMessageRes = if (restorePrompt == null) R.string.account_google_connected_message else null,
+            transientMessageRes = if (restorePrompt == null) R.string.account_drive_restore_no_backup_message else null,
             restorePrompt = restorePrompt,
         )
     }

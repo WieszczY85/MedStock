@@ -74,7 +74,12 @@ class AccountFragment : Fragment() {
             }
 
             state.transientMessageRes?.let { messageRes ->
-                Toast.makeText(requireContext(), messageRes, Toast.LENGTH_LONG).show()
+                val duration = if (messageRes == R.string.account_drive_restore_no_backup_message) {
+                    Toast.LENGTH_SHORT
+                } else {
+                    Toast.LENGTH_LONG
+                }
+                Toast.makeText(requireContext(), messageRes, duration).show()
                 viewModel.messageShown()
             }
         }
