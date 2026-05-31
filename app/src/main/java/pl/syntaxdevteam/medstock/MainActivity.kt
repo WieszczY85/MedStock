@@ -31,6 +31,7 @@ import pl.syntaxdevteam.medstock.core.download.StartupIngestionRunner
 import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
 import pl.syntaxdevteam.medstock.ui.alerty.reminders.RemindersListFragment
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment
+import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogDetailFragment
 import pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationEditorFragment
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationListFragment
@@ -99,6 +100,12 @@ class MainActivity : AppCompatActivity() {
                     binding.appBarMain.fab?.contentDescription = getString(R.string.fab_search_content_description)
                 }
 
+                R.id.nav_baza_leki_detail_screen -> {
+                    titleToolbar.title = getString(R.string.menu_baza)
+                    titleToolbar.subtitle = getString(R.string.medication_catalog_detail_title)
+                    binding.appBarMain.fab?.hide()
+                }
+
                 R.id.nav_alerty_lista_screen -> {
                     titleToolbar.title = getString(R.string.menu_alerty)
                     titleToolbar.subtitle = getString(R.string.menu_alerty_lista)
@@ -140,7 +147,10 @@ class MainActivity : AppCompatActivity() {
 
             syncNavigationSelection(destination.id)
 
-            if (destination.id != R.id.nav_medication_editor && destination.id != R.id.nav_reminder_editor) {
+                if (destination.id != R.id.nav_medication_editor &&
+                destination.id != R.id.nav_reminder_editor &&
+                destination.id != R.id.nav_baza_leki_detail_screen
+            ) {
                 binding.appBarMain.fab?.show()
             }
         }
@@ -248,10 +258,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_medication_editor,
                 Bundle().apply { putString(MedicationEditorFragment.ARG_PACKAGE_CODE, navigation.code) }
             )
-            is PendingScanNavigation.Catalog -> navigateTopLevel(
-                navController,
-                R.id.nav_baza_leki_screen,
-                Bundle().apply { putString(MedicationCatalogFragment.ARG_PACKAGE_CODE, navigation.code) }
+            is PendingScanNavigation.Catalog -> navController.navigate(
+                R.id.nav_baza_leki_detail_screen,
+                Bundle().apply { putString(MedicationCatalogDetailFragment.ARG_PACKAGE_CODE, navigation.code) }
             )
         }
     }
@@ -304,7 +313,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun syncNavigationSelection(@IdRes destinationId: Int) {
         val drawerCheckedId = when (destinationId) {
-            R.id.nav_baza_leki_screen -> R.id.nav_baza_leki_screen
+            R.id.nav_baza_leki_screen, R.id.nav_baza_leki_detail_screen -> R.id.nav_baza_leki_screen
             R.id.nav_baza_apteki_screen -> R.id.nav_baza_apteki_screen
             R.id.nav_alerty_lista_screen -> R.id.nav_alerty_lista_screen
             R.id.nav_alerty_przypomnienia_screen -> R.id.nav_alerty_przypomnienia_screen
@@ -320,7 +329,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val bottomCheckedId = when (destinationId) {
-            R.id.nav_baza_leki_screen, R.id.nav_baza_apteki_screen -> R.id.nav_baza_leki_screen
+            R.id.nav_baza_leki_screen, R.id.nav_baza_leki_detail_screen, R.id.nav_baza_apteki_screen -> R.id.nav_baza_leki_screen
             R.id.nav_alerty_lista_screen, R.id.nav_alerty_przypomnienia_screen -> R.id.nav_alerty_lista_screen
             R.id.nav_medication_list -> R.id.nav_medication_list
             R.id.nav_account -> R.id.nav_account

@@ -17,11 +17,14 @@ object PackageCodeNormalizer {
 
     fun normalizeScannerValues(rawValue: String?, displayValue: String?, rawBytes: ByteArray? = null): String {
         val rawBytesValue = rawBytes?.toString(Charsets.UTF_8)
-        return sequenceOf(rawValue, displayValue, rawBytesValue)
+        val normalizedValues = sequenceOf(rawValue, displayValue, rawBytesValue)
             .map { it.orEmpty().trim() }
             .map(::normalize)
-            .firstOrNull { it.isNotBlank() }
-            .orEmpty()
+            .filter { it.isNotBlank() }
+            .toList()
+        return normalizedValues.firstOrNull { it.length in SCANNER_PRIMARY_CODE_LENGTHS }
+            ?: normalizedValues.firstOrNull()
+            ?: ""
     }
 
     fun lookupVariants(rawCode: String): List<String> {
@@ -56,5 +59,6 @@ object PackageCodeNormalizer {
     private const val GS1_AI_01_PREFIX = "01"
     private const val GTIN_14_LENGTH = 14
     private val CANDIDATE_LENGTHS_FOR_LEADING_ZERO = 12..13
+    private val SCANNER_PRIMARY_CODE_LENGTHS = 12..14
     private val GS1_TEXT_AI_01_REGEX = Regex("""(?:^|[^\d])\(?01\)?(\d{14})(?=\D|$)""")
 }

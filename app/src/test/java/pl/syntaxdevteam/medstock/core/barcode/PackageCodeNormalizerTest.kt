@@ -91,4 +91,16 @@ class PackageCodeNormalizerTest {
             )
         )
     }
+
+    @Test
+    fun normalizeScannerValuesPrefersGtinCandidateOverShortRawValue() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalizeScannerValues(
+                rawValue = "17546485",
+                displayValue = null,
+                rawBytes = "(01)05909990991914(21)ABC123".toByteArray(),
+            )
+        )
+    }
 }

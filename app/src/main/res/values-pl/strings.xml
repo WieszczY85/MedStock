@@ -82,6 +82,16 @@
     <string name="medication_availability_otc">Bez recepty</string>
     <string name="medication_availability_lz">Lecznictwo zamknięte</string>
     <string name="medication_catalog_search_hint">Szukaj po nazwie lub substancji czynnej</string>
+    <string name="medication_catalog_detail_title">Szczegóły leku</string>
+    <string name="medication_catalog_detail_loading">Wyszukiwanie leku po zeskanowanym kodzie opakowania…</string>
+    <string name="medication_catalog_detail_scanned_code">Zeskanowany kod: %1$s</string>
+    <string name="medication_catalog_detail_snapshot">Wersja danych: %1$s</string>
+    <string name="medication_catalog_detail_identifier">Identyfikator produktu: %1$s</string>
+    <string name="medication_catalog_detail_active_substance">Substancja czynna: %1$s</string>
+    <string name="medication_catalog_detail_form">Postać farmaceutyczna: %1$s</string>
+    <string name="medication_catalog_detail_route">Droga podania: %1$s</string>
+    <string name="medication_catalog_detail_responsible_entity">Podmiot odpowiedzialny: %1$s</string>
+    <string name="medication_catalog_detail_manufacturer_country">Kraj wytwórcy: %1$s</string>
     <string name="pharmacy_catalog_loading">Wczytywanie katalogu aptek z lokalnej bazy…</string>
     <string name="pharmacy_catalog_empty">Brak zapisanych rekordów aptek w lokalnej bazie.</string>
     <string name="pharmacy_catalog_summary">Ilość aptek: %1$d \n Ostatnia aktualizacja: %2$s</string>
