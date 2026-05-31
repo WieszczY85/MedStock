@@ -128,6 +128,7 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="medication_add_scan">Skanuj kod</string>
     <string name="medication_scan_failed">Nie udało się zeskanować kodu opakowania.</string>
     <string name="medication_scan_empty_result">Skaner zwrócił pusty kod.</string>
+    <string name="medication_scan_canceled">Skanowanie zostało anulowane.</string>
     <string name="medication_scan_not_found">Nie znaleziono opakowania RPL dla zeskanowanego kodu: %1$s.</string>
     <string name="medication_editor_autofill_substance">Substancja czynna: %1$s</string>
     <string name="medication_editor_autofill_strength">Moc: %1$s</string>
