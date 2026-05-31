@@ -40,4 +40,5 @@
     <color name="preloader_status_text">#FF1D6A20</color>
     <color name="preloader_progress_fill">#FF72E84D</color>
     <color name="preloader_progress_track">#FFD6FFCB</color>
+    <color name="medication_scan_match_background">#FFFFF8C4</color>
 </resources>

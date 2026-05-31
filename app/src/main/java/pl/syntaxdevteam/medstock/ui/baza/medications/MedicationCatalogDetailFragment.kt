@@ -1,12 +1,18 @@
 package pl.syntaxdevteam.medstock.ui.baza.medications
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.net.Uri
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.BackgroundColorSpan
+import android.text.style.StyleSpan
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import pl.syntaxdevteam.medstock.R
@@ -55,12 +61,12 @@ class MedicationCatalogDetailFragment : Fragment() {
             is MedicationCatalogDetailUiState.Found -> {
                 binding.textScanCode.text = getString(R.string.medication_catalog_detail_scanned_code, state.scannedCode)
                 binding.textStatus.text = getString(R.string.medication_catalog_detail_snapshot, state.snapshotDate)
-                bindMedication(state.medication)
+                bindMedication(state.medication, state.matchedPackageCodes)
             }
         }
     }
 
-    private fun bindMedication(item: MedicationCatalogEntry) {
+    private fun bindMedication(item: MedicationCatalogEntry, matchedPackageCodes: List<String>) {
         binding.cardMedicationDetail.visibility = View.VISIBLE
         binding.textMedicationTitle.text = getString(
             R.string.medication_catalog_title_with_availability,
@@ -68,7 +74,16 @@ class MedicationCatalogDetailFragment : Fragment() {
             item.dose.ifBlank { "—" },
             availabilityLabel(item.primaryAvailabilityCode).ifBlank { "—" }
         )
-        binding.textMedicationDetails.text = buildString {
+        binding.textMedicationDetails.text = buildMedicationDetails(item, matchedPackageCodes)
+        bindDocumentButton(binding.buttonMedicationLeaflet, item.leafletUrl)
+        bindDocumentButton(binding.buttonMedicationCharacteristics, item.characteristicsUrl)
+    }
+
+    private fun buildMedicationDetails(
+        item: MedicationCatalogEntry,
+        matchedPackageCodes: List<String>
+    ): SpannableStringBuilder {
+        return SpannableStringBuilder().apply {
             appendLine(getString(R.string.medication_catalog_detail_identifier, item.entityKey.ifBlank { "—" }))
             appendLine(getString(R.string.medication_catalog_detail_active_substance, item.commonName.ifBlank { "—" }))
             appendLine(getString(R.string.medication_catalog_detail_form, item.pharmaceuticalForm.ifBlank { "—" }))
@@ -82,12 +97,44 @@ class MedicationCatalogDetailFragment : Fragment() {
             } else {
                 item.packages.forEach { pkg ->
                     append("\n• ")
-                    append(getString(R.string.medication_catalog_package_row, pkg.ean, pkg.quantity))
+                    val row = buildPackageRow(pkg, isScannedPackageMatch(pkg, matchedPackageCodes))
+                    val rowStart = length
+                    append(row)
+                    if (isScannedPackageMatch(pkg, matchedPackageCodes)) {
+                        setSpan(
+                            BackgroundColorSpan(ContextCompat.getColor(requireContext(), R.color.medication_scan_match_background)),
+                            rowStart,
+                            length,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                        setSpan(StyleSpan(Typeface.BOLD), rowStart, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
                 }
             }
         }
-        bindDocumentButton(binding.buttonMedicationLeaflet, item.leafletUrl)
-        bindDocumentButton(binding.buttonMedicationCharacteristics, item.characteristicsUrl)
+    }
+
+    private fun buildPackageRow(pkg: MedicationPackageInfo, matchesScannedCode: Boolean): String {
+        val packageRow = getString(R.string.medication_catalog_package_row, pkg.ean, pkg.quantity)
+        return if (matchesScannedCode) {
+            getString(R.string.medication_catalog_detail_matched_package_row, packageRow)
+        } else {
+            packageRow
+        }
+    }
+
+    private fun isScannedPackageMatch(pkg: MedicationPackageInfo, matchedPackageCodes: List<String>): Boolean {
+        val packageCode = pkg.ean.filter(Char::isDigit)
+        if (packageCode.isBlank()) return false
+        return matchedPackageCodes
+            .map { it.filter(Char::isDigit) }
+            .filter { it.isNotBlank() }
+            .any { candidate ->
+                packageCode == candidate ||
+                    packageCode.contains(candidate) ||
+                    candidate.contains(packageCode) ||
+                    packageCode.trimStart('0') == candidate.trimStart('0')
+            }
     }
 
     private fun bindDocumentButton(button: View, url: String) {

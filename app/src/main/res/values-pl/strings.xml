@@ -92,6 +92,7 @@
     <string name="medication_catalog_detail_route">Droga podania: %1$s</string>
     <string name="medication_catalog_detail_responsible_entity">Podmiot odpowiedzialny: %1$s</string>
     <string name="medication_catalog_detail_manufacturer_country">Kraj wytwórcy: %1$s</string>
+    <string name="medication_catalog_detail_matched_package_row">%1$s ← zeskanowane opakowanie</string>
     <string name="pharmacy_catalog_loading">Wczytywanie katalogu aptek z lokalnej bazy…</string>
     <string name="pharmacy_catalog_empty">Brak zapisanych rekordów aptek w lokalnej bazie.</string>
     <string name="pharmacy_catalog_summary">Ilość aptek: %1$d \n Ostatnia aktualizacja: %2$s</string>

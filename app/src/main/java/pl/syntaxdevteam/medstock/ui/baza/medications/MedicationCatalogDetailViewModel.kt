@@ -13,7 +13,12 @@ import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
 
 sealed interface MedicationCatalogDetailUiState {
     data object Loading : MedicationCatalogDetailUiState
-    data class Found(val scannedCode: String, val snapshotDate: String, val medication: MedicationCatalogEntry) : MedicationCatalogDetailUiState
+    data class Found(
+        val scannedCode: String,
+        val snapshotDate: String,
+        val medication: MedicationCatalogEntry,
+        val matchedPackageCodes: List<String>
+    ) : MedicationCatalogDetailUiState
     data class NotFound(val scannedCode: String) : MedicationCatalogDetailUiState
     data object EmptyDatabase : MedicationCatalogDetailUiState
 }
@@ -84,10 +89,17 @@ class MedicationCatalogDetailViewModel(application: Application) : AndroidViewMo
                     _uiState.postValue(MedicationCatalogDetailUiState.NotFound(normalizedCode))
                     return@use
                 }
+                val packageDescription = cursor.getString(8).orEmpty()
+                val packages = MedicationPackageParser.parse(
+                    kodEan = "",
+                    opakowanie = packageDescription,
+                    unknownPackageLabel = getApplication<Application>().getString(R.string.medication_catalog_package_unknown)
+                )
                 _uiState.postValue(
                     MedicationCatalogDetailUiState.Found(
                         scannedCode = normalizedCode,
                         snapshotDate = snapshotDate,
+                        matchedPackageCodes = codeVariants + findPackageEansForMatchedCodes(packageDescription, codeVariants),
                         medication = MedicationCatalogEntry(
                             entityKey = cursor.getString(0).orEmpty(),
                             displayName = cursor.getString(1).orEmpty(),
@@ -97,11 +109,7 @@ class MedicationCatalogDetailViewModel(application: Application) : AndroidViewMo
                             pharmaceuticalForm = cursor.getString(5).orEmpty(),
                             responsibleEntity = cursor.getString(6).orEmpty(),
                             manufacturerCountry = cursor.getString(7).orEmpty(),
-                            packages = MedicationPackageParser.parse(
-                                kodEan = "",
-                                opakowanie = cursor.getString(8).orEmpty(),
-                                unknownPackageLabel = getApplication<Application>().getString(R.string.medication_catalog_package_unknown)
-                            ),
+                            packages = packages,
                             leafletUrl = cursor.getString(9).orEmpty(),
                             characteristicsUrl = cursor.getString(10).orEmpty()
                         )
@@ -109,5 +117,27 @@ class MedicationCatalogDetailViewModel(application: Application) : AndroidViewMo
                 )
             }
         }
+    }
+
+    private fun findPackageEansForMatchedCodes(packageDescription: String, codeVariants: List<String>): List<String> {
+        val normalizedPackaging = packageDescription
+            .replace("\\r\\n", "\n")
+            .replace("\\n", "\n")
+            .replace("\r\n", "\n")
+        return normalizedPackaging
+            .lines()
+            .filter { line ->
+                val digits = line.filter(Char::isDigit)
+                codeVariants.any { variant ->
+                    val candidate = variant.filter(Char::isDigit)
+                    candidate.isNotBlank() && digits.contains(candidate)
+                }
+            }
+            .flatMap { line -> PACKAGE_CODE_REGEX.findAll(line).map { it.value }.toList() }
+            .distinct()
+    }
+
+    companion object {
+        private val PACKAGE_CODE_REGEX = Regex("""\b\d{8,14}\b""")
     }
 }

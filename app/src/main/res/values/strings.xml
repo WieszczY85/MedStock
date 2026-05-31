@@ -92,6 +92,7 @@
     <string name="medication_catalog_detail_route">Route: %1$s</string>
     <string name="medication_catalog_detail_responsible_entity">Responsible entity: %1$s</string>
     <string name="medication_catalog_detail_manufacturer_country">Manufacturer country: %1$s</string>
+    <string name="medication_catalog_detail_matched_package_row">%1$s ← scanned package</string>
     <string name="pharmacy_catalog_loading">Loading pharmacy catalog from local database…</string>
     <string name="pharmacy_catalog_empty">No pharmacy records found in local database.</string>
     <string name="pharmacy_catalog_summary">Pharmacy count: %1$d \n Last update: %2$s</string>
