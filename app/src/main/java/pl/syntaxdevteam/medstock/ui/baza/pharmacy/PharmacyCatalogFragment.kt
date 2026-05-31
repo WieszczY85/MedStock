@@ -181,14 +181,20 @@ private class PharmacyCatalogViewHolder(
 
         val isInactive = item.status.contains("nieakty", ignoreCase = true) ||
             item.status.contains("inactive", ignoreCase = true)
-        val textColor = ContextCompat.getColor(
-            context,
-            if (isInactive) android.R.color.darker_gray else android.R.color.black
-        )
-        title.setTextColor(textColor)
-        subtitle.setTextColor(textColor)
-        details.setTextColor(textColor)
-        itemView.alpha = if (isInactive) 0.72f else 1f
+        if (isInactive) {
+            val inactiveTextColor = ContextCompat.getColor(context, R.color.pharmacy_inactive_text)
+            title.setTextColor(inactiveTextColor)
+            subtitle.setTextColor(inactiveTextColor)
+            details.setTextColor(inactiveTextColor)
+            title.setTypeface(title.typeface, android.graphics.Typeface.NORMAL)
+            itemView.alpha = 0.62f
+        } else {
+            title.setTextColor(ContextCompat.getColor(context, R.color.pharmacy_active_title))
+            subtitle.setTextColor(ContextCompat.getColor(context, R.color.pharmacy_active_supporting))
+            details.setTextColor(ContextCompat.getColor(context, R.color.pharmacy_active_supporting))
+            title.setTypeface(title.typeface, android.graphics.Typeface.BOLD)
+            itemView.alpha = 1f
+        }
         mapButton.setOnClickListener { onMapClick(item) }
     }
 }

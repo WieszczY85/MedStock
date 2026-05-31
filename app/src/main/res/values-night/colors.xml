@@ -25,6 +25,15 @@
     <color name="text_secondary">#FFC1DDBA</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="stock_status_ok_stroke">#FF7EE36A</color>
+    <color name="stock_status_ok_background">#FF123616</color>
+    <color name="stock_status_low_stroke">#FFFFD166</color>
+    <color name="stock_status_low_background">#FF3A2D10</color>
+    <color name="stock_status_empty_stroke">#FFFF8A80</color>
+    <color name="stock_status_empty_background">#FF3C1717</color>
+    <color name="pharmacy_active_title">#FFEFFFEA</color>
+    <color name="pharmacy_active_supporting">#FFC1DDBA</color>
+    <color name="pharmacy_inactive_text">#FF7E9278</color>
     <color name="preloader_brand_med">#FFFF3B30</color>
     <color name="preloader_brand_stock">#FF92E77A</color>
     <color name="preloader_status_text">#FFE4F8DF</color>
