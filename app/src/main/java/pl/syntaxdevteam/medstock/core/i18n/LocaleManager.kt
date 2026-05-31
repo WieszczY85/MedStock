@@ -7,7 +7,7 @@ import androidx.core.os.LocaleListCompat
 
 object LocaleManager {
 
-    private val supportedLanguageTags = setOf("en", "pl")
+    private val supportedLanguageTags = setOf("en", "pl", "de")
 
     fun applySystemLocale(context: Context) {
         val systemLocales = ConfigurationCompat.getLocales(context.resources.configuration)
