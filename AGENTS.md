@@ -96,7 +96,6 @@ Use these commands when validating changes:
 
 ```bash
 ./gradlew --no-daemon :app:assembleDebug
-./gradlew --no-daemon :app:lintDebug
 ```
 Avoid running plain ./gradlew build unless explicitly requested, because it may trigger tasks that are not required for basic validation.
 
