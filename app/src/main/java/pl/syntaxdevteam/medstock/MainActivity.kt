@@ -31,6 +31,7 @@ import pl.syntaxdevteam.medstock.core.download.StartupIngestionRunner
 import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
 import pl.syntaxdevteam.medstock.ui.alerty.reminders.RemindersListFragment
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment
+import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogDetailFragment
 import pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationEditorFragment
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationListFragment
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private var pendingScanNavigation: PendingScanNavigation? = null
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -98,6 +100,12 @@ class MainActivity : AppCompatActivity() {
                     binding.appBarMain.fab?.contentDescription = getString(R.string.fab_search_content_description)
                 }
 
+                R.id.nav_baza_leki_detail_screen -> {
+                    titleToolbar.title = getString(R.string.menu_baza)
+                    titleToolbar.subtitle = getString(R.string.medication_catalog_detail_title)
+                    binding.appBarMain.fab?.hide()
+                }
+
                 R.id.nav_alerty_lista_screen -> {
                     titleToolbar.title = getString(R.string.menu_alerty)
                     titleToolbar.subtitle = getString(R.string.menu_alerty_lista)
@@ -139,7 +147,10 @@ class MainActivity : AppCompatActivity() {
 
             syncNavigationSelection(destination.id)
 
-            if (destination.id != R.id.nav_medication_editor && destination.id != R.id.nav_reminder_editor) {
+                if (destination.id != R.id.nav_medication_editor &&
+                destination.id != R.id.nav_reminder_editor &&
+                destination.id != R.id.nav_baza_leki_detail_screen
+            ) {
                 binding.appBarMain.fab?.show()
             }
         }
@@ -179,6 +190,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPostResume() {
+        super.onPostResume()
+        executePendingScanNavigation()
+    }
+
     private fun requestStartupNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
@@ -205,12 +221,7 @@ class MainActivity : AppCompatActivity() {
         popupMenu.setOnMenuItemClickListener { selected ->
             when (selected.itemId) {
                 R.id.nav_medication_add_manual -> navController.navigate(R.id.nav_medication_editor)
-                R.id.nav_medication_add_scan -> startMedicationPackageScanner { code ->
-                    navController.navigate(
-                        R.id.nav_medication_editor,
-                        Bundle().apply { putString(MedicationEditorFragment.ARG_PACKAGE_CODE, code) }
-                    )
-                }
+                R.id.nav_medication_add_scan -> startMedicationPackageScanner(::openMedicationEditorForScannedCode)
             }
             true
         }
@@ -224,10 +235,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun openMedicationEditorForScannedCode(code: String) {
+        queueScanNavigation(PendingScanNavigation.Editor(code))
+    }
+
+    private fun openMedicationCatalogForScannedCode(code: String) {
+        queueScanNavigation(PendingScanNavigation.Catalog(code))
+    }
+
+    private fun queueScanNavigation(navigation: PendingScanNavigation) {
+        pendingScanNavigation = navigation
+        binding.root.post { executePendingScanNavigation() }
+    }
+
+    private fun executePendingScanNavigation() {
+        if (supportFragmentManager.isStateSaved) return
+        val navigation = pendingScanNavigation ?: return
+        pendingScanNavigation = null
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        when (navigation) {
+            is PendingScanNavigation.Editor -> navController.navigate(
+                R.id.nav_medication_editor,
+                Bundle().apply { putString(MedicationEditorFragment.ARG_PACKAGE_CODE, navigation.code) }
+            )
+            is PendingScanNavigation.Catalog -> navController.navigate(
+                R.id.nav_baza_leki_detail_screen,
+                Bundle().apply { putString(MedicationCatalogDetailFragment.ARG_PACKAGE_CODE, navigation.code) }
+            )
+        }
+    }
+
     private fun startMedicationPackageScanner(onPackageCodeScanned: (String) -> Unit) {
         MedicationPackageScanner(this).start(
             onPackageCodeScanned = onPackageCodeScanned,
             onEmptyResult = { showLongToast(getString(R.string.medication_scan_empty_result)) },
+            onCanceled = { showLongToast(getString(R.string.medication_scan_canceled)) },
             onFailure = { showLongToast(getString(R.string.medication_scan_failed)) },
         )
     }
@@ -244,13 +286,7 @@ class MainActivity : AppCompatActivity() {
         popupMenu.setOnMenuItemClickListener { selected ->
             when (selected.itemId) {
                 R.id.nav_baza_leki -> navigateTopLevel(navController, R.id.nav_baza_leki_screen)
-                R.id.nav_baza_scan_find -> startMedicationPackageScanner { code ->
-                    navigateTopLevel(
-                        navController,
-                        R.id.nav_baza_leki_screen,
-                        Bundle().apply { putString(MedicationCatalogFragment.ARG_PACKAGE_CODE, code) }
-                    )
-                }
+                R.id.nav_baza_scan_find -> startMedicationPackageScanner(::openMedicationCatalogForScannedCode)
                 R.id.nav_baza_apteki -> navigateTopLevel(navController, R.id.nav_baza_apteki_screen)
                 R.id.nav_alerty_lista -> navigateTopLevel(navController, R.id.nav_alerty_lista_screen)
                 R.id.nav_alerty_przypomnienia -> navigateTopLevel(navController, R.id.nav_alerty_przypomnienia_screen)
@@ -277,7 +313,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun syncNavigationSelection(@IdRes destinationId: Int) {
         val drawerCheckedId = when (destinationId) {
-            R.id.nav_baza_leki_screen -> R.id.nav_baza_leki_screen
+            R.id.nav_baza_leki_screen, R.id.nav_baza_leki_detail_screen -> R.id.nav_baza_leki_screen
             R.id.nav_baza_apteki_screen -> R.id.nav_baza_apteki_screen
             R.id.nav_alerty_lista_screen -> R.id.nav_alerty_lista_screen
             R.id.nav_alerty_przypomnienia_screen -> R.id.nav_alerty_przypomnienia_screen
@@ -293,7 +329,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val bottomCheckedId = when (destinationId) {
-            R.id.nav_baza_leki_screen, R.id.nav_baza_apteki_screen -> R.id.nav_baza_leki_screen
+            R.id.nav_baza_leki_screen, R.id.nav_baza_leki_detail_screen, R.id.nav_baza_apteki_screen -> R.id.nav_baza_leki_screen
             R.id.nav_alerty_lista_screen, R.id.nav_alerty_przypomnienia_screen -> R.id.nav_alerty_lista_screen
             R.id.nav_medication_list -> R.id.nav_medication_list
             R.id.nav_account -> R.id.nav_account
@@ -304,6 +340,13 @@ class MainActivity : AppCompatActivity() {
             clearCheckedItems(bottomMenu)
             bottomCheckedId?.let { bottomMenu.findItem(it)?.isChecked = true }
         }
+    }
+
+    private sealed interface PendingScanNavigation {
+        val code: String
+
+        data class Editor(override val code: String) : PendingScanNavigation
+        data class Catalog(override val code: String) : PendingScanNavigation
     }
 
     private fun clearCheckedItems(menu: Menu) {

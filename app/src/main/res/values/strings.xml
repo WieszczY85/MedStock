@@ -82,6 +82,16 @@
     <string name="medication_availability_otc">Over the counter</string>
     <string name="medication_availability_lz">Inpatient treatment only</string>
     <string name="medication_catalog_search_hint">Search by name or active substance</string>
+    <string name="medication_catalog_detail_title">Medication details</string>
+    <string name="medication_catalog_detail_loading">Searching medication by scanned package code…</string>
+    <string name="medication_catalog_detail_scanned_code">Scanned code: %1$s</string>
+    <string name="medication_catalog_detail_snapshot">Data snapshot: %1$s</string>
+    <string name="medication_catalog_detail_identifier">Product identifier: %1$s</string>
+    <string name="medication_catalog_detail_active_substance">Active substance: %1$s</string>
+    <string name="medication_catalog_detail_form">Pharmaceutical form: %1$s</string>
+    <string name="medication_catalog_detail_route">Route: %1$s</string>
+    <string name="medication_catalog_detail_responsible_entity">Responsible entity: %1$s</string>
+    <string name="medication_catalog_detail_manufacturer_country">Manufacturer country: %1$s</string>
     <string name="pharmacy_catalog_loading">Loading pharmacy catalog from local database…</string>
     <string name="pharmacy_catalog_empty">No pharmacy records found in local database.</string>
     <string name="pharmacy_catalog_summary">Pharmacy count: %1$d \n Last update: %2$s</string>
@@ -128,6 +138,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="medication_add_scan">Scan code</string>
     <string name="medication_scan_failed">Could not scan the package code.</string>
     <string name="medication_scan_empty_result">Scanner returned an empty code.</string>
+    <string name="medication_scan_canceled">Scanning was canceled.</string>
     <string name="medication_scan_not_found">No RPL package matched scanned code: %1$s.</string>
     <string name="medication_editor_autofill_substance">Active substance: %1$s</string>
     <string name="medication_editor_autofill_strength">Strength: %1$s</string>
