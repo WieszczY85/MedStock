@@ -85,7 +85,7 @@
     <string name="medication_catalog_detail_title">Medication details</string>
     <string name="medication_catalog_detail_loading">Searching medication by scanned package code…</string>
     <string name="medication_catalog_detail_scanned_code">Scanned code: %1$s</string>
-    <string name="medication_catalog_detail_snapshot">Data snapshot: %1$s</string>
+    <string name="medication_catalog_detail_snapshot">Data version: %1$s</string>
     <string name="medication_catalog_detail_identifier">Product identifier: %1$s</string>
     <string name="medication_catalog_detail_active_substance">Active substance: %1$s</string>
     <string name="medication_catalog_detail_form">Pharmaceutical form: %1$s</string>
@@ -261,13 +261,13 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="account_drive_title">Google Drive backup</string>
     <string name="account_drive_summary">By enabling the backup of your medications, you have access to them from any device on which you log in to your account via MedStock.</string>
     <string name="account_drive_switch_label">Save medication backup in Google Drive</string>
-    <string name="account_drive_backup_now_button">Create backup snapshot now</string>
+    <string name="account_drive_backup_now_button">Create data backup now</string>
     <string name="account_drive_requires_google">Connect a Google account first.</string>
     <string name="account_drive_disabled_message">Google Drive backup disabled.</string>
-    <string name="account_drive_snapshot_created_message">Medication backup snapshot prepared.</string>
-    <string name="account_drive_snapshot_failed_message">Could not prepare medication backup snapshot.</string>
+    <string name="account_drive_snapshot_created_message">Medication data backup prepared.</string>
+    <string name="account_drive_snapshot_failed_message">Could not prepare medication data backup.</string>
     <string name="account_drive_status_connect_first">Google Drive backup is available after connecting a Google account.</string>
-    <string name="account_drive_status_enabled">Google Drive backup is enabled. A medication snapshot will be prepared for synchronization.</string>
-    <string name="account_drive_status_enabled_with_date">Google Drive backup is enabled. \nLast snapshot: %1$s.</string>
+    <string name="account_drive_status_enabled">Google Drive backup is enabled. Medication data will be prepared for synchronization.</string>
+    <string name="account_drive_status_enabled_with_date">Google Drive backup is enabled. \nLast data backup: %1$s.</string>
     <string name="account_drive_status_disabled">Google Drive backup is disabled.</string>
 </resources>
