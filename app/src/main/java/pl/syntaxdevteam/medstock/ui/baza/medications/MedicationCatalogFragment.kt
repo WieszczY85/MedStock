@@ -1,5 +1,6 @@
 package pl.syntaxdevteam.medstock.ui.baza.medications
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -222,10 +223,12 @@ private class MedicationCatalogViewHolder(view: View) : RecyclerView.ViewHolder(
         button.setOnClickListener {
             if (normalizedUrl.isBlank()) return@setOnClickListener
             val uri = Uri.parse(normalizedUrl)
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            if (intent.resolveActivity(context.packageManager) != null) {
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addCategory(Intent.CATEGORY_BROWSABLE)
+            }
+            try {
                 context.startActivity(intent)
-            } else {
+            } catch (_: ActivityNotFoundException) {
                 Toast.makeText(context, R.string.medication_catalog_document_unavailable, Toast.LENGTH_SHORT).show()
             }
         }

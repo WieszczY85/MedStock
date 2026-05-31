@@ -2,6 +2,7 @@ package pl.syntaxdevteam.medstock.ui.baza.pharmacy
 
 import android.os.Bundle
 import android.net.Uri
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -97,19 +98,24 @@ class PharmacyCatalogFragment : Fragment() {
             return
         }
 
-        val uri = Uri.parse("geo:0,0?q=${Uri.encode(query)}")
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-            setPackage("com.google.android.apps.maps")
-        }
+        val geoUri = Uri.parse("geo:0,0?q=${Uri.encode(query)}")
+        val webUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encode(query)}")
+        val mapIntents = listOf(
+            Intent(Intent.ACTION_VIEW, geoUri).apply { setPackage("com.google.android.apps.maps") },
+            Intent(Intent.ACTION_VIEW, geoUri),
+            Intent(Intent.ACTION_VIEW, webUri).apply { addCategory(Intent.CATEGORY_BROWSABLE) }
+        )
 
-        val packageManager = requireContext().packageManager
-        when {
-            intent.resolveActivity(packageManager) != null -> startActivity(intent)
-            Intent(Intent.ACTION_VIEW, uri).resolveActivity(packageManager) != null -> {
-                startActivity(Intent(Intent.ACTION_VIEW, uri))
+        val opened = mapIntents.any { intent ->
+            try {
+                startActivity(intent)
+                true
+            } catch (_: ActivityNotFoundException) {
+                false
             }
-
-            else -> Toast.makeText(requireContext(), R.string.pharmacy_catalog_map_unavailable, Toast.LENGTH_SHORT).show()
+        }
+        if (!opened) {
+            Toast.makeText(requireContext(), R.string.pharmacy_catalog_map_unavailable, Toast.LENGTH_SHORT).show()
         }
     }
 

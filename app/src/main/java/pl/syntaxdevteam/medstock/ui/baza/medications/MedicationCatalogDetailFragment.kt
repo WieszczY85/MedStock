@@ -1,5 +1,6 @@
 package pl.syntaxdevteam.medstock.ui.baza.medications
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -91,13 +92,16 @@ class MedicationCatalogDetailFragment : Fragment() {
     }
 
     private fun bindDocumentButton(button: View, url: String) {
-        button.isEnabled = url.isNotBlank()
+        val normalizedUrl = url.trim()
+        button.isEnabled = normalizedUrl.isNotBlank()
         button.setOnClickListener {
-            if (url.isBlank()) return@setOnClickListener
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            if (intent.resolveActivity(requireContext().packageManager) != null) {
+            if (normalizedUrl.isBlank()) return@setOnClickListener
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(normalizedUrl)).apply {
+                addCategory(Intent.CATEGORY_BROWSABLE)
+            }
+            try {
                 startActivity(intent)
-            } else {
+            } catch (_: ActivityNotFoundException) {
                 Toast.makeText(requireContext(), R.string.medication_catalog_document_unavailable, Toast.LENGTH_SHORT).show()
             }
         }
