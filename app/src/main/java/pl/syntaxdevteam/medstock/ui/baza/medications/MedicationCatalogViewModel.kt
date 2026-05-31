@@ -10,6 +10,7 @@ import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.R
+import pl.syntaxdevteam.medstock.core.barcode.PackageCodeNormalizer
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
 
 data class MedicationCatalogEntry(
@@ -50,7 +51,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private val pageSize = 20
     private var snapshotDate: String? = null
-        private var recordCount: Int = 0
+    private var recordCount: Int = 0
     private var offset: Int = 0
     private var selectedLetter: String = "#"
     private var searchQuery: String = ""
@@ -90,7 +91,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
     }
 
     fun onPackageCodeSearchRequested(rawCode: String) {
-        val normalizedCode = rawCode.filter(Char::isDigit)
+        val normalizedCode = PackageCodeNormalizer.normalize(rawCode)
         if (normalizedCode.isBlank()) return
         selectedLetter = "#"
         searchQuery = normalizedCode
@@ -100,7 +101,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
 
     private fun reloadCatalog() {
         offset = 0
-                snapshotDate = null
+        snapshotDate = null
         loadedItems.clear()
         _uiState.postValue(MedicationCatalogUiState(summaryResId = R.string.medication_catalog_loading, selectedLetter = selectedLetter))
         loadPage(reset = true)
@@ -142,7 +143,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
                 }
 
                 val selectedSnapshotDate = snapshotDate ?: return@launch
-                                val clause = buildFilterClause(selectedLetter)
+                val clause = buildFilterClause(selectedLetter)
                 val args = mutableListOf<String>(selectedSnapshotDate)
                 when (selectedLetter) {
                     "123" -> args += "[0-9]*"
@@ -256,7 +257,9 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
     private fun buildSearchClause(query: String, mode: SearchMode): String {
         if (query.isBlank()) return ""
         if (mode == SearchMode.PACKAGE_CODE) {
-            return "AND COALESCE(s.opakowanie, '') LIKE ?"
+            val placeholders = PackageCodeNormalizer.lookupVariants(query)
+                .joinToString(" OR ") { "COALESCE(s.opakowanie, '') LIKE ?" }
+            return if (placeholders.isBlank()) "" else "AND ($placeholders)"
         }
         val targetColumn = when (mode) {
             SearchMode.NAME -> "nazwa_produktu"
@@ -276,7 +279,7 @@ class MedicationCatalogViewModel(application: Application) : AndroidViewModel(ap
         val trimmed = query.trim()
         if (trimmed.isBlank()) return emptyList()
         if (mode == SearchMode.PACKAGE_CODE) {
-            return listOf("%${trimmed.filter(Char::isDigit)}%")
+            return PackageCodeNormalizer.lookupVariants(trimmed).map { "%$it%" }
         }
         return listOf(
             "%$trimmed%",

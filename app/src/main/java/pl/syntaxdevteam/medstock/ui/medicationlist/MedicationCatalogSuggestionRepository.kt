@@ -2,6 +2,7 @@ package pl.syntaxdevteam.medstock.ui.medicationlist
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import pl.syntaxdevteam.medstock.core.barcode.PackageCodeNormalizer
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationPackageParser
 
@@ -71,10 +72,15 @@ class MedicationCatalogSuggestionRepository(context: Context) {
     }
 
     fun findByPackageCode(rawCode: String): MedicationCatalogSuggestion? {
-        val normalizedCode = rawCode.filter(Char::isDigit)
+        val normalizedCode = PackageCodeNormalizer.normalize(rawCode)
         if (normalizedCode.length < MIN_PACKAGE_CODE_LENGTH) return null
+        val codeVariants = PackageCodeNormalizer.lookupVariants(normalizedCode)
+        if (codeVariants.isEmpty()) return null
 
         val db = dbHelper.readableDatabase
+        val packageCodeClause = codeVariants.joinToString(" OR ") {
+            "COALESCE(opakowanie, '') LIKE ?"
+        }
         val sql = """
             SELECT
                 COALESCE(nazwa_produktu, ''),
@@ -83,12 +89,12 @@ class MedicationCatalogSuggestionRepository(context: Context) {
                 COALESCE(postac_farmaceutyczna, ''),
                 COALESCE(substancja_czynna, '')
             FROM rpl
-            WHERE COALESCE(opakowanie, '') LIKE ?
+            WHERE $packageCodeClause
             ORDER BY nazwa_produktu COLLATE NOCASE ASC, moc COLLATE NOCASE ASC
             LIMIT 1
         """.trimIndent()
 
-        db.rawQuery(sql, arrayOf("%$normalizedCode%")).use { cursor ->
+        db.rawQuery(sql, codeVariants.map { "%$it%" }.toTypedArray()).use { cursor ->
             if (!cursor.moveToFirst()) return null
             val medicationName = cursor.getString(0).orEmpty().trim()
             if (medicationName.isBlank()) return null

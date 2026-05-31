@@ -39,7 +39,7 @@ class RemindersViewModel(application: Application) : AndroidViewModel(applicatio
     fun findReminder(id: Long): MedicationReminder? = reminders.value.orEmpty().firstOrNull { it.id == id }
 
     fun saveReminder(id: Long?, hour: Int, minute: Int, dayMask: Int, label: String, soundName: String, medicationIds: List<Long>) {
-        if (hour !in 0..23 || minute !in 0..59 || medicationIds.isEmpty()) return
+        if (hour !in 0..23 || minute !in 0..59) return
         val validSoundName = ReminderSoundCatalog.selectedSound(getApplication(), soundName).name
         viewModelScope.launch(Dispatchers.IO) {
             val savedId = if (id == null || id <= 0L) {
