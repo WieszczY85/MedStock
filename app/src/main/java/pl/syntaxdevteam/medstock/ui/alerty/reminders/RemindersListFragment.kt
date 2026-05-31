@@ -78,11 +78,11 @@ class RemindersListFragment : Fragment() {
     private fun updatePermissionCard() {
         val needsNotification = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-        val exactSettingsIntent = scheduler.exactAlarmSettingsIntent()
-        binding.cardReminderPermissions.visibility = if (needsNotification || exactSettingsIntent != null) View.VISIBLE else View.GONE
+        val fullScreenSettingsIntent = scheduler.fullScreenIntentSettingsIntent()
+        binding.cardReminderPermissions.visibility = if (needsNotification || fullScreenSettingsIntent != null) View.VISIBLE else View.GONE
         binding.textReminderPermissionsMessage.text = when {
             needsNotification -> getString(R.string.reminder_notification_permission_message)
-            exactSettingsIntent != null -> getString(R.string.reminder_exact_alarm_permission_message)
+            fullScreenSettingsIntent != null -> getString(R.string.reminder_full_screen_permission_message)
             else -> getString(R.string.reminder_permissions_message)
         }
     }
@@ -103,7 +103,7 @@ class RemindersListFragment : Fragment() {
             openPermissionSettings(notificationSettingsIntent())
             return
         }
-        scheduler.exactAlarmSettingsIntent()?.let(::openPermissionSettings)
+        scheduler.fullScreenIntentSettingsIntent()?.let(::openPermissionSettings)
     }
 
     private fun openPermissionSettings(intent: Intent) {

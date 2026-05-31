@@ -1,10 +1,13 @@
 package pl.syntaxdevteam.medstock.core.reminders
 
 import android.app.AlarmManager
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import pl.syntaxdevteam.medstock.ui.alerty.ringing.ReminderRingingActivity
 import pl.syntaxdevteam.medstock.ui.alerty.reminders.MedicationReminder
@@ -49,16 +52,11 @@ class ReminderScheduler(private val context: Context) {
     )
 
     private fun scheduleAlarm(triggerAtMillis: Long, operation: PendingIntent, reminderId: Long) {
-        if (canScheduleExactAlarm()) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation)
-            Log.i(TAG, "Scheduled exact reminder alarm id=$reminderId triggerAtMillis=$triggerAtMillis")
-        } else {
-            alarmManager.setAlarmClock(
-                AlarmManager.AlarmClockInfo(triggerAtMillis, ringingPendingIntent(reminderId)),
-                operation
-            )
-            Log.i(TAG, "Scheduled alarm-clock reminder id=$reminderId triggerAtMillis=$triggerAtMillis because exact alarm permission is unavailable")
-        }
+        alarmManager.setAlarmClock(
+            AlarmManager.AlarmClockInfo(triggerAtMillis, ringingPendingIntent(reminderId)),
+            operation
+        )
+        Log.i(TAG, "Scheduled alarm-clock reminder id=$reminderId triggerAtMillis=$triggerAtMillis")
     }
 
     private fun ringingPendingIntent(reminderId: Long): PendingIntent = PendingIntent.getActivity(
@@ -67,9 +65,6 @@ class ReminderScheduler(private val context: Context) {
         ReminderRingingActivity.intent(context, reminderId),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
-
-    private fun canScheduleExactAlarm(): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
 
     private fun cancelPending(requestCode: Int, action: String) {
         val intent = PendingIntent.getBroadcast(
@@ -88,7 +83,17 @@ class ReminderScheduler(private val context: Context) {
         MedicationReminderRepository(context).getAll().filter { it.enabled }.forEach(::schedule)
     }
 
-    fun exactAlarmSettingsIntent(): Intent? = null
+    fun fullScreenIntentSettingsIntent(): Intent? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+            !context.getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
+        ) {
+            Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+                data = Uri.fromParts("package", context.packageName, null)
+            }
+        } else {
+            null
+        }
+    }
 
     companion object {
         const val ACTION_FIRE_REMINDER = "pl.syntaxdevteam.medstock.action.FIRE_MEDICATION_REMINDER"
