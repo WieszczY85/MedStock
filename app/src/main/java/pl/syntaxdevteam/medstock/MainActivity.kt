@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private var pendingScanNavigation: PendingScanNavigation? = null
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -179,6 +180,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPostResume() {
+        super.onPostResume()
+        executePendingScanNavigation()
+    }
+
     private fun requestStartupNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
@@ -220,20 +226,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openMedicationEditorForScannedCode(code: String) {
-        binding.root.post {
-            findNavController(R.id.nav_host_fragment_content_main).navigate(
-                R.id.nav_medication_editor,
-                Bundle().apply { putString(MedicationEditorFragment.ARG_PACKAGE_CODE, code) }
-            )
-        }
+        queueScanNavigation(PendingScanNavigation.Editor(code))
     }
 
     private fun openMedicationCatalogForScannedCode(code: String) {
-        binding.root.post {
-            navigateTopLevel(
-                findNavController(R.id.nav_host_fragment_content_main),
+        queueScanNavigation(PendingScanNavigation.Catalog(code))
+    }
+
+    private fun queueScanNavigation(navigation: PendingScanNavigation) {
+        pendingScanNavigation = navigation
+        binding.root.post { executePendingScanNavigation() }
+    }
+
+    private fun executePendingScanNavigation() {
+        if (supportFragmentManager.isStateSaved) return
+        val navigation = pendingScanNavigation ?: return
+        pendingScanNavigation = null
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        when (navigation) {
+            is PendingScanNavigation.Editor -> navController.navigate(
+                R.id.nav_medication_editor,
+                Bundle().apply { putString(MedicationEditorFragment.ARG_PACKAGE_CODE, navigation.code) }
+            )
+            is PendingScanNavigation.Catalog -> navigateTopLevel(
+                navController,
                 R.id.nav_baza_leki_screen,
-                Bundle().apply { putString(MedicationCatalogFragment.ARG_PACKAGE_CODE, code) }
+                Bundle().apply { putString(MedicationCatalogFragment.ARG_PACKAGE_CODE, navigation.code) }
             )
         }
     }
@@ -313,6 +331,13 @@ class MainActivity : AppCompatActivity() {
             clearCheckedItems(bottomMenu)
             bottomCheckedId?.let { bottomMenu.findItem(it)?.isChecked = true }
         }
+    }
+
+    private sealed interface PendingScanNavigation {
+        val code: String
+
+        data class Editor(override val code: String) : PendingScanNavigation
+        data class Catalog(override val code: String) : PendingScanNavigation
     }
 
     private fun clearCheckedItems(menu: Menu) {
