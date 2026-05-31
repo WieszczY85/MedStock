@@ -1,5 +1,6 @@
 package pl.syntaxdevteam.medstock.core.account
 
+import android.app.backup.BackupManager
 import android.content.ContentValues
 import android.content.Context
 import org.json.JSONArray
@@ -64,6 +65,7 @@ class DriveBackupSnapshotRepository(context: Context) {
         val directory = File(appContext.filesDir, BACKUP_DIRECTORY).apply { mkdirs() }
         return File(directory, BACKUP_FILE_NAME).apply {
             writeText(payload.toString(2))
+            BackupManager(appContext).dataChanged()
         }
     }
 
