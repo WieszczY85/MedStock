@@ -13,7 +13,14 @@ class MedicationPackageScanner(private val activity: Activity) {
         onFailure: () -> Unit,
     ) {
         val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_EAN_8, Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E)
+            .setBarcodeFormats(
+                Barcode.FORMAT_EAN_13,
+                Barcode.FORMAT_EAN_8,
+                Barcode.FORMAT_UPC_A,
+                Barcode.FORMAT_UPC_E,
+                Barcode.FORMAT_DATA_MATRIX,
+                Barcode.FORMAT_QR_CODE,
+            )
             .enableAutoZoom()
             .build()
 

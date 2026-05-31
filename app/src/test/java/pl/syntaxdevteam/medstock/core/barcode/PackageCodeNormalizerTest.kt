@@ -28,4 +28,36 @@ class PackageCodeNormalizerTest {
             PackageCodeNormalizer.lookupVariants("0 590 123 412 345")
         )
     }
+
+    @Test
+    fun normalizeExtractsGtinFromGs1DataMatrixWithParenthesizedAi() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalize("(01)05909990991914(21)ABC123(17)260531")
+        )
+    }
+
+    @Test
+    fun normalizeExtractsGtinFromCompactGs1DataMatrixPayload() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalize("010590999099191421ABC123")
+        )
+    }
+
+    @Test
+    fun lookupVariantsForGs1DataMatrixIncludesEan13Candidate() {
+        assertEquals(
+            listOf("05909990991914", "5909990991914"),
+            PackageCodeNormalizer.lookupVariants("(01)05909990991914(21)ABC123")
+        )
+    }
+
+    @Test
+    fun normalizeExtractsGtinFromCompactGs1PayloadContainingOnlyAi01() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalize("0105909990991914")
+        )
+    }
 }

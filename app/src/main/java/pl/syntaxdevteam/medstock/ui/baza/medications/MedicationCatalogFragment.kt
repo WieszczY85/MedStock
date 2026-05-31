@@ -16,12 +16,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import pl.syntaxdevteam.medstock.R
+import pl.syntaxdevteam.medstock.core.barcode.PackageCodeNormalizer
 import pl.syntaxdevteam.medstock.databinding.FragmentMedicationCatalogBinding
 
 class MedicationCatalogFragment : Fragment() {
 
     private var _binding: FragmentMedicationCatalogBinding? = null
     private val binding get() = _binding!!
+    private var suppressSearchCallbacks = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,12 +45,16 @@ class MedicationCatalogFragment : Fragment() {
 
         binding.searchMedicationCatalog.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                medicationCatalogViewModel.onSearchQueryChanged(query.orEmpty())
+                if (!suppressSearchCallbacks) {
+                    medicationCatalogViewModel.onSearchQueryChanged(query.orEmpty())
+                }
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                medicationCatalogViewModel.onSearchQueryChanged(newText.orEmpty())
+                if (!suppressSearchCallbacks) {
+                    medicationCatalogViewModel.onSearchQueryChanged(newText.orEmpty())
+                }
                 return true
             }
         })
@@ -102,10 +108,13 @@ class MedicationCatalogFragment : Fragment() {
         scannedCode: String,
         medicationCatalogViewModel: MedicationCatalogViewModel,
     ) {
+        val normalizedCode = PackageCodeNormalizer.normalize(scannedCode)
         binding.searchMedicationCatalog.visibility = View.VISIBLE
-        binding.searchMedicationCatalog.setQuery(scannedCode, false)
+        suppressSearchCallbacks = true
+        binding.searchMedicationCatalog.setQuery(normalizedCode, false)
+        suppressSearchCallbacks = false
         binding.searchMedicationCatalog.clearFocus()
-        medicationCatalogViewModel.onPackageCodeSearchRequested(scannedCode)
+        medicationCatalogViewModel.onPackageCodeSearchRequested(normalizedCode)
     }
 
     companion object {
