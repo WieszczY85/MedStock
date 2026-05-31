@@ -28,4 +28,67 @@ class PackageCodeNormalizerTest {
             PackageCodeNormalizer.lookupVariants("0 590 123 412 345")
         )
     }
+
+    @Test
+    fun normalizeExtractsGtinFromGs1DataMatrixWithParenthesizedAi() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalize("(01)05909990991914(21)ABC123(17)260531")
+        )
+    }
+
+    @Test
+    fun normalizeExtractsGtinFromCompactGs1DataMatrixPayload() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalize("010590999099191421ABC123")
+        )
+    }
+
+    @Test
+    fun lookupVariantsForGs1DataMatrixIncludesEan13Candidate() {
+        assertEquals(
+            listOf("05909990991914", "5909990991914"),
+            PackageCodeNormalizer.lookupVariants("(01)05909990991914(21)ABC123")
+        )
+    }
+
+    @Test
+    fun normalizeExtractsGtinFromCompactGs1PayloadContainingOnlyAi01() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalize("0105909990991914")
+        )
+    }
+
+    @Test
+    fun normalizeScannerValuesUsesDisplayValueWhenRawValueIsBlank() {
+        assertEquals(
+            "5909990991914",
+            PackageCodeNormalizer.normalizeScannerValues(rawValue = null, displayValue = "5909990991914")
+        )
+    }
+
+    @Test
+    fun normalizeScannerValuesReturnsGtinFromRawGs1BeforeDisplayValue() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalizeScannerValues(
+                rawValue = "(01)05909990991914(21)ABC123",
+                displayValue = "ABC123",
+            )
+        )
+    }
+
+    @Test
+    fun normalizeScannerValuesUsesRawBytesWhenTextValuesAreBlank() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalizeScannerValues(
+                rawValue = null,
+                displayValue = null,
+                rawBytes = "(01)05909990991914(21)ABC123".toByteArray(),
+            )
+        )
+    }
 }
