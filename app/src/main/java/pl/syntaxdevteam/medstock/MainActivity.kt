@@ -200,6 +200,7 @@ class MainActivity : AppCompatActivity() {
     private fun showMedicationAddSubMenu(anchor: View, navController: NavController) {
         val popupMenu = PopupMenu(this, anchor)
         popupMenu.menuInflater.inflate(R.menu.medication_add_submenu, popupMenu.menu)
+        tintPopupMenuIcons(popupMenu.menu)
         popupMenu.setForceShowIcon(true)
         popupMenu.setOnMenuItemClickListener { selected ->
             when (selected.itemId) {
@@ -214,6 +215,13 @@ class MainActivity : AppCompatActivity() {
             true
         }
         popupMenu.show()
+    }
+
+    private fun tintPopupMenuIcons(menu: Menu) {
+        val iconTint = ContextCompat.getColor(this, R.color.text_primary)
+        for (index in 0 until menu.size()) {
+            menu.getItem(index).icon?.mutate()?.setTint(iconTint)
+        }
     }
 
     private fun startMedicationPackageScanner(onPackageCodeScanned: (String) -> Unit) {
@@ -231,6 +239,7 @@ class MainActivity : AppCompatActivity() {
     private fun showBottomSubMenu(anchor: View, menuRes: Int, navController: NavController) {
         val popupMenu = PopupMenu(this, anchor)
         popupMenu.menuInflater.inflate(menuRes, popupMenu.menu)
+        tintPopupMenuIcons(popupMenu.menu)
         popupMenu.setForceShowIcon(true)
         popupMenu.setOnMenuItemClickListener { selected ->
             when (selected.itemId) {
