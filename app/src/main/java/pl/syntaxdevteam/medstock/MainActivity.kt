@@ -205,12 +205,7 @@ class MainActivity : AppCompatActivity() {
         popupMenu.setOnMenuItemClickListener { selected ->
             when (selected.itemId) {
                 R.id.nav_medication_add_manual -> navController.navigate(R.id.nav_medication_editor)
-                R.id.nav_medication_add_scan -> startMedicationPackageScanner { code ->
-                    navController.navigate(
-                        R.id.nav_medication_editor,
-                        Bundle().apply { putString(MedicationEditorFragment.ARG_PACKAGE_CODE, code) }
-                    )
-                }
+                R.id.nav_medication_add_scan -> startMedicationPackageScanner(::openMedicationEditorForScannedCode)
             }
             true
         }
@@ -224,10 +219,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun openMedicationEditorForScannedCode(code: String) {
+        binding.root.post {
+            findNavController(R.id.nav_host_fragment_content_main).navigate(
+                R.id.nav_medication_editor,
+                Bundle().apply { putString(MedicationEditorFragment.ARG_PACKAGE_CODE, code) }
+            )
+        }
+    }
+
+    private fun openMedicationCatalogForScannedCode(code: String) {
+        binding.root.post {
+            navigateTopLevel(
+                findNavController(R.id.nav_host_fragment_content_main),
+                R.id.nav_baza_leki_screen,
+                Bundle().apply { putString(MedicationCatalogFragment.ARG_PACKAGE_CODE, code) }
+            )
+        }
+    }
+
     private fun startMedicationPackageScanner(onPackageCodeScanned: (String) -> Unit) {
         MedicationPackageScanner(this).start(
             onPackageCodeScanned = onPackageCodeScanned,
             onEmptyResult = { showLongToast(getString(R.string.medication_scan_empty_result)) },
+            onCanceled = { showLongToast(getString(R.string.medication_scan_canceled)) },
             onFailure = { showLongToast(getString(R.string.medication_scan_failed)) },
         )
     }
@@ -244,13 +259,7 @@ class MainActivity : AppCompatActivity() {
         popupMenu.setOnMenuItemClickListener { selected ->
             when (selected.itemId) {
                 R.id.nav_baza_leki -> navigateTopLevel(navController, R.id.nav_baza_leki_screen)
-                R.id.nav_baza_scan_find -> startMedicationPackageScanner { code ->
-                    navigateTopLevel(
-                        navController,
-                        R.id.nav_baza_leki_screen,
-                        Bundle().apply { putString(MedicationCatalogFragment.ARG_PACKAGE_CODE, code) }
-                    )
-                }
+                R.id.nav_baza_scan_find -> startMedicationPackageScanner(::openMedicationCatalogForScannedCode)
                 R.id.nav_baza_apteki -> navigateTopLevel(navController, R.id.nav_baza_apteki_screen)
                 R.id.nav_alerty_lista -> navigateTopLevel(navController, R.id.nav_alerty_lista_screen)
                 R.id.nav_alerty_przypomnienia -> navigateTopLevel(navController, R.id.nav_alerty_przypomnienia_screen)

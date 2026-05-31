@@ -10,6 +10,7 @@ class MedicationPackageScanner(private val activity: Activity) {
     fun start(
         onPackageCodeScanned: (String) -> Unit,
         onEmptyResult: () -> Unit,
+        onCanceled: () -> Unit,
         onFailure: () -> Unit,
     ) {
         val options = GmsBarcodeScannerOptions.Builder()
@@ -27,12 +28,19 @@ class MedicationPackageScanner(private val activity: Activity) {
         GmsBarcodeScanning.getClient(activity, options)
             .startScan()
             .addOnSuccessListener { barcode ->
-                val code = barcode.rawValue.orEmpty()
+                val code = PackageCodeNormalizer.normalizeScannerValues(
+                    rawValue = barcode.rawValue,
+                    displayValue = barcode.displayValue,
+                    rawBytes = barcode.rawBytes,
+                )
                 if (code.isBlank()) {
                     onEmptyResult()
                 } else {
                     onPackageCodeScanned(code)
                 }
+            }
+            .addOnCanceledListener {
+                onCanceled()
             }
             .addOnFailureListener {
                 onFailure()

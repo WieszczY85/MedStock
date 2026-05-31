@@ -60,4 +60,35 @@ class PackageCodeNormalizerTest {
             PackageCodeNormalizer.normalize("0105909990991914")
         )
     }
+
+    @Test
+    fun normalizeScannerValuesUsesDisplayValueWhenRawValueIsBlank() {
+        assertEquals(
+            "5909990991914",
+            PackageCodeNormalizer.normalizeScannerValues(rawValue = null, displayValue = "5909990991914")
+        )
+    }
+
+    @Test
+    fun normalizeScannerValuesReturnsGtinFromRawGs1BeforeDisplayValue() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalizeScannerValues(
+                rawValue = "(01)05909990991914(21)ABC123",
+                displayValue = "ABC123",
+            )
+        )
+    }
+
+    @Test
+    fun normalizeScannerValuesUsesRawBytesWhenTextValuesAreBlank() {
+        assertEquals(
+            "05909990991914",
+            PackageCodeNormalizer.normalizeScannerValues(
+                rawValue = null,
+                displayValue = null,
+                rawBytes = "(01)05909990991914(21)ABC123".toByteArray(),
+            )
+        )
+    }
 }

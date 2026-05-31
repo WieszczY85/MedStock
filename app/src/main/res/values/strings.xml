@@ -128,6 +128,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="medication_add_scan">Scan code</string>
     <string name="medication_scan_failed">Could not scan the package code.</string>
     <string name="medication_scan_empty_result">Scanner returned an empty code.</string>
+    <string name="medication_scan_canceled">Scanning was canceled.</string>
     <string name="medication_scan_not_found">No RPL package matched scanned code: %1$s.</string>
     <string name="medication_editor_autofill_substance">Active substance: %1$s</string>
     <string name="medication_editor_autofill_strength">Strength: %1$s</string>

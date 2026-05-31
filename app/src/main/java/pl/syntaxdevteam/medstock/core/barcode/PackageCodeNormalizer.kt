@@ -15,6 +15,15 @@ object PackageCodeNormalizer {
         return rawCode.filter(Char::isDigit)
     }
 
+    fun normalizeScannerValues(rawValue: String?, displayValue: String?, rawBytes: ByteArray? = null): String {
+        val rawBytesValue = rawBytes?.toString(Charsets.UTF_8)
+        return sequenceOf(rawValue, displayValue, rawBytesValue)
+            .map { it.orEmpty().trim() }
+            .map(::normalize)
+            .firstOrNull { it.isNotBlank() }
+            .orEmpty()
+    }
+
     fun lookupVariants(rawCode: String): List<String> {
         val normalized = normalize(rawCode)
         if (normalized.isBlank()) return emptyList()
