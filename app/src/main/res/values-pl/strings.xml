@@ -274,6 +274,7 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="account_drive_restore_dialog_message">Znaleziono kopię z %1$s. Zawiera %2$d leków i %3$d alarmów. Przywrócenie zastąpi lokalne leki i alarmy oraz zastosuje zapisane ustawienia.</string>
     <string name="account_drive_restore_dialog_confirm">Przywróć kopię</string>
     <string name="account_drive_restore_dialog_skip">Nie teraz</string>
+    <string name="account_drive_restore_no_backup_message">Nie znaleziono wcześniejszej kopii dla tego konta Google.</string>
     <string name="account_drive_restore_success_message">Kopia została przywrócona.</string>
     <string name="account_drive_restore_failed_message">Nie udało się przywrócić kopii.</string>
 </resources>

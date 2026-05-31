@@ -274,6 +274,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="account_drive_restore_dialog_message">A backup from %1$s was found. It contains %2$d medications and %3$d alarms. Restoring it will replace local medications and alarms, and apply saved settings.</string>
     <string name="account_drive_restore_dialog_confirm">Restore backup</string>
     <string name="account_drive_restore_dialog_skip">Not now</string>
+    <string name="account_drive_restore_no_backup_message">No previous backup was found for this Google account.</string>
     <string name="account_drive_restore_success_message">Backup restored.</string>
     <string name="account_drive_restore_failed_message">Could not restore backup.</string>
 </resources>
