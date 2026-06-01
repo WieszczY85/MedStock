@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import org.gradle.api.GradleException
 
 plugins {
     alias(libs.plugins.android.application)
@@ -7,9 +8,29 @@ plugins {
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
+val releaseSigningKeys = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
 
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
+val missingReleaseSigningKeys = releaseSigningKeys.filter { key ->
+    keystoreProperties.getProperty(key).isNullOrBlank()
+}
+val hasReleaseSigningConfig = keystorePropertiesFile.exists() && missingReleaseSigningKeys.isEmpty()
+
+fun validateReleaseSigningConfig() {
+    if (!keystorePropertiesFile.exists()) {
+        throw GradleException(
+            "Release signing requires keystore.properties. Copy keystore.properties.example, " +
+                "fill it outside version control, and provide the upload keystore."
+        )
+    }
+    if (missingReleaseSigningKeys.isNotEmpty()) {
+        throw GradleException(
+            "Release signing is missing keystore.properties keys: ${missingReleaseSigningKeys.joinToString()}"
+        )
+    }
 }
 
 android {
@@ -22,11 +43,11 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystorePropertiesFile.exists()) {
-                storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
+            if (hasReleaseSigningConfig) {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
             }
         }
     }
@@ -36,21 +57,23 @@ android {
         minSdk = 31
         targetSdk = 36
         versionCode = 1
-        versionName = "0.7.0-R0.1-SNAPSHOT"
+        versionName = "0.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            if (hasReleaseSigningConfig) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
@@ -81,4 +104,19 @@ dependencies {
     testImplementation(libs.androidx.core)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+}
+
+val releaseSigningTaskNames = setOf(
+    "preReleaseBuild",
+    "assembleRelease",
+    "bundleRelease",
+    "packageRelease",
+    "packageReleaseBundle",
+    "signReleaseBundle",
+)
+
+tasks.configureEach {
+    if (name in releaseSigningTaskNames) {
+        doFirst { validateReleaseSigningConfig() }
+    }
 }

@@ -169,6 +169,16 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
     <string name="settings_export_database_success">Die Datenbank wurde exportiert.</string>
     <string name="settings_export_database_missing">Die lokale Datenbankdatei existiert nicht.</string>
     <string name="settings_export_database_failed">Die Datenbank konnte nicht exportiert werden.</string>
+    <string name="settings_privacy_title">Datenschutz und Datensicherheit</string>
+    <string name="settings_privacy_summary">MedStock ist ein Haushalts-Inventarmanager für Arzneimittel. Die App diagnostiziert nicht, behandelt nicht, empfiehlt keine Arzneimittel und legt keine Dosierung fest.</string>
+    <string name="settings_privacy_local_data_title">Auf diesem Gerät gespeicherte Daten</string>
+    <string name="settings_privacy_local_data_body">Die App speichert die von dir eingegebenen Arzneimittel, Angaben zu Packung und Stärke, Wirkstoff, Lagerbestand, von dir eingegebene Dosierung, Ablaufdaten, Schwellenwerte für Bestandsalarme, Erinnerungen, Dosisereignisse, App-Einstellungen sowie Katalogdatenbanken zum Abgleich mit öffentlichen Arzneimittelregistern.</string>
+    <string name="settings_privacy_cloud_backup_title">Google-Konto und Drive-Sicherung</string>
+    <string name="settings_privacy_cloud_backup_body">Wenn du ein Google-Konto verbindest, speichert MedStock die ausgewählte E-Mail-Adresse lokal und kann das Konto-Avatar laden. Wenn du die Google-Drive-Sicherung aktivierst, lädt die App eine JSON-Sicherung mit deinen Produkten, der von dir eingegebenen Dosierung, Erinnerungen, Bestandsdaten, Alarmeinstellungen und Einstellungen in den appDataFolder-Bereich deines Google Drive hoch. Die Drive-Sicherung ist optional und kann im Konto-Bildschirm deaktiviert werden.</string>
+    <string name="settings_privacy_medical_disclaimer_title">Medizinischer Hinweis</string>
+    <string name="settings_privacy_medical_disclaimer_body">MedStock ist kein Medizinprodukt. Die App gibt keine medizinischen Ratschläge, prüft nicht, ob deine Dosierung korrekt ist, und ersetzt keine Beratung durch Ärztinnen, Ärzte oder Apotheker. Du bist für die eingegebenen Daten und für die Befolgung professioneller medizinischer Anweisungen verantwortlich.</string>
+    <string name="settings_privacy_controls_title">Deine Kontrolle</string>
+    <string name="settings_privacy_controls_body">Du kannst Arzneimittel und Erinnerungen in der App bearbeiten oder löschen, die Drive-Sicherung deaktivieren, das Google-Konto trennen, die lokale Datenbank exportieren, App-Daten in den Android-Einstellungen löschen und MedStock-Sicherungsdaten aus Google Drive entfernen. MedStock verwendet keine Werbung, keine Analytik und verkauft keine personenbezogenen Daten.</string>
     <string name="reminder_summary">Aktive Erinnerungen: %1$d / %2$d</string>
     <string name="reminder_empty">Du hast noch keine Arzneimittel-Erinnerungen. Verwende +, um einen Wecker-ähnlichen Alarm hinzuzufügen.</string>
     <string name="reminder_enabled_content_description">Erinnerung aktivieren</string>
@@ -258,7 +268,7 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
     <string name="account_disconnect_dialog_message">Das Drive-Backup wird deaktiviert, und lokale Verbindungsdaten des Kontos werden gelöscht.</string>
     <string name="account_disconnect_dialog_confirm">Trennen</string>
     <string name="account_drive_title">Backup in Google Drive</string>
-    <string name="account_drive_summary">Wenn du das Backup aktivierst, kannst du Arzneimittel, Alarme und App-Einstellungen auf Geräten wiederherstellen, auf denen du dich in MedStock anmeldest.</string>
+    <string name="account_drive_summary">Die optionale Google-Drive-Sicherung speichert eine JSON-Kopie deiner Arzneimittel, der von dir eingegebenen Dosierung, Bestände, Erinnerungen, Alarmeinstellungen und App-Einstellungen im appDataFolder-Bereich deines Google Drive, damit du sie nach der Anmeldung in MedStock wiederherstellen kannst.</string>
     <string name="account_drive_switch_label">Kopie der App-Daten in Google Drive speichern</string>
     <string name="account_drive_backup_now_button">Daten jetzt sichern</string>
     <string name="account_drive_requires_google">Verbinde zuerst ein Google-Konto.</string>
@@ -267,7 +277,7 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
     <string name="account_drive_snapshot_failed_message">Die Kopie der App-Daten konnte nicht vorbereitet werden.</string>
     <string name="account_drive_snapshot_uploaded_message">Die Sicherung wurde in Google Drive hochgeladen.</string>
     <string name="account_drive_status_connect_first">Das Backup in Google Drive ist nach dem Verbinden eines Google-Kontos verfügbar.</string>
-    <string name="account_drive_status_enabled">Das Backup in Google Drive ist aktiviert. Arzneimittel-, Alarm- und Einstellungsdaten werden zur Synchronisierung vorbereitet.</string>
+    <string name="account_drive_status_enabled">Die Google-Drive-Sicherung ist aktiviert. Arzneimitteldaten, von dir eingegebene Dosierung, Bestände, Erinnerungen, Alarmeinstellungen und App-Einstellungen werden in den appDataFolder-Bereich deines Google Drive hochgeladen.</string>
     <string name="account_drive_status_enabled_with_date">Das Backup in Google Drive ist aktiviert. \nLetzte Datensicherung: %1$s.</string>
     <string name="account_drive_status_disabled">Das Backup in Google Drive ist deaktiviert.</string>
     <string name="account_drive_restore_dialog_title">Gefundene Sicherung wiederherstellen?</string>

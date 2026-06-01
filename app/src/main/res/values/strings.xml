@@ -170,6 +170,16 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="settings_export_database_success">Database exported successfully.</string>
     <string name="settings_export_database_missing">Local database file does not exist.</string>
     <string name="settings_export_database_failed">Failed to export database.</string>
+    <string name="settings_privacy_title">Privacy and Data safety</string>
+    <string name="settings_privacy_summary">MedStock is a home inventory manager for medicinal products. It does not diagnose, treat, recommend medicines, or set dosage.</string>
+    <string name="settings_privacy_local_data_title">Data stored on this device</string>
+    <string name="settings_privacy_local_data_body">The app stores the medicinal products you enter, package/strength details, active substance, stock amount, user-entered dosage, expiry dates, stock alert thresholds, reminders, dose events, app preferences, and catalog databases used to match public medicine registry data.</string>
+    <string name="settings_privacy_cloud_backup_title">Google account and Drive backup</string>
+    <string name="settings_privacy_cloud_backup_body">If you connect a Google account, MedStock stores the selected email locally and may fetch the account avatar. If you enable Google Drive backup, the app uploads a JSON backup with your products, user-entered dosage, reminders, stock data, alert settings, and preferences to the appDataFolder area of your Google Drive. Drive backup is optional and can be disabled from the Account screen.</string>
+    <string name="settings_privacy_medical_disclaimer_title">Medical disclaimer</string>
+    <string name="settings_privacy_medical_disclaimer_body">MedStock is not a medical device. It does not provide medical advice, verify whether your dosage is correct, or replace advice from a doctor or pharmacist. You are responsible for the data you enter and for following professional medical instructions.</string>
+    <string name="settings_privacy_controls_title">Your controls</string>
+    <string name="settings_privacy_controls_body">You can edit or delete medicines and reminders in the app, disable Drive backup, disconnect the Google account, export the local database, clear app data in Android settings, and remove MedStock backup data from Google Drive. MedStock does not use advertising, analytics, or sell personal data.</string>
     <string name="reminder_summary">Active reminders: %1$d / %2$d</string>
     <string name="reminder_empty">No medicine reminders yet. Use + to add an alarm-style reminder.</string>
     <string name="reminder_enabled_content_description">Enable reminder</string>
@@ -259,7 +269,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="account_disconnect_dialog_message">Drive backup will be disabled and local account connection data will be removed.</string>
     <string name="account_disconnect_dialog_confirm">Disconnect</string>
     <string name="account_drive_title">Google Drive backup</string>
-    <string name="account_drive_summary">By enabling backup, your medications, reminders, and app preferences can be restored on devices where you sign in to MedStock.</string>
+    <string name="account_drive_summary">Optional Google Drive backup stores a JSON copy of your medicinal products, user-entered dosage, stock levels, reminders, alert settings, and app preferences in your Google Drive appDataFolder so you can restore them after signing in to MedStock.</string>
     <string name="account_drive_switch_label">Save app data backup in Google Drive</string>
     <string name="account_drive_backup_now_button">Create data backup now</string>
     <string name="account_drive_requires_google">Connect a Google account first.</string>
@@ -268,7 +278,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="account_drive_snapshot_uploaded_message">Backup uploaded to Google Drive.</string>
     <string name="account_drive_snapshot_failed_message">Could not upload app data backup to Google Drive.</string>
     <string name="account_drive_status_connect_first">Google Drive backup is available after connecting a Google account.</string>
-    <string name="account_drive_status_enabled">Google Drive backup is enabled. Medication, reminder, and settings data will be uploaded directly to Google Drive.</string>
+    <string name="account_drive_status_enabled">Google Drive backup is enabled. Medicinal product records, user-entered dosage, stock levels, reminders, alert settings, and app preferences will be uploaded to your Google Drive appDataFolder.</string>
     <string name="account_drive_status_enabled_with_date">Google Drive backup is enabled. \nLast data backup: %1$s.</string>
     <string name="account_drive_status_disabled">Google Drive backup is disabled.</string>
     <string name="account_drive_restore_dialog_title">Restore detected backup?</string>

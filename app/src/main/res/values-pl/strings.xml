@@ -170,6 +170,16 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="settings_export_database_success">Baza danych została wyeksportowana.</string>
     <string name="settings_export_database_missing">Lokalny plik bazy danych nie istnieje.</string>
     <string name="settings_export_database_failed">Nie udało się wyeksportować bazy danych.</string>
+    <string name="settings_privacy_title">Prywatność i Data safety</string>
+    <string name="settings_privacy_summary">MedStock jest menedżerem domowych zasobów produktów leczniczych. Nie diagnozuje, nie leczy, nie rekomenduje leków i nie ustala dawkowania.</string>
+    <string name="settings_privacy_local_data_title">Dane przechowywane na tym urządzeniu</string>
+    <string name="settings_privacy_local_data_body">Aplikacja zapisuje wpisane przez Ciebie produkty lecznicze, informacje o opakowaniu i mocy, substancję czynną, stan magazynowy, dawkowanie wpisane przez użytkownika, terminy ważności, progi alertów zapasów, przypomnienia, zdarzenia dawek, preferencje aplikacji oraz bazy katalogów używane do dopasowania danych z publicznych rejestrów leków.</string>
+    <string name="settings_privacy_cloud_backup_title">Konto Google i kopia w Drive</string>
+    <string name="settings_privacy_cloud_backup_body">Jeśli połączysz konto Google, MedStock zapisuje lokalnie wybrany adres email i może pobrać avatar konta. Jeśli włączysz kopię w Google Drive, aplikacja wysyła kopię JSON z produktami, dawkowaniem wpisanym przez użytkownika, przypomnieniami, stanami magazynowymi, ustawieniami alertów i preferencjami do obszaru appDataFolder na Twoim Google Drive. Kopia w Drive jest opcjonalna i możesz ją wyłączyć na ekranie Konto.</string>
+    <string name="settings_privacy_medical_disclaimer_title">Zastrzeżenie medyczne</string>
+    <string name="settings_privacy_medical_disclaimer_body">MedStock nie jest wyrobem medycznym. Nie udziela porad medycznych, nie weryfikuje poprawności dawkowania i nie zastępuje porady lekarza ani farmaceuty. Odpowiadasz za wpisane dane oraz za stosowanie się do zaleceń specjalisty.</string>
+    <string name="settings_privacy_controls_title">Twoja kontrola</string>
+    <string name="settings_privacy_controls_body">Możesz edytować lub usuwać leki i przypomnienia w aplikacji, wyłączyć kopię w Drive, odłączyć konto Google, wyeksportować lokalną bazę, wyczyścić dane aplikacji w ustawieniach Androida oraz usunąć dane kopii MedStock z Google Drive. MedStock nie używa reklam, analityki ani nie sprzedaje danych osobowych.</string>
     <string name="reminder_summary">Aktywne przypomnienia: %1$d / %2$d</string>
     <string name="reminder_empty">Nie masz jeszcze przypomnień o lekach. Użyj +, aby dodać alarm w stylu budzika.</string>
     <string name="reminder_enabled_content_description">Włącz przypomnienie</string>
@@ -259,7 +269,7 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="account_disconnect_dialog_message">Kopia w Drive zostanie wyłączona, a lokalne dane połączenia konta zostaną usunięte.</string>
     <string name="account_disconnect_dialog_confirm">Odłącz</string>
     <string name="account_drive_title">Kopia w Google Drive</string>
-    <string name="account_drive_summary">Włączając kopię zapasową, możesz przywrócić leki, alarmy i preferencje aplikacji na urządzeniach, na których zalogujesz się w MedStock.</string>
+    <string name="account_drive_summary">Opcjonalna kopia w Google Drive zapisuje kopię JSON Twoich produktów leczniczych, dawkowania wpisanego przez użytkownika, stanów magazynowych, przypomnień, ustawień alertów i preferencji aplikacji w obszarze appDataFolder na Twoim Google Drive, aby można było je przywrócić po zalogowaniu w MedStock.</string>
     <string name="account_drive_switch_label">Zapisuj kopię danych aplikacji w Google Drive</string>
     <string name="account_drive_backup_now_button">Utwórz kopię danych teraz</string>
     <string name="account_drive_requires_google">Najpierw połącz konto Google.</string>
@@ -268,7 +278,7 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="account_drive_snapshot_uploaded_message">Kopia została wysłana na Google Drive.</string>
     <string name="account_drive_snapshot_failed_message">Nie udało się wysłać kopii danych aplikacji na Google Drive.</string>
     <string name="account_drive_status_connect_first">Kopia w Google Drive będzie dostępna po połączeniu konta Google.</string>
-    <string name="account_drive_status_enabled">Kopia w Google Drive jest włączona. Dane leków, alarmów i ustawień będą wysyłane bezpośrednio na Google Drive.</string>
+    <string name="account_drive_status_enabled">Kopia w Google Drive jest włączona. Dane produktów leczniczych, dawkowanie wpisane przez użytkownika, stany magazynowe, przypomnienia, ustawienia alertów i preferencje aplikacji będą wysyłane do obszaru appDataFolder na Twoim Google Drive.</string>
     <string name="account_drive_status_enabled_with_date">Kopia w Google Drive jest włączona. \nOstatnia kopia danych: %1$s.</string>
     <string name="account_drive_status_disabled">Kopia w Google Drive jest wyłączona.</string>
     <string name="account_drive_restore_dialog_title">Przywrócić wykrytą kopię?</string>
