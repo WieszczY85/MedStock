@@ -24,67 +24,6 @@
                 android:orientation="vertical"
                 android:padding="@dimen/space_4">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_info_title"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/settings_app_name_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_2"
-                    android:textColor="@color/text_secondary"
-                    tools:text="MedStock" />
-
-                <TextView
-                    android:id="@+id/settings_author_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_1"
-                    android:textColor="@color/text_secondary"
-                    tools:text="by WieszczY" />
-
-                <TextView
-                    android:id="@+id/settings_version_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_1"
-                    android:textColor="@color/text_secondary"
-                    tools:text="Wersja: 1.0" />
-
-                <TextView
-                    android:id="@+id/settings_last_update_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_1"
-                    android:textColor="@color/text_secondary"
-                    tools:text="Ostatnia aktualizacja bazy: 2026-05-26 12:45:00" />
-
-                <TextView
-                    android:id="@+id/settings_db_size_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_1"
-                    android:textColor="@color/text_secondary"
-                    tools:text="Rozmiar bazy: 18 MB" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.MedStock.Card.Primary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_3">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/space_4">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -151,6 +90,67 @@
                         android:text="@string/settings_theme_off"
                         android:textAllCaps="false" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MedStock.Card.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_3">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/space_4">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_info_title"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/settings_app_name_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:textColor="@color/text_secondary"
+                    tools:text="MedStock" />
+
+                <TextView
+                    android:id="@+id/settings_author_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_1"
+                    android:textColor="@color/text_secondary"
+                    tools:text="by WieszczY" />
+
+                <TextView
+                    android:id="@+id/settings_version_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_1"
+                    android:textColor="@color/text_secondary"
+                    tools:text="Wersja: 1.0" />
+
+                <TextView
+                    android:id="@+id/settings_last_update_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_1"
+                    android:textColor="@color/text_secondary"
+                    tools:text="Ostatnia aktualizacja bazy: 2026-05-26 12:45:00" />
+
+                <TextView
+                    android:id="@+id/settings_db_size_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_1"
+                    android:textColor="@color/text_secondary"
+                    tools:text="Rozmiar bazy: 18 MB" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

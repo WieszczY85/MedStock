@@ -79,12 +79,3 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         return context.getString(R.string.settings_database_size_value, formatter, modifiedAt)
     }
 }
-
-data class SettingsUiState(
-    val appName: String,
-    val author: String,
-    val version: String,
-    val lastDatabaseUpdate: String,
-    val databaseSize: String,
-    val themeMode: AppThemeMode
-)
