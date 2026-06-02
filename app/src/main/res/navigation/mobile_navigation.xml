@@ -32,14 +32,14 @@
     <fragment
         android:id="@+id/nav_alerty_lista_screen"
         android:name="pl.syntaxdevteam.medstock.ui.alerty.alerts.AlertsListFragment"
-        android:label="@string/menu_alerty"
+        android:label="@string/menu_alerty_lista"
         tools:layout="@layout/fragment_alerts_list" />
 
 
     <fragment
         android:id="@+id/nav_alerty_przypomnienia_screen"
         android:name="pl.syntaxdevteam.medstock.ui.alerty.reminders.RemindersListFragment"
-        android:label="@string/menu_alerty"
+        android:label="@string/menu_alarm"
         tools:layout="@layout/fragment_reminders_list" />
 
     <fragment
@@ -66,4 +66,10 @@
         android:name="pl.syntaxdevteam.medstock.ui.settings.SettingsFragment"
         android:label="@string/menu_settings"
         tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/nav_help"
+        android:name="pl.syntaxdevteam.medstock.ui.help.HelpFragment"
+        android:label="@string/menu_help"
+        tools:layout="@layout/fragment_help" />
 </navigation>

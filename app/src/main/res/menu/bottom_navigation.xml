@@ -13,9 +13,9 @@
             android:icon="@drawable/ic_database_black_24dp"
             android:title="@string/menu_baza_nav" />
         <item
-            android:id="@+id/nav_alerty_lista_screen"
-            android:icon="@drawable/ic_notifications_black_24dp"
-            android:title="@string/menu_alerty_nav" />
+            android:id="@+id/nav_alerty_przypomnienia_screen"
+            android:icon="@drawable/ic_alarm_black_24dp"
+            android:title="@string/menu_alarm" />
         <item
             android:id="@+id/nav_account"
             android:icon="@drawable/ic_account_circle_black_24dp"

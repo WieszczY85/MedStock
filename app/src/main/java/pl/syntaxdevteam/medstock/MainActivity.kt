@@ -8,6 +8,7 @@ import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -23,11 +24,17 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import pl.syntaxdevteam.medstock.core.barcode.MedicationPackageScanner
 import pl.syntaxdevteam.medstock.core.download.StartupIngestionRunner
+import pl.syntaxdevteam.medstock.core.download.UserMedicationRepository
+import pl.syntaxdevteam.medstock.core.stock.MedicationStockCalculator
+import pl.syntaxdevteam.medstock.core.stock.MedicationStockStatus
+import pl.syntaxdevteam.medstock.core.stock.StockAlertDismissalStore
 import pl.syntaxdevteam.medstock.databinding.ActivityMainBinding
 import pl.syntaxdevteam.medstock.ui.alerty.reminders.RemindersListFragment
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment
@@ -43,6 +50,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private var pendingScanNavigation: PendingScanNavigation? = null
+    private var alertsBadgeItem: MenuItem? = null
+    private var alertsBadgeRefreshJob: Job? = null
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -117,12 +126,12 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_alerty_lista_screen -> {
-                    titleToolbar.title = getString(R.string.menu_alerty)
-                    titleToolbar.subtitle = getString(R.string.menu_alerty_lista)
+                    titleToolbar.title = getString(R.string.menu_alerty_lista)
+                    titleToolbar.subtitle = null
                 }
 
                 R.id.nav_alerty_przypomnienia_screen -> {
-                    titleToolbar.title = getString(R.string.menu_alerty)
+                    titleToolbar.title = getString(R.string.menu_alarm)
                     titleToolbar.subtitle = getString(R.string.menu_alerty_przypomnienia)
                     binding.appBarMain.fab?.setImageResource(android.R.drawable.ic_input_add)
                     binding.appBarMain.fab?.contentDescription = getString(R.string.fab_add_reminder_content_description)
@@ -149,7 +158,13 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.nav_reminder_editor -> {
                     titleToolbar.title = getString(R.string.reminder_editor_title)
-                    titleToolbar.subtitle = getString(R.string.menu_alerty_przypomnienia)
+                    titleToolbar.subtitle = getString(R.string.menu_alarm)
+                    binding.appBarMain.fab?.hide()
+                }
+
+                R.id.nav_help -> {
+                    titleToolbar.title = getString(R.string.menu_help)
+                    titleToolbar.subtitle = null
                     binding.appBarMain.fab?.hide()
                 }
 
@@ -166,7 +181,8 @@ class MainActivity : AppCompatActivity() {
                 if (destination.id != R.id.nav_medication_editor &&
                 destination.id != R.id.nav_reminder_editor &&
                 destination.id != R.id.nav_baza_leki_detail_screen &&
-                destination.id != R.id.nav_account
+                destination.id != R.id.nav_account &&
+                destination.id != R.id.nav_help
             ) {
                 binding.appBarMain.fab?.show()
             }
@@ -192,11 +208,6 @@ class MainActivity : AppCompatActivity() {
                         false
                     }
 
-                    R.id.nav_alerty_lista_screen -> {
-                        showBottomSubMenu(it, R.menu.alerty_submenu, navController)
-                        false
-                    }
-
                     else -> {
                         navigateTopLevel(navController, item.itemId)
                         true
@@ -210,6 +221,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPostResume() {
         super.onPostResume()
         executePendingScanNavigation()
+        refreshAlertsBadge()
     }
 
     private fun requestStartupNotificationPermissionIfNeeded() {
@@ -228,6 +240,7 @@ class MainActivity : AppCompatActivity() {
         R.id.nav_alerty_przypomnienia_screen,
         R.id.nav_account,
         R.id.nav_settings,
+        R.id.nav_help,
     )
 
     private fun showMedicationAddSubMenu(anchor: View, navController: NavController) {
@@ -332,11 +345,11 @@ class MainActivity : AppCompatActivity() {
         val drawerCheckedId = when (destinationId) {
             R.id.nav_baza_leki_screen, R.id.nav_baza_leki_detail_screen -> R.id.nav_baza_leki_screen
             R.id.nav_baza_apteki_screen -> R.id.nav_baza_apteki_screen
-            R.id.nav_alerty_lista_screen -> R.id.nav_alerty_lista_screen
             R.id.nav_alerty_przypomnienia_screen -> R.id.nav_alerty_przypomnienia_screen
             R.id.nav_medication_list -> R.id.nav_medication_list
             R.id.nav_account -> R.id.nav_account
             R.id.nav_settings -> R.id.nav_settings
+            R.id.nav_help -> R.id.nav_help
             else -> null
         }
 
@@ -347,7 +360,7 @@ class MainActivity : AppCompatActivity() {
 
         val bottomCheckedId = when (destinationId) {
             R.id.nav_baza_leki_screen, R.id.nav_baza_leki_detail_screen, R.id.nav_baza_apteki_screen -> R.id.nav_baza_leki_screen
-            R.id.nav_alerty_lista_screen, R.id.nav_alerty_przypomnienia_screen -> R.id.nav_alerty_lista_screen
+            R.id.nav_alerty_przypomnienia_screen -> R.id.nav_alerty_przypomnienia_screen
             R.id.nav_medication_list -> R.id.nav_medication_list
             R.id.nav_account -> R.id.nav_account
             else -> null
@@ -445,18 +458,60 @@ class MainActivity : AppCompatActivity() {
         val navView: NavigationView? = findViewById(R.id.nav_view)
         if (navView == null) {
             menuInflater.inflate(R.menu.overflow, menu)
+            alertsBadgeItem = menu.findItem(R.id.nav_alerty_lista_screen)
+            alertsBadgeItem?.actionView?.setOnClickListener { openAlertsList() }
+            refreshAlertsBadge()
         }
         return result
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.nav_alerty_lista_screen -> {
+                openAlertsList()
+                return true
+            }
             R.id.nav_settings -> {
                 val navController = findNavController(R.id.nav_host_fragment_content_main)
                 navController.navigate(R.id.nav_settings)
+                return true
+            }
+            R.id.nav_help -> {
+                val navController = findNavController(R.id.nav_host_fragment_content_main)
+                navController.navigate(R.id.nav_help)
+                return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun openAlertsList() {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        navigateTopLevel(navController, R.id.nav_alerty_lista_screen)
+    }
+
+    private fun refreshAlertsBadge() {
+        val actionView = alertsBadgeItem?.actionView ?: return
+        alertsBadgeRefreshJob?.cancel()
+        alertsBadgeRefreshJob = lifecycleScope.launch {
+            val count = withContext(Dispatchers.IO) { calculateVisibleStockAlertCount() }
+            val badge = actionView.findViewById<TextView>(R.id.action_alerts_badge)
+            badge?.visibility = if (count > 0) View.VISIBLE else View.GONE
+            badge?.text = when {
+                count <= 0 -> ""
+                count > MAX_ALERT_BADGE_COUNT -> getString(R.string.alert_badge_overflow)
+                else -> count.toString()
+            }
+        }
+    }
+
+    private fun calculateVisibleStockAlertCount(): Int {
+        val medicationRepository = UserMedicationRepository(applicationContext)
+        val dismissalStore = StockAlertDismissalStore(applicationContext)
+        return medicationRepository.getAll().count { medication ->
+            val stockInfo = MedicationStockCalculator.calculate(medication)
+            stockInfo.status != MedicationStockStatus.OK && !dismissalStore.isDismissed(medication.id, stockInfo.status)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -469,6 +524,7 @@ class MainActivity : AppCompatActivity() {
         private const val PRELOADER_LONG_RUNNING_NOTICE_DELAY_MS = 2_500L
         private const val PRELOADER_SYNTHETIC_PROGRESS_INTERVAL_MS = 900L
         private const val PRELOADER_SYNTHETIC_PROGRESS_LIMIT = 95
+        private const val MAX_ALERT_BADGE_COUNT = 99
     }
 
 }

@@ -17,6 +17,8 @@
     <string name="menu_alerty">Warnungen</string>
     <string name="menu_account">Konto</string>
     <string name="menu_settings">Einstellungen</string>
+    <string name="menu_alarm">Alarm</string>
+    <string name="menu_help">Hilfe</string>
     <string name="menu_baza_leki">Arzneimittelkatalog</string>
     <string name="menu_baza_scan_find">Scannen und Arzneimittel finden</string>
     <string name="menu_baza_apteki">Apothekenkatalog</string>
@@ -34,6 +36,8 @@
     <string name="cta_primary">Arzneimittel hinzufügen</string>
     <string name="cta_support">Später erinnern</string>
     <string name="cta_danger">Dosis überspringen</string>
+
+    <string name="alert_badge_overflow">99+</string>
 
     <string name="fab_content_description">Schaltfläche zum Ausführen einer Aktion</string>
     <string name="fab_search_content_description">Arzneimittel suchen</string>
@@ -169,6 +173,8 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
     <string name="settings_export_database_success">Die Datenbank wurde exportiert.</string>
     <string name="settings_export_database_missing">Die lokale Datenbankdatei existiert nicht.</string>
     <string name="settings_export_database_failed">Die Datenbank konnte nicht exportiert werden.</string>
+    <string name="help_privacy_policy_title">Datenschutzerklärung</string>
+    <string name="help_data_safety_title">Datensicherheit</string>
     <string name="settings_privacy_title">Datenschutz und Datensicherheit</string>
     <string name="settings_privacy_summary">MedStock ist ein Haushalts-Inventarmanager für Arzneimittel. Die App diagnostiziert nicht, behandelt nicht, empfiehlt keine Arzneimittel und legt keine Dosierung fest.</string>
     <string name="settings_privacy_local_data_title">Auf diesem Gerät gespeicherte Daten</string>

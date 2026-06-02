@@ -17,6 +17,8 @@
     <string name="menu_alerty">Alerty</string>
     <string name="menu_account">Konto</string>
     <string name="menu_settings">Ustawienia</string>
+    <string name="menu_alarm">Alarm</string>
+    <string name="menu_help">Pomoc</string>
     <string name="menu_baza_leki">Katalog leków</string>
     <string name="menu_baza_scan_find">Skanuj i znajdź lek</string>
     <string name="menu_baza_apteki">Katalog aptek</string>
@@ -34,6 +36,8 @@
     <string name="cta_primary">Dodaj lek</string>
     <string name="cta_support">Przypomnij później</string>
     <string name="cta_danger">Pomiń dawkę</string>
+
+    <string name="alert_badge_overflow">99+</string>
 
     <string name="fab_content_description">Przycisk uruchamiający akcję</string>
     <string name="fab_search_content_description">Szukaj leków</string>
@@ -170,6 +174,8 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="settings_export_database_success">Baza danych została wyeksportowana.</string>
     <string name="settings_export_database_missing">Lokalny plik bazy danych nie istnieje.</string>
     <string name="settings_export_database_failed">Nie udało się wyeksportować bazy danych.</string>
+    <string name="help_privacy_policy_title">Polityka prywatności</string>
+    <string name="help_data_safety_title">Data safety</string>
     <string name="settings_privacy_title">Prywatność i Data safety</string>
     <string name="settings_privacy_summary">MedStock jest menedżerem domowych zasobów produktów leczniczych. Nie diagnozuje, nie leczy, nie rekomenduje leków i nie ustala dawkowania.</string>
     <string name="settings_privacy_local_data_title">Dane przechowywane na tym urządzeniu</string>
