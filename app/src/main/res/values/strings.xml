@@ -17,6 +17,8 @@
     <string name="menu_alerty">Alerts</string>
     <string name="menu_account">Account</string>
     <string name="menu_settings">Settings</string>
+    <string name="menu_alarm">Alarm</string>
+    <string name="menu_help">Help</string>
     <string name="menu_baza_leki">Medication catalog</string>
     <string name="menu_baza_scan_find">Scan and find medication</string>
     <string name="menu_baza_apteki">Pharmacy catalog</string>
@@ -34,6 +36,8 @@
     <string name="cta_primary">Add medication</string>
     <string name="cta_support">Remind later</string>
     <string name="cta_danger">Skip dose</string>
+
+    <string name="alert_badge_overflow">99+</string>
 
     <string name="fab_content_description">Represents a view to invoke an action</string>
     <string name="fab_search_content_description">Search medications</string>
@@ -170,6 +174,8 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="settings_export_database_success">Database exported successfully.</string>
     <string name="settings_export_database_missing">Local database file does not exist.</string>
     <string name="settings_export_database_failed">Failed to export database.</string>
+    <string name="help_privacy_policy_title">Privacy policy</string>
+    <string name="help_data_safety_title">Data safety</string>
     <string name="settings_privacy_title">Privacy and Data safety</string>
     <string name="settings_privacy_summary">MedStock is a home inventory manager for medicinal products. It does not diagnose, treat, recommend medicines, or set dosage.</string>
     <string name="settings_privacy_local_data_title">Data stored on this device</string>

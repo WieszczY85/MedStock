@@ -2,8 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/nav_alerty_lista_screen"
+        android:title="@string/menu_alerty_lista"
+        app:actionLayout="@layout/action_alerts_badge"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_settings_black_24dp"
         android:title="@string/menu_settings"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/nav_help"
+        android:icon="@drawable/ic_help_outline_black_24dp"
+        android:title="@string/menu_help"
         app:showAsAction="never" />
 </menu>
