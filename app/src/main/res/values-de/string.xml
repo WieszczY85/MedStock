@@ -192,6 +192,7 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
     <string name="reminder_permissions_message">Erteile Alarm- und Benachrichtigungsberechtigungen, damit Arzneimittel-Erinnerungen pünktlich ausgelöst werden.</string>
     <string name="reminder_permissions_button">Berechtigungen öffnen</string>
     <string name="reminder_notification_permission_message">Android benötigt die Zustimmung zu Benachrichtigungen, bevor MedStock Arzneimittel-Alarme anzeigen kann.</string>
+    <string name="reminder_exact_alarm_permission_message">Erlaube genaue Alarme, damit MedStock Arzneimittel-Erinnerungen zur gewählten Uhrzeit auslösen kann.</string>
     <string name="reminder_full_screen_permission_message">Erlaube Vollbildalarme, damit MedStock den Klingelbildschirm öffnen kann, wenn das Telefon gesperrt ist.</string>
     <string name="fab_add_reminder_content_description">Arzneimittel-Erinnerung hinzufügen</string>
     <string name="reminder_editor_title">Arzneimittel-Alarm</string>

@@ -52,11 +52,40 @@ class ReminderScheduler(private val context: Context) {
     )
 
     private fun scheduleAlarm(triggerAtMillis: Long, operation: PendingIntent, reminderId: Long) {
-        alarmManager.setAlarmClock(
-            AlarmManager.AlarmClockInfo(triggerAtMillis, ringingPendingIntent(reminderId)),
-            operation
-        )
-        Log.i(TAG, "Scheduled alarm-clock reminder id=$reminderId triggerAtMillis=$triggerAtMillis")
+        if (!canScheduleExactAlarms()) {
+            scheduleInexactAlarm(triggerAtMillis, operation, reminderId)
+            return
+        }
+
+        try {
+            alarmManager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(triggerAtMillis, ringingPendingIntent(reminderId)),
+                operation
+            )
+            Log.i(TAG, "Scheduled alarm-clock reminder id=$reminderId triggerAtMillis=$triggerAtMillis")
+        } catch (exception: SecurityException) {
+            Log.w(TAG, "Exact alarm permission was revoked while scheduling reminder id=$reminderId", exception)
+            scheduleInexactAlarm(triggerAtMillis, operation, reminderId)
+        }
+    }
+
+    private fun scheduleInexactAlarm(triggerAtMillis: Long, operation: PendingIntent, reminderId: Long) {
+        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation)
+        Log.w(TAG, "Scheduled inexact reminder id=$reminderId triggerAtMillis=$triggerAtMillis because exact alarms are not allowed")
+    }
+
+    fun canScheduleExactAlarms(): Boolean {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+    }
+
+    fun exactAlarmSettingsIntent(): Intent? {
+        return if (!canScheduleExactAlarms()) {
+            Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                data = Uri.fromParts("package", context.packageName, null)
+            }
+        } else {
+            null
+        }
     }
 
     private fun ringingPendingIntent(reminderId: Long): PendingIntent = PendingIntent.getActivity(

@@ -193,6 +193,7 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="reminder_permissions_message">Nadaj uprawnienia alarmów i powiadomień, aby przypomnienia o lekach uruchamiały się punktualnie.</string>
     <string name="reminder_permissions_button">Otwórz uprawnienia</string>
     <string name="reminder_notification_permission_message">Android wymaga zgody na powiadomienia, zanim MedStock pokaże alarmy leków.</string>
+    <string name="reminder_exact_alarm_permission_message">Zezwól na dokładne alarmy, aby MedStock uruchamiał przypomnienia o lekach o wybranej godzinie.</string>
     <string name="reminder_full_screen_permission_message">Zezwól na alarmy pełnoekranowe, aby MedStock mógł otworzyć ekran dzwonienia, gdy telefon jest zablokowany.</string>
     <string name="fab_add_reminder_content_description">Dodaj przypomnienie o leku</string>
     <string name="reminder_editor_title">Alarm leku</string>

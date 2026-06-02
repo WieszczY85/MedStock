@@ -193,6 +193,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="reminder_permissions_message">Grant alarm and notification permissions so medicine reminders can ring on time.</string>
     <string name="reminder_permissions_button">Open permissions</string>
     <string name="reminder_notification_permission_message">Android requires notification permission before MedStock can show medicine alarms.</string>
+    <string name="reminder_exact_alarm_permission_message">Allow exact alarms so MedStock can ring medicine reminders at the selected time.</string>
     <string name="reminder_full_screen_permission_message">Allow full-screen alarms so MedStock can open the ringing screen when the phone is locked.</string>
     <string name="fab_add_reminder_content_description">Add medicine reminder</string>
     <string name="reminder_editor_title">Medicine alarm</string>
