@@ -17,7 +17,7 @@
     <string name="menu_alerty">Alerty</string>
     <string name="menu_account">Konto</string>
     <string name="menu_settings">Ustawienia</string>
-    <string name="menu_alarm">Alarm</string>
+    <string name="menu_alarm">Alarmy</string>
     <string name="menu_help">Pomoc</string>
     <string name="menu_baza_leki">Katalog leków</string>
     <string name="menu_baza_scan_find">Skanuj i znajdź lek</string>
