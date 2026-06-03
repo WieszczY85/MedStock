@@ -2,28 +2,37 @@ package pl.syntaxdevteam.medstock.core.i18n
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 
 object LocaleManager {
 
-    private val supportedLanguageTags = setOf("en", "pl", "de")
+    private const val PREFERENCES_NAME = "app_locale_preferences"
+    private const val KEY_LANGUAGE_MODE = "language_mode"
 
-    fun applySystemLocale(context: Context) {
-        val systemLocales = ConfigurationCompat.getLocales(context.resources.configuration)
-        val firstSystemLocale = systemLocales[0]
+    fun getLanguageMode(context: Context): AppLanguageMode {
+        val preferences = context.applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        return AppLanguageMode.fromPreferenceValue(preferences.getString(KEY_LANGUAGE_MODE, null))
+    }
 
-        val resolvedLanguageTag = firstSystemLocale
-            ?.toLanguageTag()
-            ?.takeIf { languageTag ->
-                val languageCode = languageTag.substringBefore('-')
-                supportedLanguageTags.contains(languageCode)
-            }
+    fun applyStoredLanguage(context: Context) {
+        applyLanguageMode(getLanguageMode(context))
+    }
 
-        val appLocales = resolvedLanguageTag
+    fun setLanguageMode(context: Context, languageMode: AppLanguageMode) {
+        context.applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_LANGUAGE_MODE, languageMode.preferenceValue)
+            .apply()
+        applyLanguageMode(languageMode)
+    }
+
+    private fun applyLanguageMode(languageMode: AppLanguageMode) {
+        val appLocales = languageMode.languageTag
             ?.let { LocaleListCompat.forLanguageTags(it) }
             ?: LocaleListCompat.getEmptyLocaleList()
 
-        AppCompatDelegate.setApplicationLocales(appLocales)
+        if (AppCompatDelegate.getApplicationLocales() != appLocales) {
+            AppCompatDelegate.setApplicationLocales(appLocales)
+        }
     }
 }

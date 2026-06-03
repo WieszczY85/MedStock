@@ -7,6 +7,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
 import pl.syntaxdevteam.medstock.core.download.UserMedicationRepository
+import pl.syntaxdevteam.medstock.core.i18n.AppLanguageMode
+import pl.syntaxdevteam.medstock.core.i18n.LocaleManager
 import pl.syntaxdevteam.medstock.core.reminders.MedicationReminderRepository
 import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
 import pl.syntaxdevteam.medstock.core.theme.ThemeManager
@@ -29,6 +31,7 @@ class DriveBackupSnapshotRepository(context: Context) {
             put("createdAtUtc", System.currentTimeMillis())
             put("preferences", JSONObject().apply {
                 put("themeMode", ThemeManager.getThemeMode(appContext).preferenceValue)
+                put("languageMode", LocaleManager.getLanguageMode(appContext).preferenceValue)
             })
             put("medications", JSONArray().apply {
                 medications.forEach { medication ->
@@ -179,7 +182,9 @@ class DriveBackupSnapshotRepository(context: Context) {
     private fun restorePreferences(preferences: JSONObject?) {
         preferences ?: return
         val themeMode = AppThemeMode.fromPreferenceValue(preferences.optString("themeMode"))
+        val languageMode = AppLanguageMode.fromPreferenceValue(preferences.optString("languageMode"))
         ThemeManager.setThemeMode(appContext, themeMode)
+        LocaleManager.setLanguageMode(appContext, languageMode)
     }
 
     private fun snapshotFile(): File = File(File(appContext.filesDir, BACKUP_DIRECTORY), BACKUP_FILE_NAME)
