@@ -1,6 +1,7 @@
 # MedStock_One
 Aplikacja nie ma doradzać medycznie ani samodzielnie ustalać dawkowania. Ma pomagać w ewidencji leków, kontrolowaniu stanów magazynowych, przypominać o braniu kolejnej dawki, terminów ważności oraz przypominaniu o kończących się zapasach na podstawie dawkowania wpisanego przez użytkownika.
 
+Źródła pobieranych danych:
 * RDG:
     - https://rdg.ezdrowie.gov.pl/Decision/DownloadPublicXml
 * RPL:
@@ -9,14 +10,3 @@ Aplikacja nie ma doradzać medycznie ani samodzielnie ustalać dawkowania. Ma po
 * RA:
     - https://rejestry.ezdrowie.gov.pl/api/ra/filegenerator/getxls
     - https://rejestry.ezdrowie.gov.pl/api/ra/filegenerator/getcsv
-
-> Na przyszłość:
-> Następny krok dla rozwoju i18n to jawny language_preference (np. system|pl|en) i warunek w LocaleManager, który najpierw sprawdza preferencję usera, potem dopiero system.
-## Szybkie odświeżenie APK na emulatorze
-Jeżeli emulator czasem trzyma stary stan po zmianach, użyj zadania:
-
-```bash
-./gradlew cleanRunDebug --no-daemon
-```
-
-To zadanie wykonuje kolejno `:app:clean`, `:app:assembleDebug` i `:app:installDebug`, dzięki czemu instalujesz świeżą paczkę debug na urządzeniu.
