@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pl.syntaxdevteam.medstock.R
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
+import pl.syntaxdevteam.medstock.core.i18n.AppLanguageMode
 import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
 import pl.syntaxdevteam.medstock.databinding.FragmentSettingsBinding
 import java.io.FileInputStream
@@ -46,6 +47,7 @@ class SettingsFragment : Fragment() {
             binding.settingsLastUpdateValue.text = state.lastDatabaseUpdate
             binding.settingsDbSizeValue.text = state.databaseSize
             setCheckedThemeMode(state.themeMode)
+            setCheckedLanguageMode(state.languageMode)
         }
 
         binding.settingsThemeModeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -57,6 +59,19 @@ class SettingsFragment : Fragment() {
                 else -> return@addOnButtonCheckedListener
             }
             settingsViewModel.setThemeMode(themeMode)
+        }
+
+        binding.settingsLanguageModeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val languageMode = when (checkedId) {
+                R.id.settings_language_auto_button -> AppLanguageMode.AUTO
+                R.id.settings_language_pl_button -> AppLanguageMode.POLISH
+                R.id.settings_language_en_button -> AppLanguageMode.ENGLISH
+                R.id.settings_language_de_button -> AppLanguageMode.GERMAN
+                R.id.settings_language_fr_button -> AppLanguageMode.FRENCH
+                else -> return@addOnButtonCheckedListener
+            }
+            settingsViewModel.setLanguageMode(languageMode)
         }
 
         binding.settingsForceUpdateButton.setOnClickListener {
@@ -78,6 +93,19 @@ class SettingsFragment : Fragment() {
         }
         if (binding.settingsThemeModeGroup.checkedButtonId != checkedButtonId) {
             binding.settingsThemeModeGroup.check(checkedButtonId)
+        }
+    }
+
+    private fun setCheckedLanguageMode(languageMode: AppLanguageMode) {
+        val checkedButtonId = when (languageMode) {
+            AppLanguageMode.AUTO -> R.id.settings_language_auto_button
+            AppLanguageMode.POLISH -> R.id.settings_language_pl_button
+            AppLanguageMode.ENGLISH -> R.id.settings_language_en_button
+            AppLanguageMode.GERMAN -> R.id.settings_language_de_button
+            AppLanguageMode.FRENCH -> R.id.settings_language_fr_button
+        }
+        if (binding.settingsLanguageModeGroup.checkedButtonId != checkedButtonId) {
+            binding.settingsLanguageModeGroup.check(checkedButtonId)
         }
     }
 

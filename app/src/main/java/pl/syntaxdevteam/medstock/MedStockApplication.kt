@@ -9,6 +9,6 @@ class MedStockApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         ThemeManager.applyStoredTheme(this)
-        LocaleManager.applySystemLocale(this)
+        LocaleManager.applyStoredLanguage(this)
     }
 }
