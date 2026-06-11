@@ -19,6 +19,21 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Ilość aptek: 3456 \n Ostatnia aktualizacja: 2026-05-23" />
 
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_pharmacies_in_my_city"
+        style="@style/Widget.MedStock.Button.CtaSupport"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/pharmacy_catalog_find_in_my_city"
+        app:icon="@drawable/ic_my_location_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_pharmacy_catalog_summary" />
+
     <androidx.appcompat.widget.SearchView
         android:id="@+id/search_pharmacy_catalog"
         android:layout_width="0dp"
@@ -31,7 +46,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_pharmacy_catalog_summary" />
+        app:layout_constraintTop_toBottomOf="@id/button_pharmacies_in_my_city" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_pharmacy_letters"

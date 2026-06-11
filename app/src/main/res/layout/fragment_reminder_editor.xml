@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="@string/reminder_editor_header"
             android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/medColorTextPrimary"
             android:textStyle="bold" />
 
         <com.google.android.material.card.MaterialCardView
@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/surface_card_soft"
+            app:cardBackgroundColor="?attr/medColorSurfaceCardSoft"
             app:cardCornerRadius="@dimen/radius_lg"
             app:cardElevation="@dimen/card_elevation_low">
 
@@ -43,7 +43,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/TextAppearance.Material3.DisplayLarge"
-                    android:textColor="@color/green_900"
+                    android:textColor="?attr/medColorPrimaryText"
                     android:textStyle="bold"
                     tools:text="08:30" />
 
@@ -84,7 +84,7 @@
             android:layout_marginTop="20dp"
             android:text="@string/reminder_days_header"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/medColorTextPrimary"
             android:textStyle="bold" />
 
         <com.google.android.material.chip.ChipGroup
@@ -100,7 +100,7 @@
             android:layout_marginTop="20dp"
             android:text="@string/reminder_medications_header"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/medColorTextPrimary"
             android:textStyle="bold" />
 
         <TextView
@@ -110,7 +110,7 @@
             android:layout_marginTop="8dp"
             android:text="@string/reminder_medications_empty"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            android:textColor="@color/text_secondary" />
+            android:textColor="?attr/medColorTextSecondary" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerview_reminder_medications"

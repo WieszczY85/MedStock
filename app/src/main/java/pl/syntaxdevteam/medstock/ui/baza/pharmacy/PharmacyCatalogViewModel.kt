@@ -33,12 +33,14 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
     private val pageSize = 20
     private val polishLocale = Locale.forLanguageTag("pl-PL")
     private var snapshotDate: String? = null
-        private var recordCount: Int = 0
+    private var recordCount: Int = 0
     private var offset: Int = 0
     private var selectedLetter: String = "#"
     private var searchQuery: String = ""
     private var searchMode: SearchMode = SearchMode.CITY
     @Volatile private var isPageLoading: Boolean = false
+    @Volatile private var reloadPending: Boolean = false
+    @Volatile private var pendingResolveSearchMode: Boolean = true
     private val loadedItems = mutableListOf<PharmacyCatalogEntry>()
 
     private val _uiState = MutableLiveData(
@@ -63,6 +65,13 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
         loadPage(reset = false)
     }
 
+    fun filterByCity(city: String) {
+        selectedLetter = "#"
+        searchQuery = city.trim()
+        searchMode = SearchMode.CITY
+        reloadCatalog(resolveSearchMode = false)
+    }
+
     fun onSearchQueryChanged(query: String) {
         val normalized = query.trim()
         if (normalized == searchQuery) return
@@ -71,15 +80,20 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
         reloadCatalog()
     }
 
-    private fun reloadCatalog() {
+    private fun reloadCatalog(resolveSearchMode: Boolean = true) {
         offset = 0
-                snapshotDate = null
+        snapshotDate = null
         loadedItems.clear()
         _uiState.postValue(PharmacyCatalogUiState(summaryResId = R.string.pharmacy_catalog_loading, selectedLetter = selectedLetter))
-        loadPage(reset = true)
+        if (isPageLoading) {
+            reloadPending = true
+            pendingResolveSearchMode = resolveSearchMode
+        } else {
+            loadPage(reset = true, resolveSearchMode = resolveSearchMode)
+        }
     }
 
-    private fun loadPage(reset: Boolean) {
+    private fun loadPage(reset: Boolean, resolveSearchMode: Boolean = true) {
         viewModelScope.launch(Dispatchers.IO) {
             if (isPageLoading) return@launch
             isPageLoading = true
@@ -109,7 +123,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                 }
 
                 val selectedSnapshotDate = snapshotDate ?: return@launch
-                                val clause = buildFilterClause(selectedLetter)
+                val clause = buildFilterClause(selectedLetter)
                 val args = mutableListOf<String>(selectedSnapshotDate)
                 when (selectedLetter) {
                     "123" -> args += "[0-9]*"
@@ -117,7 +131,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                     else -> args += "$selectedLetter%"
                 }
 
-                if (searchQuery.isNotBlank() && reset) {
+                if (searchQuery.isNotBlank() && reset && resolveSearchMode) {
                     searchMode = resolveSearchMode(db, selectedSnapshotDate, selectedLetter, searchQuery)
                 }
                 val searchClause = buildSearchClause(searchQuery, searchMode)
@@ -181,6 +195,10 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                 }
             } finally {
                 isPageLoading = false
+                if (reloadPending) {
+                    reloadPending = false
+                    loadPage(reset = true, resolveSearchMode = pendingResolveSearchMode)
+                }
             }
         }
     }

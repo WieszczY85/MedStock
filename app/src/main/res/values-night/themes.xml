@@ -1,22 +1,110 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<resources>
     <style name="Theme.MedStock" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/green_500</item>
-        <item name="colorPrimaryVariant">@color/title_bar_background</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/green_200</item>
-        <item name="colorSecondaryVariant">@color/green_500</item>
-        <item name="colorOnSecondary">@color/green_900</item>
-        <item name="colorSurface">@color/surface_light</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+        <item name="colorPrimary">?attr/medColorPrimary</item>
+        <item name="colorPrimaryVariant">?attr/medColorTitleBar</item>
+        <item name="colorOnPrimary">?attr/medColorPrimaryText</item>
+        <item name="colorSecondary">?attr/medColorPrimarySoft</item>
+        <item name="colorSecondaryVariant">?attr/medColorPrimaryDark</item>
+        <item name="colorOnSecondary">?attr/medColorPrimaryText</item>
+        <item name="colorSurface">?attr/medColorSurface</item>
+        <item name="android:colorAccent">?attr/medColorPrimary</item>
+        <item name="android:windowBackground">?attr/medColorSurface</item>
+        <item name="android:statusBarColor">?attr/medColorTitleBar</item>
+        <item name="medColorPrimary">@color/green_500</item>
+        <item name="medColorPrimaryDark">@color/green_700</item>
+        <item name="medColorPrimaryText">@color/green_900</item>
+        <item name="medColorPrimarySoft">@color/green_200</item>
+        <item name="medColorSurface">@color/surface_light</item>
+        <item name="medColorSurfaceCard">@color/surface_card</item>
+        <item name="medColorSurfaceCardSoft">@color/surface_card_soft</item>
+        <item name="medColorTextPrimary">@color/text_primary</item>
+        <item name="medColorTextSecondary">@color/text_secondary</item>
+        <item name="medColorTopBar">@color/top_app_bar_background</item>
+        <item name="medColorTopBarContent">@color/top_app_bar_content</item>
+        <item name="medColorTitleBar">@color/title_bar_background</item>
+        <item name="medColorTitleBarText">@color/title_bar_text</item>
+        <item name="medColorBottomBar">@color/bottom_nav_background</item>
+        <item name="medColorBottomSelected">@color/bottom_nav_selected</item>
+        <item name="medColorBottomUnselected">@color/bottom_nav_unselected</item>
     </style>
-    <style name="Theme.MedStock.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="colorControlNormal">@color/top_app_bar_content</item>
+
+    <style name="Theme.MedStock.Ocean.NoActionBar" parent="Theme.MedStock.NoActionBar">
+        <item name="medColorPrimary">#64B5F6</item>
+        <item name="medColorPrimaryDark">#42A5F5</item>
+        <item name="medColorPrimaryText">#071A2A</item>
+        <item name="medColorPrimarySoft">#244B68</item>
+        <item name="medColorSurface">#06131D</item>
+        <item name="medColorSurfaceCard">#0C2536</item>
+        <item name="medColorSurfaceCardSoft">#12344A</item>
+        <item name="medColorTextPrimary">#EAF6FF</item>
+        <item name="medColorTextSecondary">#B7D4E8</item>
+        <item name="medColorTopBar">#06131D</item>
+        <item name="medColorTopBarContent">#D9F0FF</item>
+        <item name="medColorTitleBar">#123D5A</item>
+        <item name="medColorTitleBarText">#EAF6FF</item>
+        <item name="medColorBottomBar">#0C2536</item>
+        <item name="medColorBottomSelected">#81C7F5</item>
+        <item name="medColorBottomUnselected">#AAC6D8</item>
     </style>
+
+    <style name="Theme.MedStock.Berry.NoActionBar" parent="Theme.MedStock.NoActionBar">
+        <item name="medColorPrimary">#F06292</item>
+        <item name="medColorPrimaryDark">#EC407A</item>
+        <item name="medColorPrimaryText">#2B0B18</item>
+        <item name="medColorPrimarySoft">#5C263B</item>
+        <item name="medColorSurface">#1B0910</item>
+        <item name="medColorSurfaceCard">#35111F</item>
+        <item name="medColorSurfaceCardSoft">#48182A</item>
+        <item name="medColorTextPrimary">#FFF0F5</item>
+        <item name="medColorTextSecondary">#E2B8C7</item>
+        <item name="medColorTopBar">#1B0910</item>
+        <item name="medColorTopBarContent">#FFDCE8</item>
+        <item name="medColorTitleBar">#5B1731</item>
+        <item name="medColorTitleBarText">#FFF0F5</item>
+        <item name="medColorBottomBar">#35111F</item>
+        <item name="medColorBottomSelected">#F48FB1</item>
+        <item name="medColorBottomUnselected">#D5A6B7</item>
+    </style>
+
+    <style name="Theme.MedStock.Sage.NoActionBar" parent="Theme.MedStock.NoActionBar">
+        <item name="medColorPrimary">#A8C9AD</item>
+        <item name="medColorPrimaryDark">#7FA987</item>
+        <item name="medColorPrimaryText">#122117</item>
+        <item name="medColorPrimarySoft">#354C39</item>
+        <item name="medColorSurface">#0B130D</item>
+        <item name="medColorSurfaceCard">#17251A</item>
+        <item name="medColorSurfaceCardSoft">#213326</item>
+        <item name="medColorTextPrimary">#F0F8F1</item>
+        <item name="medColorTextSecondary">#BDD0C0</item>
+        <item name="medColorTopBar">#0B130D</item>
+        <item name="medColorTopBarContent">#E5F3E7</item>
+        <item name="medColorTitleBar">#304A35</item>
+        <item name="medColorTitleBarText">#F0F8F1</item>
+        <item name="medColorBottomBar">#17251A</item>
+        <item name="medColorBottomSelected">#B6D6BB</item>
+        <item name="medColorBottomUnselected">#AFC3B2</item>
+    </style>
+
+    <style name="Theme.MedStock.Lavender.NoActionBar" parent="Theme.MedStock.NoActionBar">
+        <item name="medColorPrimary">#C5AFE3</item>
+        <item name="medColorPrimaryDark">#A98DD0</item>
+        <item name="medColorPrimaryText">#1B1228</item>
+        <item name="medColorPrimarySoft">#45345C</item>
+        <item name="medColorSurface">#120B1B</item>
+        <item name="medColorSurfaceCard">#251832</item>
+        <item name="medColorSurfaceCardSoft">#342246</item>
+        <item name="medColorTextPrimary">#F7EFFF</item>
+        <item name="medColorTextSecondary">#D7C5E8</item>
+        <item name="medColorTopBar">#120B1B</item>
+        <item name="medColorTopBarContent">#F0E3FF</item>
+        <item name="medColorTitleBar">#493361</item>
+        <item name="medColorTitleBarText">#F7EFFF</item>
+        <item name="medColorBottomBar">#251832</item>
+        <item name="medColorBottomSelected">#D0B5EF</item>
+        <item name="medColorBottomUnselected">#CBB8DA</item>
+    </style>
+
+    <style name="Theme.MedStock.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"><item name="colorControlNormal">?attr/medColorTopBarContent</item></style>
 
     <style name="Theme.MedStock.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight" />
 </resources>

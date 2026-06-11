@@ -15,7 +15,7 @@
         android:layout_gravity="center"
         android:contentDescription="@string/menu_alerty_lista"
         android:src="@drawable/ic_notifications_black_24dp"
-        app:tint="@color/top_app_bar_content" />
+        app:tint="?attr/medColorTopBarContent" />
 
     <TextView
         android:id="@+id/action_alerts_badge"

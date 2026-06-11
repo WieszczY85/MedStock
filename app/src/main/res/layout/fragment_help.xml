@@ -28,7 +28,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/help_privacy_policy_title"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -36,7 +36,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_1"
                     android:text="@string/settings_privacy_summary"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/medColorTextSecondary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -56,7 +56,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/help_data_safety_title"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -64,7 +64,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_3"
                     android:text="@string/settings_privacy_local_data_title"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -72,14 +72,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_1"
                     android:text="@string/settings_privacy_local_data_body"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/medColorTextSecondary" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_3"
                     android:text="@string/settings_privacy_cloud_backup_title"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -87,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_1"
                     android:text="@string/settings_privacy_cloud_backup_body"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/medColorTextSecondary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -107,7 +107,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/settings_privacy_medical_disclaimer_title"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -115,14 +115,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_1"
                     android:text="@string/settings_privacy_medical_disclaimer_body"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/medColorTextSecondary" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_3"
                     android:text="@string/settings_privacy_controls_title"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -130,7 +130,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_1"
                     android:text="@string/settings_privacy_controls_body"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/medColorTextSecondary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>

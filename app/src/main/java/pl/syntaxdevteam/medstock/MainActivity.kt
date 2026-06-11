@@ -40,6 +40,7 @@ import pl.syntaxdevteam.medstock.ui.alerty.reminders.RemindersListFragment
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogFragment
 import pl.syntaxdevteam.medstock.ui.baza.medications.MedicationCatalogDetailFragment
 import pl.syntaxdevteam.medstock.ui.baza.pharmacy.PharmacyCatalogFragment
+import pl.syntaxdevteam.medstock.core.theme.ThemeManager
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationEditorFragment
 import pl.syntaxdevteam.medstock.ui.medicationlist.MedicationListFragment
 import androidx.core.view.size
@@ -58,6 +59,7 @@ class MainActivity : AppCompatActivity() {
     ) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(ThemeManager.getActivityThemeResId(this))
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -71,11 +73,11 @@ class MainActivity : AppCompatActivity() {
                 ?.primaryNavigationFragment
             when (currentFragment) {
                 is MedicationCatalogFragment -> {
-                    currentFragment.toggleSearch()
+                    currentFragment.openSearch()
                 }
 
                 is PharmacyCatalogFragment -> {
-                    currentFragment.toggleSearch()
+                    currentFragment.openSearch()
                 }
 
                 is MedicationListFragment -> {

@@ -13,7 +13,7 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-        android:textColor="@color/text_secondary"
+        android:textColor="?attr/medColorTextSecondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -26,7 +26,7 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         android:visibility="gone"
-        app:cardBackgroundColor="@color/cta_support_bg"
+        app:cardBackgroundColor="?attr/medColorPrimarySoft"
         app:cardCornerRadius="@dimen/radius_md"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/reminder_permissions_title"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                android:textColor="@color/text_primary"
+                android:textColor="?attr/medColorTextPrimary"
                 android:textStyle="bold" />
 
             <TextView
@@ -54,7 +54,7 @@
                 android:layout_marginTop="6dp"
                 android:text="@string/reminder_permissions_message"
                 android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="@color/text_secondary" />
+                android:textColor="?attr/medColorTextSecondary" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_reminder_permissions"
@@ -73,7 +73,7 @@
         android:padding="32dp"
         android:text="@string/reminder_empty"
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-        android:textColor="@color/text_secondary"
+        android:textColor="?attr/medColorTextSecondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

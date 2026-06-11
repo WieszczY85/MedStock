@@ -1,15 +1,24 @@
 package pl.syntaxdevteam.medstock.ui.baza.pharmacy
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.Settings
 import android.net.Uri
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -17,18 +26,32 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import pl.syntaxdevteam.medstock.R
 import pl.syntaxdevteam.medstock.databinding.FragmentPharmacyCatalogBinding
+import pl.syntaxdevteam.medstock.core.location.LocationCityResolver
 
 class PharmacyCatalogFragment : Fragment() {
 
     private var _binding: FragmentPharmacyCatalogBinding? = null
     private val binding get() = _binding!!
+    private lateinit var pharmacyCatalogViewModel: PharmacyCatalogViewModel
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            findPharmaciesInCurrentCity()
+        } else {
+            showLocationPermissionExplanation()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val pharmacyCatalogViewModel =
+        pharmacyCatalogViewModel =
             ViewModelProvider(this)[PharmacyCatalogViewModel::class.java]
 
         _binding = FragmentPharmacyCatalogBinding.inflate(inflater, container, false)
@@ -52,6 +75,10 @@ class PharmacyCatalogFragment : Fragment() {
                 return true
             }
         })
+
+        binding.buttonPharmaciesInMyCity.setOnClickListener {
+            requestLocationAndFindCity()
+        }
 
         binding.recyclerPharmacyCatalog.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -79,16 +106,94 @@ class PharmacyCatalogFragment : Fragment() {
         _binding = null
     }
 
-    fun toggleSearch() {
+    fun openSearch() {
         val searchView = binding.searchPharmacyCatalog
-        val shouldShow = searchView.visibility != View.VISIBLE
-        searchView.visibility = if (shouldShow) View.VISIBLE else View.GONE
-        if (shouldShow) {
-            searchView.requestFocus()
-        } else {
-            searchView.setQuery("", false)
-            searchView.clearFocus()
+        searchView.visibility = View.VISIBLE
+        searchView.isIconified = false
+        searchView.requestFocusFromTouch()
+        searchView.post {
+            val inputMethodManager = requireContext().getSystemService(InputMethodManager::class.java)
+            inputMethodManager?.showSoftInput(searchView.findFocus() ?: searchView, InputMethodManager.SHOW_IMPLICIT)
         }
+    }
+
+    private fun requestLocationAndFindCity() {
+        val hasFineLocation = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val hasCoarseLocation = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        if (hasFineLocation || hasCoarseLocation) {
+            findPharmaciesInCurrentCity()
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    private fun findPharmaciesInCurrentCity() {
+        binding.buttonPharmaciesInMyCity.isEnabled = false
+        binding.buttonPharmaciesInMyCity.setText(R.string.pharmacy_catalog_locating)
+        viewLifecycleOwner.lifecycleScope.launch {
+            when (val result = LocationCityResolver(requireContext().applicationContext).resolve()) {
+                is LocationCityResolver.Result.Success -> {
+                    binding.searchPharmacyCatalog.visibility = View.VISIBLE
+                    binding.searchPharmacyCatalog.setQuery(result.city, false)
+                    binding.searchPharmacyCatalog.clearFocus()
+                    pharmacyCatalogViewModel.filterByCity(result.city)
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.pharmacy_catalog_city_detected, result.city),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                LocationCityResolver.Result.LocationDisabled -> showLocationDisabledDialog()
+                LocationCityResolver.Result.LocationUnavailable -> showLocationError(R.string.pharmacy_catalog_location_unavailable)
+                LocationCityResolver.Result.CityUnavailable -> showLocationError(R.string.pharmacy_catalog_city_unavailable)
+            }
+            _binding?.buttonPharmaciesInMyCity?.apply {
+                isEnabled = true
+                setText(R.string.pharmacy_catalog_find_in_my_city)
+            }
+        }
+    }
+
+    private fun showLocationPermissionExplanation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.pharmacy_catalog_location_permission_title)
+            .setMessage(R.string.pharmacy_catalog_location_permission_message)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(R.string.settings_open_app_settings) { _, _ ->
+                startActivity(
+                    Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        "package:${requireContext().packageName}".toUri()
+                    )
+                )
+            }
+            .show()
+    }
+
+    private fun showLocationDisabledDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.pharmacy_catalog_location_disabled_title)
+            .setMessage(R.string.pharmacy_catalog_location_disabled_message)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(R.string.pharmacy_catalog_open_location_settings) { _, _ ->
+                startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+            }
+            .show()
+    }
+
+    private fun showLocationError(messageResId: Int) {
+        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_LONG).show()
     }
 
     private fun openPharmacyInGoogleMaps(item: PharmacyCatalogEntry) {

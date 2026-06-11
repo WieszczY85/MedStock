@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/medColorTextPrimary"
             android:textStyle="bold" />
 
         <TextView
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_1"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            android:textColor="@color/text_secondary" />
+            android:textColor="?attr/medColorTextSecondary" />
 
         <TextView
             android:id="@+id/text_medication_collapsed_hint"
@@ -35,7 +35,7 @@
             android:layout_marginTop="@dimen/space_1"
             android:text="@string/medication_catalog_expand_hint"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:textColor="@color/text_secondary" />
+            android:textColor="?attr/medColorTextSecondary" />
 
         <TextView
             android:id="@+id/text_medication_details"
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_2"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/medColorTextPrimary"
             android:visibility="gone" />
 
         <LinearLayout

@@ -105,7 +105,6 @@
     <string name="pharmacy_catalog_details">Straße: %1$s • Gebäude: %2$s • Einheit: %3$s • Status: %4$s</string>
     <string name="pharmacy_catalog_missing_city">Kein Ort vorhanden</string>
     <string name="pharmacy_catalog_search_hint">Nach Apothekenname suchen</string>
-    <string name="pharmacy_catalog_find_on_map">Auf Karte suchen</string>
     <string name="pharmacy_catalog_missing_address">Keine Adressdaten für diese Apotheke vorhanden.</string>
     <string name="pharmacy_catalog_map_unavailable">Keine Karten-App auf diesem Gerät vorhanden.</string>
 
@@ -309,4 +308,39 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
     <string name="account_drive_authorization_cancelled_message">Der Zugriff auf Google Drive wurde nicht gewährt.</string>
     <string name="account_drive_authorization_required_message">Die Bestätigung des Zugriffs auf Google Drive ist erforderlich.</string>
     <string name="account_google_avatar_content_description">Google-Konto-Avatar</string>
+
+    <string name="pharmacy_catalog_show_on_map">Auf Karte anzeigen</string>
+    <string name="pharmacy_catalog_find_in_my_city">Apotheken in meiner Stadt finden</string>
+    <string name="pharmacy_catalog_locating">Stadt wird ermittelt…</string>
+    <string name="pharmacy_catalog_city_detected">Apotheken in %1$s werden angezeigt</string>
+    <string name="pharmacy_catalog_location_permission_title">Standortberechtigung</string>
+    <string name="pharmacy_catalog_location_permission_message">Der Standort wird nur verwendet, um die aktuelle Stadt zu erkennen und den Apothekenkatalog zu filtern.</string>
+    <string name="pharmacy_catalog_location_disabled_title">Standort ist deaktiviert</string>
+    <string name="pharmacy_catalog_location_disabled_message">Aktivieren Sie den Gerätestandort, um die aktuelle Stadt zu erkennen.</string>
+    <string name="pharmacy_catalog_open_location_settings">Standorteinstellungen</string>
+    <string name="pharmacy_catalog_location_unavailable">Der Standort konnte nicht ermittelt werden.</string>
+    <string name="pharmacy_catalog_city_unavailable">Die Stadt konnte nicht ermittelt werden.</string>
+    <string name="settings_open_app_settings">App-Einstellungen</string>
+    <string name="settings_theme_summary_short">Helligkeit</string>
+    <string name="settings_palette_title">Farbvariante</string>
+    <string name="settings_palette_summary_short">Oberflächenfarbe</string>
+    <string name="settings_palette_icon_description">Farbvariante</string>
+    <string name="settings_palette_green">Grün</string>
+    <string name="settings_palette_ocean">Ozean</string>
+    <string name="settings_palette_berry">Beere</string>
+    <string name="settings_palette_sage">Pastell-Salbei</string>
+    <string name="settings_palette_lavender">Pastell-Lavendel</string>
+    <string name="settings_language_summary_short">App-Sprache</string>
+    <string name="settings_help_for_theme">Hilfe zur Helligkeit</string>
+    <string name="settings_help_for_palette">Hilfe zur Farbvariante</string>
+    <string name="settings_help_for_language">Hilfe zur Sprache</string>
+    <string name="settings_theme_help_message">Automatisch folgt dem hellen oder dunklen Systemmodus. Hell und Dunkel erzwingen die gewählte Helligkeit.</string>
+    <string name="settings_palette_help_message">Ändert Akzent-, Flächen-, Karten- und Navigationsfarben. Grün bleibt der Standard.</string>
+    <string name="settings_language_help_message">Automatisch verwendet eine unterstützte Systemsprache. Eine manuelle Auswahl überschreibt die Systemeinstellung.</string>
+    <string name="settings_developer_title">Entwicklerwerkzeuge</string>
+    <string name="settings_developer_enabled">Entwicklermodus aktiviert</string>
+    <plurals name="settings_developer_taps_remaining">
+        <item quantity="one">Noch eine Berührung bis zum Entwicklermodus</item>
+        <item quantity="other">Noch %d Berührungen bis zum Entwicklermodus</item>
+    </plurals>
 </resources>

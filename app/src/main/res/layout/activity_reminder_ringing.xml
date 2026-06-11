@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/surface_light"
+    android:background="?attr/medColorSurface"
     android:fillViewport="true">
 
     <LinearLayout
@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Material3.DisplayLarge"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/medColorTextPrimary"
             android:textStyle="bold"
             tools:text="08:30" />
 
@@ -31,7 +31,7 @@
             android:gravity="center"
             android:text="@string/reminder_ringing_title"
             android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/medColorTextPrimary"
             android:textStyle="bold" />
 
         <TextView
@@ -42,13 +42,13 @@
             android:gravity="center"
             android:text="@string/reminder_ringing_message"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-            android:textColor="@color/text_secondary" />
+            android:textColor="?attr/medColorTextSecondary" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            app:cardBackgroundColor="@color/surface_card"
+            app:cardBackgroundColor="?attr/medColorSurfaceCard"
             app:cardCornerRadius="@dimen/radius_md"
             app:cardElevation="@dimen/card_elevation_low">
 
@@ -63,7 +63,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/reminder_ringing_medications_header"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -72,7 +72,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     tools:text="Acard • 75 mg • 1 tabletka" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -108,7 +108,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            app:cardBackgroundColor="@color/surface_card_soft"
+            app:cardBackgroundColor="?attr/medColorSurfaceCardSoft"
             app:cardCornerRadius="@dimen/radius_md">
 
             <LinearLayout
@@ -122,7 +122,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/reminder_history_title"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -132,7 +132,7 @@
                     android:layout_marginTop="8dp"
                     android:text="@string/reminder_history_empty"
                     android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/medColorTextSecondary" />
 
                 <LinearLayout
                     android:id="@+id/container_dose_history"

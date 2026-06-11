@@ -105,7 +105,6 @@
     <string name="pharmacy_catalog_details">Street: %1$s • Building: %2$s • Unit: %3$s • Status: %4$s</string>
     <string name="pharmacy_catalog_missing_city">No city</string>
     <string name="pharmacy_catalog_search_hint">Search by pharmacy name</string>
-    <string name="pharmacy_catalog_find_on_map">Find on map</string>
     <string name="pharmacy_catalog_missing_address">No address data for this pharmacy.</string>
     <string name="pharmacy_catalog_map_unavailable">No map app available on this device.</string>
 
@@ -311,4 +310,39 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="account_google_authorization_required_message">Google account profile access confirmation is required.</string>
     <string name="account_drive_authorization_cancelled_message">Google Drive access was not granted.</string>
     <string name="account_google_avatar_content_description">Google account avatar</string>
+
+    <string name="pharmacy_catalog_show_on_map">Show on map</string>
+    <string name="pharmacy_catalog_find_in_my_city">Find pharmacies in my city</string>
+    <string name="pharmacy_catalog_locating">Detecting your city…</string>
+    <string name="pharmacy_catalog_city_detected">Showing pharmacies in %1$s</string>
+    <string name="pharmacy_catalog_location_permission_title">Location permission</string>
+    <string name="pharmacy_catalog_location_permission_message">Location access is needed only to detect your current city and filter the pharmacy catalog. You can enable it in app settings.</string>
+    <string name="pharmacy_catalog_location_disabled_title">Location is turned off</string>
+    <string name="pharmacy_catalog_location_disabled_message">Turn on device location to detect your current city.</string>
+    <string name="pharmacy_catalog_open_location_settings">Location settings</string>
+    <string name="pharmacy_catalog_location_unavailable">Your location could not be determined. Try again outdoors or check location settings.</string>
+    <string name="pharmacy_catalog_city_unavailable">Your city could not be determined from the current location.</string>
+    <string name="settings_open_app_settings">App settings</string>
+    <string name="settings_theme_summary_short">Interface brightness</string>
+    <string name="settings_palette_title">Color palette</string>
+    <string name="settings_palette_summary_short">Interface accent</string>
+    <string name="settings_palette_icon_description">Color palette</string>
+    <string name="settings_palette_green">Green</string>
+    <string name="settings_palette_ocean">Ocean</string>
+    <string name="settings_palette_berry">Berry</string>
+    <string name="settings_palette_sage">Pastel sage</string>
+    <string name="settings_palette_lavender">Pastel lavender</string>
+    <string name="settings_language_summary_short">Application language</string>
+    <string name="settings_help_for_theme">Help for brightness setting</string>
+    <string name="settings_help_for_palette">Help for color palette</string>
+    <string name="settings_help_for_language">Help for language setting</string>
+    <string name="settings_theme_help_message">Choose Automatic to follow the device light or dark mode. Light and Dark force the selected brightness regardless of system settings.</string>
+    <string name="settings_palette_help_message">Changes the interface accent, surfaces, cards and navigation colors. Green is the original default. Ocean and Berry are stronger; Sage and Lavender are softer pastel variants.</string>
+    <string name="settings_language_help_message">Automatic uses a supported system language and otherwise falls back to the default resources. A manually selected language overrides the system setting.</string>
+    <string name="settings_developer_title">Developer tools</string>
+    <string name="settings_developer_enabled">Developer mode enabled</string>
+    <plurals name="settings_developer_taps_remaining">
+        <item quantity="one">One more tap to enable developer mode</item>
+        <item quantity="other">%d more taps to enable developer mode</item>
+    </plurals>
 </resources>

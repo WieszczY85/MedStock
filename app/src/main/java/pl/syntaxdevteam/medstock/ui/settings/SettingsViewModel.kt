@@ -12,6 +12,7 @@ import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
 import pl.syntaxdevteam.medstock.core.i18n.AppLanguageMode
 import pl.syntaxdevteam.medstock.core.i18n.LocaleManager
 import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
+import pl.syntaxdevteam.medstock.core.theme.AppColorPalette
 import pl.syntaxdevteam.medstock.core.theme.ThemeManager
 import java.io.File
 import java.text.DateFormat
@@ -30,6 +31,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val context = getApplication<Application>()
         ThemeManager.setThemeMode(context, themeMode)
         _uiState.value = _uiState.value?.copy(themeMode = themeMode)
+    }
+
+    fun setColorPalette(colorPalette: AppColorPalette) {
+        val context = getApplication<Application>()
+        ThemeManager.setColorPalette(context, colorPalette)
+        _uiState.value = _uiState.value?.copy(colorPalette = colorPalette)
     }
 
     fun setLanguageMode(languageMode: AppLanguageMode) {
@@ -70,6 +77,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     lastDatabaseUpdate = lastDbUpdateValue,
                     databaseSize = dbSizeValue,
                     themeMode = ThemeManager.getThemeMode(context),
+                    colorPalette = ThemeManager.getColorPalette(context),
                     languageMode = LocaleManager.getLanguageMode(context)
                 )
             )
