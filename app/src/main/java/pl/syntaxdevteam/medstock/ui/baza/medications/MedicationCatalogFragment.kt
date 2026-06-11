@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
 import java.util.Locale
@@ -93,15 +94,14 @@ class MedicationCatalogFragment : Fragment() {
         _binding = null
     }
 
-    fun toggleSearch() {
+    fun openSearch() {
         val searchView = binding.searchMedicationCatalog
-        val shouldShow = searchView.visibility != View.VISIBLE
-        searchView.visibility = if (shouldShow) View.VISIBLE else View.GONE
-        if (shouldShow) {
-            searchView.requestFocus()
-        } else {
-            searchView.setQuery("", false)
-            searchView.clearFocus()
+        searchView.visibility = View.VISIBLE
+        searchView.isIconified = false
+        searchView.requestFocusFromTouch()
+        searchView.post {
+            val inputMethodManager = requireContext().getSystemService(InputMethodManager::class.java)
+            inputMethodManager?.showSoftInput(searchView.findFocus() ?: searchView, InputMethodManager.SHOW_IMPLICIT)
         }
     }
 

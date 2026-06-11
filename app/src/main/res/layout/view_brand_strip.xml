@@ -29,7 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/brand_name_stock"
-        android:textColor="@color/brand_stock_text"
+        android:textColor="?attr/medColorPrimaryDark"
         android:textSize="30sp"
         android:textStyle="bold" />
 </LinearLayout>

@@ -105,7 +105,6 @@
     <string name="pharmacy_catalog_details">Ulica: %1$s • Budynek: %2$s • Lokal: %3$s • Status: %4$s</string>
     <string name="pharmacy_catalog_missing_city">Brak miejscowości</string>
     <string name="pharmacy_catalog_search_hint">Szukaj po nazwie apteki</string>
-    <string name="pharmacy_catalog_find_on_map">Znajdź na mapie</string>
     <string name="pharmacy_catalog_missing_address">Brak danych adresowych tej apteki.</string>
     <string name="pharmacy_catalog_map_unavailable">Brak aplikacji map na tym urządzeniu.</string>
 
@@ -158,7 +157,7 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
 
     <string name="settings_info_title">Informacje o aplikacji</string>
     <string name="settings_author_value">Autor: WieszczY (SyntaxDevTeam)</string>
-    <string name="settings_db_date_value">Ostatnia aktualizacja:  </string>
+    <string name="settings_db_date_value">Ostatnia aktualizacja: %1$s</string>
     <string name="settings_version_value">Wersja: %1$s</string>
     <string name="settings_unknown_value">Brak danych</string>
     <string name="settings_database_size_value">Rozmiar bazy: %1$s (modyfikacja: %2$s)</string>
@@ -311,4 +310,41 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
     <string name="account_google_authorization_required_message">Wymagane jest potwierdzenie dostępu do profilu konta Google.</string>
     <string name="account_drive_authorization_cancelled_message">Nie przyznano dostępu do Google Drive.</string>
     <string name="account_google_avatar_content_description">Awatar konta Google</string>
+
+    <string name="pharmacy_catalog_show_on_map">Pokaż na mapie</string>
+    <string name="pharmacy_catalog_find_in_my_city">Znajdź apteki w moim mieście</string>
+    <string name="pharmacy_catalog_locating">Ustalam Twoje miasto…</string>
+    <string name="pharmacy_catalog_city_detected">Wyświetlam apteki w mieście: %1$s</string>
+    <string name="pharmacy_catalog_location_permission_title">Dostęp do lokalizacji</string>
+    <string name="pharmacy_catalog_location_permission_message">Lokalizacja jest używana wyłącznie do ustalenia bieżącego miasta i filtrowania katalogu aptek. Uprawnienie możesz włączyć w ustawieniach aplikacji.</string>
+    <string name="pharmacy_catalog_location_disabled_title">Lokalizacja jest wyłączona</string>
+    <string name="pharmacy_catalog_location_disabled_message">Włącz lokalizację urządzenia, aby ustalić bieżące miasto.</string>
+    <string name="pharmacy_catalog_open_location_settings">Ustawienia lokalizacji</string>
+    <string name="pharmacy_catalog_location_unavailable">Nie udało się ustalić lokalizacji. Spróbuj ponownie na zewnątrz lub sprawdź ustawienia lokalizacji.</string>
+    <string name="pharmacy_catalog_city_unavailable">Nie udało się ustalić miasta na podstawie bieżącej lokalizacji.</string>
+    <string name="settings_open_app_settings">Ustawienia aplikacji</string>
+    <string name="settings_theme_summary_short">Jasność interfejsu</string>
+    <string name="settings_palette_title">Wariant kolorystyczny</string>
+    <string name="settings_palette_summary_short">Kolor interfejsu</string>
+    <string name="settings_palette_icon_description">Wariant kolorystyczny</string>
+    <string name="settings_palette_green">Zielony</string>
+    <string name="settings_palette_ocean">Ocean</string>
+    <string name="settings_palette_berry">Jagodowy</string>
+    <string name="settings_palette_sage">Pastelowa szałwia</string>
+    <string name="settings_palette_lavender">Pastelowa lawenda</string>
+    <string name="settings_language_summary_short">Język aplikacji</string>
+    <string name="settings_help_for_theme">Pomoc dotycząca jasności</string>
+    <string name="settings_help_for_palette">Pomoc dotycząca kolorów</string>
+    <string name="settings_help_for_language">Pomoc dotycząca języka</string>
+    <string name="settings_theme_help_message">Opcja Automatycznie dopasowuje jasny lub ciemny wygląd do ustawień urządzenia. Tryby Jasny i Ciemny wymuszają wybraną jasność niezależnie od systemu.</string>
+    <string name="settings_palette_help_message">Zmienia akcent, powierzchnie, karty i kolory nawigacji. Zielony to dotychczasowy wariant domyślny. Ocean i Jagodowy są mocniejsze, a Szałwia i Lawenda mają łagodniejszy, pastelowy charakter.</string>
+    <string name="settings_language_help_message">Tryb Automatycznie wybiera obsługiwany język systemu, a w pozostałych przypadkach używa zasobów domyślnych. Ręczny wybór ma pierwszeństwo przed językiem systemowym.</string>
+    <string name="settings_developer_title">Narzędzia programisty</string>
+    <string name="settings_developer_enabled">Tryb programisty został włączony</string>
+    <plurals name="settings_developer_taps_remaining">
+        <item quantity="one">Jeszcze jedno dotknięcie do włączenia trybu programisty</item>
+        <item quantity="few">Jeszcze %d dotknięcia do włączenia trybu programisty</item>
+        <item quantity="many">Jeszcze %d dotknięć do włączenia trybu programisty</item>
+        <item quantity="other">Jeszcze %d dotknięcia do włączenia trybu programisty</item>
+    </plurals>
 </resources>

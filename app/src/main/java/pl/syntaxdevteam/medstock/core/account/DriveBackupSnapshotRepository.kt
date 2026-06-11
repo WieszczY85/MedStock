@@ -11,6 +11,7 @@ import pl.syntaxdevteam.medstock.core.i18n.AppLanguageMode
 import pl.syntaxdevteam.medstock.core.i18n.LocaleManager
 import pl.syntaxdevteam.medstock.core.reminders.MedicationReminderRepository
 import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
+import pl.syntaxdevteam.medstock.core.theme.AppColorPalette
 import pl.syntaxdevteam.medstock.core.theme.ThemeManager
 import java.io.File
 
@@ -31,6 +32,7 @@ class DriveBackupSnapshotRepository(context: Context) {
             put("createdAtUtc", System.currentTimeMillis())
             put("preferences", JSONObject().apply {
                 put("themeMode", ThemeManager.getThemeMode(appContext).preferenceValue)
+                put("colorPalette", ThemeManager.getColorPalette(appContext).preferenceValue)
                 put("languageMode", LocaleManager.getLanguageMode(appContext).preferenceValue)
             })
             put("medications", JSONArray().apply {
@@ -182,8 +184,10 @@ class DriveBackupSnapshotRepository(context: Context) {
     private fun restorePreferences(preferences: JSONObject?) {
         preferences ?: return
         val themeMode = AppThemeMode.fromPreferenceValue(preferences.optString("themeMode"))
+        val colorPalette = AppColorPalette.fromPreferenceValue(preferences.optString("colorPalette"))
         val languageMode = AppLanguageMode.fromPreferenceValue(preferences.optString("languageMode"))
         ThemeManager.setThemeMode(appContext, themeMode)
+        ThemeManager.setColorPalette(appContext, colorPalette)
         LocaleManager.setLanguageMode(appContext, languageMode)
     }
 

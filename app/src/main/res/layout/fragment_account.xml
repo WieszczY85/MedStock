@@ -28,7 +28,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/account_google_title"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -36,7 +36,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_1"
                     android:text="@string/account_google_summary"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/medColorTextSecondary" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -55,7 +55,7 @@
                             android:layout_height="match_parent"
                             android:background="@drawable/bg_account_avatar"
                             android:gravity="center"
-                            android:textColor="@color/green_900"
+                            android:textColor="?attr/medColorPrimaryText"
                             android:textSize="28sp"
                             android:textStyle="bold"
                             tools:text="S" />
@@ -68,7 +68,7 @@
                             android:scaleType="centerCrop"
                             android:visibility="gone"
                             app:shapeAppearanceOverlay="@style/Shape.MedStock.Circle"
-                            app:strokeColor="@color/green_700"
+                            app:strokeColor="?attr/medColorPrimaryDark"
                             app:strokeWidth="2dp"
                             tools:src="@tools:sample/avatars"
                             tools:visibility="visible" />
@@ -85,7 +85,7 @@
                             android:id="@+id/account_email_value"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/text_primary"
+                            android:textColor="?attr/medColorTextPrimary"
                             android:textStyle="bold"
                             tools:text="syntax@example.com" />
 
@@ -94,7 +94,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/space_1"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="?attr/medColorTextSecondary"
                             tools:text="Połączono z kontem Google" />
                     </LinearLayout>
                 </LinearLayout>
@@ -134,7 +134,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/account_drive_title"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/medColorTextPrimary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -142,7 +142,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_1"
                     android:text="@string/account_drive_summary"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/medColorTextSecondary" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/account_drive_backup_switch"
@@ -150,14 +150,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_3"
                     android:text="@string/account_drive_switch_label"
-                    android:textColor="@color/text_primary" />
+                    android:textColor="?attr/medColorTextPrimary" />
 
                 <TextView
                     android:id="@+id/account_drive_status_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_1"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="?attr/medColorTextSecondary"
                     tools:text="Kopia w Google Drive jest włączona." />
 
                 <com.google.android.material.button.MaterialButton
@@ -167,7 +167,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_3"
                     android:text="@string/account_drive_backup_now_button"
-                    android:textColor="@color/text_primary" />
+                    android:textColor="?attr/medColorTextPrimary" />
 
                 <ProgressBar
                     android:id="@+id/account_progress"

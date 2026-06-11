@@ -16,7 +16,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/top_app_bar_background"
+            android:background="?attr/medColorTopBar"
             android:elevation="2dp"
             app:contentInsetStartWithNavigation="0dp"
             app:popupTheme="@style/Theme.MedStock.PopupOverlay">
@@ -28,8 +28,8 @@
             android:id="@+id/title_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/title_bar_background"
-            app:titleTextColor="@color/title_bar_text" />
+            android:background="?attr/medColorTitleBar"
+            app:titleTextColor="?attr/medColorTitleBarText" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

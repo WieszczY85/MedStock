@@ -5,17 +5,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import pl.syntaxdevteam.medstock.R
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
 import pl.syntaxdevteam.medstock.core.i18n.AppLanguageMode
 import pl.syntaxdevteam.medstock.core.i18n.LocaleManager
+import pl.syntaxdevteam.medstock.core.theme.AppColorPalette
 import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
 import pl.syntaxdevteam.medstock.core.theme.ThemeManager
-import java.io.File
-import java.text.DateFormat
-import java.util.Date
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -32,6 +30,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _uiState.value = _uiState.value?.copy(themeMode = themeMode)
     }
 
+    fun setColorPalette(colorPalette: AppColorPalette) {
+        val context = getApplication<Application>()
+        ThemeManager.setColorPalette(context, colorPalette)
+        _uiState.value = _uiState.value?.copy(colorPalette = colorPalette)
+    }
+
     fun setLanguageMode(languageMode: AppLanguageMode) {
         val context = getApplication<Application>()
         LocaleManager.setLanguageMode(context, languageMode)
@@ -41,50 +45,31 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private fun loadSettingsInfo() {
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>()
-            val appName = context.getString(R.string.app_name)
-            val author = context.getString(R.string.settings_author_value)
-            val versionName = context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: context.getString(R.string.settings_unknown_value)
-            val version = context.getString(R.string.settings_version_value, versionName)
+            val versionName = context.packageManager
+                .getPackageInfo(context.packageName, 0)
+                .versionName
+                .orEmpty()
 
             val dbHelper = RegistryIngestDatabaseHelper.getInstance(context)
-            val lastDbUpdate = dbHelper.readableDatabase.rawQuery(
+            val lastDatabaseUpdate = dbHelper.readableDatabase.rawQuery(
                 "SELECT MAX(data_snapshot) FROM (SELECT data_snapshot FROM rpl UNION ALL SELECT data_snapshot FROM ra UNION ALL SELECT data_snapshot FROM rdg)",
                 null
             ).use { cursor ->
-                if (cursor.moveToFirst()) cursor.getString(0) else null
+                if (cursor.moveToFirst()) cursor.getString(0)?.takeIf { it.isNotBlank() } else null
             }
-
-            val lastDbUpdateValue = if (lastDbUpdate.isNullOrBlank()) {
-                context.getString(R.string.settings_unknown_value)
-            } else {
-                context.getString(R.string.settings_db_date_value) + lastDbUpdate
-            }
-
-            val dbSizeValue = resolveDatabaseSize(dbHelper.readableDatabase.path)
+            val databaseFile = File(dbHelper.readableDatabase.path)
 
             _uiState.postValue(
                 SettingsUiState(
-                    appName = appName,
-                    author = author,
-                    version = version,
-                    lastDatabaseUpdate = lastDbUpdateValue,
-                    databaseSize = dbSizeValue,
+                    versionName = versionName,
+                    lastDatabaseUpdate = lastDatabaseUpdate,
+                    databaseSizeBytes = databaseFile.takeIf(File::exists)?.length(),
+                    databaseModifiedAtMillis = databaseFile.takeIf(File::exists)?.lastModified(),
                     themeMode = ThemeManager.getThemeMode(context),
+                    colorPalette = ThemeManager.getColorPalette(context),
                     languageMode = LocaleManager.getLanguageMode(context)
                 )
             )
         }
-    }
-
-    private fun resolveDatabaseSize(databasePath: String): String {
-        val context = getApplication<Application>()
-        val file = File(databasePath)
-        if (!file.exists()) return context.getString(R.string.settings_unknown_value)
-
-        val bytes = file.length()
-        val formatter = android.text.format.Formatter.formatShortFileSize(context, bytes)
-        val modifiedAt = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-            .format(Date(file.lastModified()))
-        return context.getString(R.string.settings_database_size_value, formatter, modifiedAt)
     }
 }

@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/medColorTextPrimary"
             android:textStyle="bold" />
 
         <TextView
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_1"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            android:textColor="@color/text_secondary" />
+            android:textColor="?attr/medColorTextSecondary" />
 
         <TextView
             android:id="@+id/text_pharmacy_details"
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_1"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:textColor="@color/text_primary" />
+            android:textColor="?attr/medColorTextPrimary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_find_on_map"
@@ -42,8 +42,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_2"
-            android:text="@string/pharmacy_catalog_find_on_map"
-            android:textColor="@color/text_primary"
+            android:text="@string/pharmacy_catalog_show_on_map"
+            android:textColor="?attr/medColorTextPrimary"
             />
 
     </LinearLayout>

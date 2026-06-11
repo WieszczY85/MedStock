@@ -1,0 +1,18 @@
+<resources>
+    <attr name="medColorPrimary" format="color" />
+    <attr name="medColorPrimaryDark" format="color" />
+    <attr name="medColorPrimaryText" format="color" />
+    <attr name="medColorPrimarySoft" format="color" />
+    <attr name="medColorSurface" format="color" />
+    <attr name="medColorSurfaceCard" format="color" />
+    <attr name="medColorSurfaceCardSoft" format="color" />
+    <attr name="medColorTextPrimary" format="color" />
+    <attr name="medColorTextSecondary" format="color" />
+    <attr name="medColorTopBar" format="color" />
+    <attr name="medColorTopBarContent" format="color" />
+    <attr name="medColorTitleBar" format="color" />
+    <attr name="medColorTitleBarText" format="color" />
+    <attr name="medColorBottomBar" format="color" />
+    <attr name="medColorBottomSelected" format="color" />
+    <attr name="medColorBottomUnselected" format="color" />
+</resources>
