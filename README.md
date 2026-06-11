@@ -93,8 +93,8 @@ MedStock sprawdzi się u osób, które:
 
 MedStock powstał po to, aby codzienne zarządzanie lekami było prostsze, bardziej przejrzyste i mniej zależne od pamięci. To praktyczna aplikacja dla osób, które chcą wiedzieć, jakie leki mają, kiedy powinny je przyjąć i kiedy trzeba uzupełnić zapasy.
 
-# Oficjalne źródła pobieranych danych
-### Wszystkie dane są autentycznymi, dostępnymi publicznie danymi z polskiego rejestru dostępnego na https://rejestry.ezdrowie.gov.pl/
+## Oficjalne źródła pobieranych danych
+Wszystkie dane są autentycznymi, dostępnymi publicznie danymi z polskiego rejestru dostępnego na https://rejestry.ezdrowie.gov.pl/
 
 * Rejestr decyzji wydanych przez Głównego Inspektora Farmaceutycznego:
     - https://rdg.ezdrowie.gov.pl/Decision/DownloadPublicXml
