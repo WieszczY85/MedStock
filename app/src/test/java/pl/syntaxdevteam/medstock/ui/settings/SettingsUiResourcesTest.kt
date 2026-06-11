@@ -38,6 +38,45 @@ class SettingsUiResourcesTest {
         assertTrue(permissionCard.contains("android:textColor=\"?attr/medColorTextSecondary\""))
     }
 
+    @Test
+    fun `support buttons inherit palette contrast text from design system`() {
+        val designSystem = File("src/main/res/values/design_system.xml").readText()
+        val styleStart = designSystem.indexOf("Widget.MedStock.Button.CtaSupport")
+        val styleEnd = designSystem.indexOf("</style>", styleStart)
+        val supportStyle = designSystem.substring(styleStart, styleEnd)
+
+        assertTrue(supportStyle.contains("""<item name="backgroundTint">?attr/medColorPrimarySoft</item>"""))
+        assertTrue(supportStyle.contains("""<item name="android:textColor">?attr/medColorPrimaryText</item>"""))
+
+        var supportButtonCount = 0
+        File("src/main/res").walkTopDown()
+            .filter { file ->
+                file.isFile &&
+                    file.extension == "xml" &&
+                    file.parentFile?.name?.startsWith("layout") == true
+            }
+            .forEach { layoutFile ->
+                val layout = layoutFile.readText()
+                var searchFrom = 0
+                while (true) {
+                    val buttonStart = layout.indexOf(
+                        """style="@style/Widget.MedStock.Button.CtaSupport"""",
+                        searchFrom
+                    )
+                    if (buttonStart < 0) break
+                    val buttonEnd = layout.indexOf("/>", buttonStart)
+                    val supportButton = layout.substring(buttonStart, buttonEnd)
+                    assertTrue(
+                        "${layoutFile.path} overrides CtaSupport text color",
+                        !supportButton.contains("android:textColor=")
+                    )
+                    supportButtonCount++
+                    searchFrom = buttonEnd + 2
+                }
+            }
+        assertTrue(supportButtonCount > 0)
+    }
+
     private fun stringResources(file: File): Map<String, String> {
         val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
         val strings = document.getElementsByTagName("string")
