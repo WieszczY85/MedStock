@@ -26,7 +26,7 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         android:visibility="gone"
-        app:cardBackgroundColor="?attr/medColorPrimarySoft"
+        app:cardBackgroundColor="?attr/medColorSurfaceCardSoft"
         app:cardCornerRadius="@dimen/radius_md"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

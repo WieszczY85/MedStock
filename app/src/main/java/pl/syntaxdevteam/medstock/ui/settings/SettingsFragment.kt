@@ -50,11 +50,7 @@ class SettingsFragment : Fragment() {
         }
 
         settingsViewModel.uiState.observe(viewLifecycleOwner) { state ->
-            binding.settingsAppNameValue.text = state.appName
-            binding.settingsAuthorValue.text = state.author
-            binding.settingsVersionValue.text = state.version
-            binding.settingsLastUpdateValue.text = state.lastDatabaseUpdate
-            binding.settingsDbSizeValue.text = state.databaseSize
+            renderLocalizedAppInfo(state)
             setCheckedThemeMode(state.themeMode)
             setCheckedColorPalette(state.colorPalette)
             setCheckedLanguageMode(state.languageMode)
@@ -119,6 +115,15 @@ class SettingsFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun renderLocalizedAppInfo(state: SettingsUiState) {
+        val info = SettingsInfoFormatter.format(requireContext(), state)
+        binding.settingsAppNameValue.text = info.appName
+        binding.settingsAuthorValue.text = info.author
+        binding.settingsVersionValue.text = info.version
+        binding.settingsLastUpdateValue.text = info.lastDatabaseUpdate
+        binding.settingsDbSizeValue.text = info.databaseSize
     }
 
     private fun showHelp(titleResId: Int, messageResId: Int) {

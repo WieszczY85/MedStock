@@ -156,7 +156,7 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
 
     <string name="settings_info_title">App-Informationen</string>
     <string name="settings_author_value">Autor: WieszczY (SyntaxDevTeam)</string>
-    <string name="settings_db_date_value">Letzte Aktualisierung:  </string>
+    <string name="settings_db_date_value">Letzte Aktualisierung: %1$s</string>
     <string name="settings_version_value">Version: %1$s</string>
     <string name="settings_unknown_value">Keine Daten</string>
     <string name="settings_database_size_value">Datenbankgröße: %1$s (Änderung: %2$s)</string>

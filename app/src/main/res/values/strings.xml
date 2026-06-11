@@ -158,7 +158,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="settings_info_title">Application information</string>
     <string name="settings_author_value">Author: WieszczY (SyntaxDevTeam)</string>
     <string name="settings_version_value">Version: %1$s</string>
-    <string name="settings_db_date_value">Last update: </string>
+    <string name="settings_db_date_value">Last update: %1$s</string>
     <string name="settings_unknown_value">No data</string>
     <string name="settings_database_size_value">Database size: %1$s (modified: %2$s)</string>
     <string name="settings_theme_title">Dark theme</string>

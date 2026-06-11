@@ -42,9 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_2"
-            android:text="@string/pharmacy_catalog_show_on_map"
-            android:textColor="?attr/medColorTextPrimary"
-            />
+            android:text="@string/pharmacy_catalog_show_on_map" />
 
     </LinearLayout>
 
