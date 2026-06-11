@@ -11,5 +11,6 @@ data class SettingsUiState(
     val databaseModifiedAtMillis: Long?,
     val themeMode: AppThemeMode,
     val colorPalette: AppColorPalette,
-    val languageMode: AppLanguageMode
+    val languageMode: AppLanguageMode,
+    val showInactivePharmacies: Boolean
 )

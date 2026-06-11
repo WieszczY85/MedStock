@@ -352,4 +352,8 @@ Wybierz istniejący lek do aktualizacji albo dodaj ten wpis jako osobny lek.</st
         <item quantity="many">Jeszcze %d dotknięć do włączenia trybu programisty</item>
         <item quantity="other">Jeszcze %d dotknięcia do włączenia trybu programisty</item>
     </plurals>
+    <string name="settings_catalog_view_title">Widok katalogów</string>
+    <string name="settings_catalog_view_summary">Wybierz, które wpisy są widoczne w katalogach.</string>
+    <string name="settings_catalog_view_icon_description">Ustawienia widoku katalogów</string>
+    <string name="settings_show_inactive_pharmacies">Pokaż nieaktywne apteki</string>
 </resources>

@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
 import pl.syntaxdevteam.medstock.core.i18n.AppLanguageMode
 import pl.syntaxdevteam.medstock.core.i18n.LocaleManager
+import pl.syntaxdevteam.medstock.core.settings.CatalogViewPreferences
 import pl.syntaxdevteam.medstock.core.theme.AppColorPalette
 import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
 import pl.syntaxdevteam.medstock.core.theme.ThemeManager
@@ -34,6 +35,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val context = getApplication<Application>()
         ThemeManager.setColorPalette(context, colorPalette)
         _uiState.value = _uiState.value?.copy(colorPalette = colorPalette)
+    }
+
+    fun setShowInactivePharmacies(showInactivePharmacies: Boolean) {
+        val context = getApplication<Application>()
+        CatalogViewPreferences.setShowInactivePharmacies(context, showInactivePharmacies)
+        _uiState.value = _uiState.value?.copy(showInactivePharmacies = showInactivePharmacies)
     }
 
     fun setLanguageMode(languageMode: AppLanguageMode) {
@@ -67,7 +74,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     databaseModifiedAtMillis = databaseFile.takeIf(File::exists)?.lastModified(),
                     themeMode = ThemeManager.getThemeMode(context),
                     colorPalette = ThemeManager.getColorPalette(context),
-                    languageMode = LocaleManager.getLanguageMode(context)
+                    languageMode = LocaleManager.getLanguageMode(context),
+                    showInactivePharmacies = CatalogViewPreferences.shouldShowInactivePharmacies(context)
                 )
             )
         }

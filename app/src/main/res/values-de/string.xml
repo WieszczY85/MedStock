@@ -348,4 +348,8 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
         <item quantity="one">Noch eine Berührung bis zum Entwicklermodus</item>
         <item quantity="other">Noch %d Berührungen bis zum Entwicklermodus</item>
     </plurals>
+    <string name="settings_catalog_view_title">Katalogansicht</string>
+    <string name="settings_catalog_view_summary">Wählen Sie aus, welche Einträge in Katalogen sichtbar sind.</string>
+    <string name="settings_catalog_view_icon_description">Einstellungen der Katalogansicht</string>
+    <string name="settings_show_inactive_pharmacies">Inaktive Apotheken anzeigen</string>
 </resources>

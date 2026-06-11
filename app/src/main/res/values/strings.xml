@@ -350,4 +350,8 @@ Select an existing medication to update, or add this as a separate list entry.</
         <item quantity="one">One more tap to enable developer mode</item>
         <item quantity="other">%d more taps to enable developer mode</item>
     </plurals>
+    <string name="settings_catalog_view_title">Catalog view</string>
+    <string name="settings_catalog_view_summary">Choose which records are visible in catalogs.</string>
+    <string name="settings_catalog_view_icon_description">Catalog view settings</string>
+    <string name="settings_show_inactive_pharmacies">Show inactive pharmacies</string>
 </resources>

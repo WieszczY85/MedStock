@@ -59,8 +59,19 @@
         <item name="backgroundTint">?attr/medColorPrimarySoft</item>
         <item name="strokeColor">?attr/medColorPrimaryDark</item>
         <item name="strokeWidth">@dimen/card_stroke</item>
-        <item name="android:textColor">?attr/medColorPrimaryText</item>
+        <item name="android:textColor">?attr/medColorTextPrimary</item>
         <item name="shapeAppearance">@style/Shape.MedStock.Rounded.Medium</item>
+    </style>
+
+    <style name="Widget.MedStock.RadioButton.SettingsOption" parent="Widget.MaterialComponents.CompoundButton.RadioButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingStart">@dimen/space_3</item>
+        <item name="android:paddingEnd">@dimen/space_3</item>
+        <item name="android:textColor">?attr/medColorTextPrimary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="buttonTint">?attr/medColorPrimary</item>
     </style>
 
     <style name="Widget.MedStock.Button.CtaDanger" parent="Widget.MaterialComponents.Button.TextButton">

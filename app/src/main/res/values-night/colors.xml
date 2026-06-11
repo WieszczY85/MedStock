@@ -40,4 +40,9 @@
     <color name="preloader_progress_fill">#FF9EF38A</color>
     <color name="preloader_progress_track">#FF365239</color>
     <color name="medication_scan_match_background">#FF4B4214</color>
+    <color name="palette_preview_green">#FF4CAF50</color>
+    <color name="palette_preview_ocean">#FF1976D2</color>
+    <color name="palette_preview_berry">#FFD81B60</color>
+    <color name="palette_preview_sage">#FF7FA987</color>
+    <color name="palette_preview_lavender">#FFA98DD0</color>
 </resources>

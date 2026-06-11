@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pl.syntaxdevteam.medstock.R
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
+import pl.syntaxdevteam.medstock.core.settings.CatalogViewPreferences
 
 data class PharmacyCatalogEntry(
     val entityKey: String,
@@ -38,6 +39,8 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
     private var selectedLetter: String = "#"
     private var searchQuery: String = ""
     private var searchMode: SearchMode = SearchMode.CITY
+    private var showInactivePharmacies: Boolean =
+        CatalogViewPreferences.shouldShowInactivePharmacies(application)
     @Volatile private var isPageLoading: Boolean = false
     @Volatile private var reloadPending: Boolean = false
     @Volatile private var pendingResolveSearchMode: Boolean = true
@@ -49,6 +52,13 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
     val uiState: LiveData<PharmacyCatalogUiState> = _uiState
 
     init {
+        reloadCatalog()
+    }
+
+    fun refreshCatalogViewPreferences() {
+        val updatedValue = CatalogViewPreferences.shouldShowInactivePharmacies(getApplication())
+        if (updatedValue == showInactivePharmacies) return
+        showInactivePharmacies = updatedValue
         reloadCatalog()
     }
 
@@ -116,7 +126,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                         snapshotDate = snapshotCursor.getString(0)
                         recordCount = scalarInt(
                             db,
-                            "SELECT COUNT(*) FROM ra WHERE data_snapshot = ?",
+                            "SELECT COUNT(*) FROM ra s WHERE s.data_snapshot = ? ${buildPharmacyStatusClause()}",
                             arrayOf(snapshotDate ?: "")
                         )
                     }
@@ -124,6 +134,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
 
                 val selectedSnapshotDate = snapshotDate ?: return@launch
                 val clause = buildFilterClause(selectedLetter)
+                val pharmacyStatusClause = buildPharmacyStatusClause()
                 val args = mutableListOf<String>(selectedSnapshotDate)
                 when (selectedLetter) {
                     "123" -> args += "[0-9]*"
@@ -150,6 +161,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                            COALESCE(s.numer_lokalu, '')
                     FROM ra s
                     WHERE s.data_snapshot = ?
+                      $pharmacyStatusClause
                       $clause
                       $searchClause
                     ORDER BY COALESCE(s.miejscowosc, '') COLLATE NOCASE ASC,
@@ -201,6 +213,13 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
                 }
             }
         }
+    }
+
+    private fun buildPharmacyStatusClause(): String = if (showInactivePharmacies) {
+        ""
+    } else {
+        "AND LOWER(COALESCE(s.stan_apteki, '')) NOT LIKE '%nieakty%' " +
+            "AND LOWER(COALESCE(s.stan_apteki, '')) NOT LIKE '%inactive%'"
     }
 
     private fun normalizeFilter(letter: String): String {
@@ -270,6 +289,7 @@ class PharmacyCatalogViewModel(application: Application) : AndroidViewModel(appl
             SELECT COUNT(*)
             FROM ra s
             WHERE s.data_snapshot = ?
+              ${buildPharmacyStatusClause()}
               $letterClause
               AND (
                   COALESCE(s.miejscowosc, '') LIKE ?

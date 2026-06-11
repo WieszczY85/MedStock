@@ -54,33 +54,38 @@ class SettingsFragment : Fragment() {
             setCheckedThemeMode(state.themeMode)
             setCheckedColorPalette(state.colorPalette)
             setCheckedLanguageMode(state.languageMode)
+            if (binding.settingsShowInactivePharmaciesSwitch.isChecked != state.showInactivePharmacies) {
+                binding.settingsShowInactivePharmaciesSwitch.isChecked = state.showInactivePharmacies
+            }
         }
 
-        binding.settingsThemeModeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
+        binding.settingsThemeModeGroup.setOnCheckedChangeListener { _, checkedId ->
             val themeMode = when (checkedId) {
                 R.id.settings_theme_auto_button -> AppThemeMode.AUTO
                 R.id.settings_theme_on_button -> AppThemeMode.ON
                 R.id.settings_theme_off_button -> AppThemeMode.OFF
-                else -> return@addOnButtonCheckedListener
+                else -> return@setOnCheckedChangeListener
             }
             settingsViewModel.setThemeMode(themeMode)
         }
 
-        binding.settingsPaletteGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
+        binding.settingsPaletteGroup.setOnCheckedChangeListener { _, checkedId ->
             val colorPalette = when (checkedId) {
                 R.id.settings_palette_green_button -> AppColorPalette.GREEN
                 R.id.settings_palette_ocean_button -> AppColorPalette.OCEAN
                 R.id.settings_palette_berry_button -> AppColorPalette.BERRY
                 R.id.settings_palette_sage_button -> AppColorPalette.SAGE
                 R.id.settings_palette_lavender_button -> AppColorPalette.LAVENDER
-                else -> return@addOnButtonCheckedListener
+                else -> return@setOnCheckedChangeListener
             }
             if (ThemeManager.getColorPalette(requireContext()) != colorPalette) {
                 settingsViewModel.setColorPalette(colorPalette)
                 requireActivity().recreate()
             }
+        }
+
+        binding.settingsShowInactivePharmaciesSwitch.setOnCheckedChangeListener { _, isChecked ->
+            settingsViewModel.setShowInactivePharmacies(isChecked)
         }
 
         binding.settingsLanguageModeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -166,7 +171,7 @@ class SettingsFragment : Fragment() {
             AppThemeMode.ON -> R.id.settings_theme_on_button
             AppThemeMode.OFF -> R.id.settings_theme_off_button
         }
-        if (binding.settingsThemeModeGroup.checkedButtonId != checkedButtonId) {
+        if (binding.settingsThemeModeGroup.checkedRadioButtonId != checkedButtonId) {
             binding.settingsThemeModeGroup.check(checkedButtonId)
         }
     }
@@ -179,7 +184,7 @@ class SettingsFragment : Fragment() {
             AppColorPalette.SAGE -> R.id.settings_palette_sage_button
             AppColorPalette.LAVENDER -> R.id.settings_palette_lavender_button
         }
-        if (binding.settingsPaletteGroup.checkedButtonId != checkedButtonId) {
+        if (binding.settingsPaletteGroup.checkedRadioButtonId != checkedButtonId) {
             binding.settingsPaletteGroup.check(checkedButtonId)
         }
     }

@@ -5,7 +5,7 @@
         <item name="colorOnPrimary">?attr/medColorPrimaryText</item>
         <item name="colorSecondary">?attr/medColorPrimarySoft</item>
         <item name="colorSecondaryVariant">?attr/medColorPrimaryDark</item>
-        <item name="colorOnSecondary">?attr/medColorPrimaryText</item>
+        <item name="colorOnSecondary">?attr/medColorTextPrimary</item>
         <item name="colorSurface">?attr/medColorSurface</item>
         <item name="android:colorAccent">?attr/medColorPrimary</item>
         <item name="android:windowBackground">?attr/medColorSurface</item>

@@ -46,7 +46,17 @@ class SettingsUiResourcesTest {
         val supportStyle = designSystem.substring(styleStart, styleEnd)
 
         assertTrue(supportStyle.contains("""<item name="backgroundTint">?attr/medColorPrimarySoft</item>"""))
-        assertTrue(supportStyle.contains("""<item name="android:textColor">?attr/medColorPrimaryText</item>"""))
+        assertTrue(supportStyle.contains("""<item name="android:textColor">?attr/medColorTextPrimary</item>"""))
+        listOf(
+            File("src/main/res/values/themes.xml"),
+            File("src/main/res/values-night/themes.xml")
+        ).forEach { themeFile ->
+            assertTrue(
+                themeFile.readText().contains(
+                    """<item name="colorOnSecondary">?attr/medColorTextPrimary</item>"""
+                )
+            )
+        }
 
         var supportButtonCount = 0
         File("src/main/res").walkTopDown()
@@ -75,6 +85,38 @@ class SettingsUiResourcesTest {
                 }
             }
         assertTrue(supportButtonCount > 0)
+    }
+
+    @Test
+    fun `theme choices use readable vertical radio lists`() {
+        val layout = File("src/main/res/layout/fragment_settings.xml").readText()
+
+        assertTrue(layout.contains("<RadioGroup"))
+        assertTrue(layout.contains("@+id/settings_theme_mode_group"))
+        assertTrue(layout.contains("@+id/settings_palette_group"))
+        assertTrue(layout.contains("@style/Widget.MedStock.RadioButton.SettingsOption"))
+        assertTrue(layout.contains("android:orientation=\"vertical\""))
+    }
+
+    @Test
+    fun `catalog visibility setting is localized in every supported language`() {
+        listOf(
+            File("src/main/res/values/strings.xml"),
+            File("src/main/res/values-pl/strings.xml"),
+            File("src/main/res/values-de/string.xml")
+        ).map(::stringResources).forEach { strings ->
+            assertTrue(strings.getValue("settings_catalog_view_title").isNotBlank())
+            assertTrue(strings.getValue("settings_show_inactive_pharmacies").isNotBlank())
+        }
+    }
+
+    @Test
+    fun `inactive pharmacies are hidden by default`() {
+        val preferences = File(
+            "src/main/java/pl/syntaxdevteam/medstock/core/settings/CatalogViewPreferences.kt"
+        ).readText()
+
+        assertTrue(preferences.contains("getBoolean(KEY_SHOW_INACTIVE_PHARMACIES, false)"))
     }
 
     private fun stringResources(file: File): Map<String, String> {
