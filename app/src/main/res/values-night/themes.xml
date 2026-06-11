@@ -1,5 +1,6 @@
 <resources>
     <style name="Theme.MedStock" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Standard Material Attributes -->
         <item name="colorPrimary">?attr/medColorPrimary</item>
         <item name="colorPrimaryVariant">?attr/medColorTitleBar</item>
         <item name="colorOnPrimary">?attr/medColorPrimaryText</item>
@@ -7,9 +8,17 @@
         <item name="colorSecondaryVariant">?attr/medColorPrimaryDark</item>
         <item name="colorOnSecondary">?attr/medColorTextPrimary</item>
         <item name="colorSurface">?attr/medColorSurface</item>
+        <item name="colorOnSurface">?attr/medColorTextPrimary</item>
+        <item name="android:colorBackground">?attr/medColorSurface</item>
+        <item name="colorOnBackground">?attr/medColorTextPrimary</item>
+        <item name="colorAccent">?attr/medColorPrimary</item>
         <item name="android:colorAccent">?attr/medColorPrimary</item>
+
+        <!-- Window Attributes -->
         <item name="android:windowBackground">?attr/medColorSurface</item>
         <item name="android:statusBarColor">?attr/medColorTitleBar</item>
+
+        <!-- Custom medColor attributes (Default Green Palette) -->
         <item name="medColorPrimary">@color/green_500</item>
         <item name="medColorPrimaryDark">@color/green_700</item>
         <item name="medColorPrimaryText">@color/green_900</item>
@@ -26,6 +35,18 @@
         <item name="medColorBottomBar">@color/bottom_nav_background</item>
         <item name="medColorBottomSelected">@color/bottom_nav_selected</item>
         <item name="medColorBottomUnselected">@color/bottom_nav_unselected</item>
+    </style>
+
+    <style name="Theme.MedStock.NoActionBar" parent="Theme.MedStock">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.MedStock.Ringing" parent="Theme.MedStock.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:showWhenLocked">true</item>
+        <item name="android:turnScreenOn">true</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <style name="Theme.MedStock.Ocean.NoActionBar" parent="Theme.MedStock.NoActionBar">
@@ -104,7 +125,9 @@
         <item name="medColorBottomUnselected">#CBB8DA</item>
     </style>
 
-    <style name="Theme.MedStock.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"><item name="colorControlNormal">?attr/medColorTopBarContent</item></style>
+    <style name="Theme.MedStock.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorControlNormal">?attr/medColorTopBarContent</item>
+    </style>
 
     <style name="Theme.MedStock.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight" />
 </resources>

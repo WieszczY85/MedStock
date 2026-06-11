@@ -2,10 +2,10 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:alpha="0.38"
-        android:color="?attr/medColorTextSecondary"
+        android:color="?medColorTextSecondary"
         android:state_enabled="false" />
     <item
-        android:color="?attr/medColorPrimary"
+        android:color="?medColorPrimary"
         android:state_checked="true" />
-    <item android:color="?attr/medColorTextSecondary" />
+    <item android:color="?medColorTextSecondary" />
 </selector>

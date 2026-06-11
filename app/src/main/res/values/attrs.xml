@@ -1,18 +1,18 @@
 <resources>
-    <attr name="medColorPrimary" format="color" />
-    <attr name="medColorPrimaryDark" format="color" />
-    <attr name="medColorPrimaryText" format="color" />
-    <attr name="medColorPrimarySoft" format="color" />
-    <attr name="medColorSurface" format="color" />
-    <attr name="medColorSurfaceCard" format="color" />
-    <attr name="medColorSurfaceCardSoft" format="color" />
-    <attr name="medColorTextPrimary" format="color" />
-    <attr name="medColorTextSecondary" format="color" />
-    <attr name="medColorTopBar" format="color" />
-    <attr name="medColorTopBarContent" format="color" />
-    <attr name="medColorTitleBar" format="color" />
-    <attr name="medColorTitleBarText" format="color" />
-    <attr name="medColorBottomBar" format="color" />
-    <attr name="medColorBottomSelected" format="color" />
-    <attr name="medColorBottomUnselected" format="color" />
+    <attr name="medColorPrimary" format="color|reference" />
+    <attr name="medColorPrimaryDark" format="color|reference" />
+    <attr name="medColorPrimaryText" format="color|reference" />
+    <attr name="medColorPrimarySoft" format="color|reference" />
+    <attr name="medColorSurface" format="color|reference" />
+    <attr name="medColorSurfaceCard" format="color|reference" />
+    <attr name="medColorSurfaceCardSoft" format="color|reference" />
+    <attr name="medColorTextPrimary" format="color|reference" />
+    <attr name="medColorTextSecondary" format="color|reference" />
+    <attr name="medColorTopBar" format="color|reference" />
+    <attr name="medColorTopBarContent" format="color|reference" />
+    <attr name="medColorTitleBar" format="color|reference" />
+    <attr name="medColorTitleBarText" format="color|reference" />
+    <attr name="medColorBottomBar" format="color|reference" />
+    <attr name="medColorBottomSelected" format="color|reference" />
+    <attr name="medColorBottomUnselected" format="color|reference" />
 </resources>
