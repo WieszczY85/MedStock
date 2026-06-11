@@ -13,6 +13,7 @@ import pl.syntaxdevteam.medstock.core.i18n.AppLanguageMode
 import pl.syntaxdevteam.medstock.core.i18n.LocaleManager
 import pl.syntaxdevteam.medstock.core.theme.AppColorPalette
 import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
+import pl.syntaxdevteam.medstock.core.theme.AppColorPalette
 import pl.syntaxdevteam.medstock.core.theme.ThemeManager
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
