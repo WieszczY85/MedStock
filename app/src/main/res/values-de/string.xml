@@ -272,7 +272,7 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
 
     <string name="account_toolbar_subtitle">Google und Cloud-Backup</string>
     <string name="account_google_title">Google-Konto</string>
-    <string name="account_google_summary">Verbinde MedStock mit deinem Google-Konto, \num Zugriff auf erweiterte App-Funktionen zu erhalten.</string>
+    <string name="account_google_summary">Konto verbinden, um Profilbild und Drive-Backup zu verwenden.</string>
     <string name="account_google_connect_button">Google-Konto verbinden</string>
     <string name="account_google_disconnect_button">Konto trennen</string>
     <string name="account_google_not_connected_email">Kein verbundenes Google-Konto</string>
@@ -286,7 +286,7 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
     <string name="account_disconnect_dialog_message">Das Drive-Backup wird deaktiviert, und lokale Verbindungsdaten des Kontos werden gelöscht.</string>
     <string name="account_disconnect_dialog_confirm">Trennen</string>
     <string name="account_drive_title">Backup in Google Drive</string>
-    <string name="account_drive_summary">Die optionale Google-Drive-Sicherung speichert eine JSON-Kopie deiner Arzneimittel, der von dir eingegebenen Dosierung, Bestände, Erinnerungen, Alarmeinstellungen und App-Einstellungen im appDataFolder-Bereich deines Google Drive, damit du sie nach der Anmeldung in MedStock wiederherstellen kannst.</string>
+    <string name="account_drive_summary">Automatische Sicherung der App-Daten in Google Drive.</string>
     <string name="account_drive_switch_label">Kopie der App-Daten in Google Drive speichern</string>
     <string name="account_drive_backup_now_button">Daten jetzt sichern</string>
     <string name="account_drive_requires_google">Verbinde zuerst ein Google-Konto.</string>
@@ -295,8 +295,8 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
     <string name="account_drive_snapshot_failed_message">Die Kopie der App-Daten konnte nicht vorbereitet werden.</string>
     <string name="account_drive_snapshot_uploaded_message">Die Sicherung wurde in Google Drive hochgeladen.</string>
     <string name="account_drive_status_connect_first">Das Backup in Google Drive ist nach dem Verbinden eines Google-Kontos verfügbar.</string>
-    <string name="account_drive_status_enabled">Die Google-Drive-Sicherung ist aktiviert. Arzneimitteldaten, von dir eingegebene Dosierung, Bestände, Erinnerungen, Alarmeinstellungen und App-Einstellungen werden in den appDataFolder-Bereich deines Google Drive hochgeladen.</string>
-    <string name="account_drive_status_enabled_with_date">Das Backup in Google Drive ist aktiviert. \nLetzte Datensicherung: %1$s.</string>
+    <string name="account_drive_status_enabled">Automatische Sicherungen sind aktiviert. Die erste Sicherung wird nach der Drive-Freigabe erstellt.</string>
+    <string name="account_drive_status_enabled_with_date">Automatische Sicherungen sind aktiviert.\nLetzte Datensicherung: %1$s.</string>
     <string name="account_drive_status_disabled">Das Backup in Google Drive ist deaktiviert.</string>
     <string name="account_drive_restore_dialog_title">Gefundene Sicherung wiederherstellen?</string>
     <string name="account_drive_restore_dialog_message">Es wurde eine Sicherung vom %1$s gefunden. Sie enthält %2$d Arzneimittel und %3$d Alarme. Die Wiederherstellung ersetzt lokale Arzneimittel und Alarme und übernimmt gespeicherte Einstellungen.</string>
@@ -307,6 +307,11 @@ Wähle ein vorhandenes Arzneimittel zur Aktualisierung oder füge diesen Eintrag
     <string name="account_drive_restore_failed_message">Die Sicherung konnte nicht wiederhergestellt werden.</string>
     <string name="account_drive_authorization_cancelled_message">Der Zugriff auf Google Drive wurde nicht gewährt.</string>
     <string name="account_drive_authorization_required_message">Die Bestätigung des Zugriffs auf Google Drive ist erforderlich.</string>
+    <string name="account_google_help_content_description">Hilfe zum Google-Konto</string>
+    <string name="account_google_help_message">MedStock speichert die Adresse des gewählten Kontos lokal und lädt das Google-Profilbild. Der Profilzugriff erfordert eine Google-Freigabe. Ist das Bild nicht verfügbar, wird der erste Buchstabe der E-Mail-Adresse angezeigt.</string>
+    <string name="account_drive_help_content_description">Hilfe zur Google-Drive-Sicherung</string>
+    <string name="account_drive_help_message">Nach dem Aktivieren erstellt MedStock sofort und danach ungefähr alle 24 Stunden bei bestehender Internetverbindung eine Sicherung. Android kann Hintergrundaufgaben verzögern. Die JSON-Sicherung enthält Arzneimittel, Dosierungen, Bestände, Erinnerungen, Alarmeinstellungen und App-Einstellungen und liegt im privaten appDataFolder deines Google Drive.</string>
+    <string name="account_google_avatar_failed_message">Das Google-Profilbild konnte nicht geladen werden. Prüfe den Kontozugriff und öffne den Konto-Bildschirm erneut.</string>
     <string name="account_google_avatar_content_description">Google-Konto-Avatar</string>
 
     <string name="pharmacy_catalog_show_on_map">Auf Karte anzeigen</string>

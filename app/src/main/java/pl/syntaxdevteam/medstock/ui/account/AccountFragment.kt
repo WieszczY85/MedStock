@@ -63,6 +63,12 @@ class AccountFragment : Fragment() {
     private fun setupClickListeners() {
         binding.accountGoogleConnectButton.setOnClickListener { openGoogleAccountPicker() }
         binding.accountGoogleDisconnectButton.setOnClickListener { confirmDisconnect() }
+        binding.accountGoogleHelp.setOnClickListener {
+            showHelp(R.string.account_google_title, R.string.account_google_help_message)
+        }
+        binding.accountDriveHelp.setOnClickListener {
+            showHelp(R.string.account_drive_title, R.string.account_drive_help_message)
+        }
         binding.accountDriveBackupSwitch.setOnCheckedChangeListener { _, isChecked ->
             val state = viewModel.uiState.value
             if (state?.driveBackupEnabled == isChecked) return@setOnCheckedChangeListener
@@ -154,11 +160,22 @@ class AccountFragment : Fragment() {
                 connectTimeout = AVATAR_CONNECT_TIMEOUT_MILLIS
                 readTimeout = AVATAR_READ_TIMEOUT_MILLIS
                 requestMethod = "GET"
+                instanceFollowRedirects = true
+                setRequestProperty("Accept", "image/*")
+                if (responseCode !in 200..299) return@run null
                 inputStream.use(BitmapFactory::decodeStream)
             } finally {
                 disconnect()
             }
         }
+
+    private fun showHelp(titleResId: Int, messageResId: Int) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(titleResId)
+            .setMessage(messageResId)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
 
     private fun showRestorePrompt(prompt: AccountRestorePrompt) {
         viewModel.dismissRestorePrompt()

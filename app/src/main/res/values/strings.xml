@@ -274,7 +274,7 @@ Select an existing medication to update, or add this as a separate list entry.</
 
     <string name="account_toolbar_subtitle">Google and cloud backup</string>
     <string name="account_google_title">Google account</string>
-    <string name="account_google_summary">Connect MedStock to your Google account\n to access advanced application features.</string>
+    <string name="account_google_summary">Connect an account to use its avatar and Drive backup.</string>
     <string name="account_google_connect_button">Connect Google account</string>
     <string name="account_google_disconnect_button">Disconnect account</string>
     <string name="account_google_not_connected_email">No Google account connected</string>
@@ -287,7 +287,7 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="account_disconnect_dialog_message">Drive backup will be disabled and local account connection data will be removed.</string>
     <string name="account_disconnect_dialog_confirm">Disconnect</string>
     <string name="account_drive_title">Google Drive backup</string>
-    <string name="account_drive_summary">Optional Google Drive backup stores a JSON copy of your medicinal products, user-entered dosage, stock levels, reminders, alert settings, and app preferences in your Google Drive appDataFolder so you can restore them after signing in to MedStock.</string>
+    <string name="account_drive_summary">Automatic app data backup in Google Drive.</string>
     <string name="account_drive_switch_label">Save app data backup in Google Drive</string>
     <string name="account_drive_backup_now_button">Create data backup now</string>
     <string name="account_drive_requires_google">Connect a Google account first.</string>
@@ -296,8 +296,8 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="account_drive_snapshot_uploaded_message">Backup uploaded to Google Drive.</string>
     <string name="account_drive_snapshot_failed_message">Could not upload app data backup to Google Drive.</string>
     <string name="account_drive_status_connect_first">Google Drive backup is available after connecting a Google account.</string>
-    <string name="account_drive_status_enabled">Google Drive backup is enabled. Medicinal product records, user-entered dosage, stock levels, reminders, alert settings, and app preferences will be uploaded to your Google Drive appDataFolder.</string>
-    <string name="account_drive_status_enabled_with_date">Google Drive backup is enabled. \nLast data backup: %1$s.</string>
+    <string name="account_drive_status_enabled">Automatic backups are enabled. The first backup will run after Drive access is granted.</string>
+    <string name="account_drive_status_enabled_with_date">Automatic backups are enabled.\nLast data backup: %1$s.</string>
     <string name="account_drive_status_disabled">Google Drive backup is disabled.</string>
     <string name="account_drive_restore_dialog_title">Restore detected backup?</string>
     <string name="account_drive_restore_dialog_message">A backup from %1$s was found. It contains %2$d medications and %3$d alarms. Restoring it will replace local medications and alarms, and apply saved settings.</string>
@@ -309,6 +309,11 @@ Select an existing medication to update, or add this as a separate list entry.</
     <string name="account_drive_authorization_required_message">Google Drive access confirmation is required.</string>
     <string name="account_google_authorization_required_message">Google account profile access confirmation is required.</string>
     <string name="account_drive_authorization_cancelled_message">Google Drive access was not granted.</string>
+    <string name="account_google_help_content_description">Help for Google account</string>
+    <string name="account_google_help_message">MedStock stores the selected account address locally and downloads its Google profile picture. Profile access requires Google authorization. If the picture is unavailable, the first email character is shown.</string>
+    <string name="account_drive_help_content_description">Help for Google Drive backup</string>
+    <string name="account_drive_help_message">Once enabled, MedStock creates a backup immediately and then automatically about every 24 hours while the device has internet access. Android may delay background work. The JSON backup contains medications, user-entered dosage, stock levels, reminders, alert settings and app preferences, and is stored in the private appDataFolder area of your Google Drive.</string>
+    <string name="account_google_avatar_failed_message">The Google profile picture could not be loaded. Check account access and reopen the Account screen to retry.</string>
     <string name="account_google_avatar_content_description">Google account avatar</string>
 
     <string name="pharmacy_catalog_show_on_map">Show on map</string>

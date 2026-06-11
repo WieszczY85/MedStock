@@ -94,6 +94,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.play.services.code.scanner)
     implementation(libs.play.services.auth)
     implementation(libs.material)

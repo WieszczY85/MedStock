@@ -24,12 +24,30 @@
                 android:orientation="vertical"
                 android:padding="@dimen/space_4">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/account_google_title"
-                    android:textColor="?attr/medColorTextPrimary"
-                    android:textStyle="bold" />
+                    android:baselineAligned="false"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/account_google_title"
+                        android:textColor="?attr/medColorTextPrimary"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/account_google_help"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/account_google_help_content_description"
+                        android:src="@drawable/ic_help_small_24" />
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -130,12 +148,30 @@
                 android:orientation="vertical"
                 android:padding="@dimen/space_4">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/account_drive_title"
-                    android:textColor="?attr/medColorTextPrimary"
-                    android:textStyle="bold" />
+                    android:baselineAligned="false"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/account_drive_title"
+                        android:textColor="?attr/medColorTextPrimary"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/account_drive_help"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/account_drive_help_content_description"
+                        android:src="@drawable/ic_help_small_24" />
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="match_parent"

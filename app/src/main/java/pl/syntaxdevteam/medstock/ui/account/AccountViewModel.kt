@@ -14,6 +14,7 @@ import pl.syntaxdevteam.medstock.core.account.AccountState
 import pl.syntaxdevteam.medstock.core.account.AccountStateStore
 import pl.syntaxdevteam.medstock.core.account.BackupSnapshotMetadata
 import pl.syntaxdevteam.medstock.core.account.DriveBackupAuthorizationRequiredException
+import pl.syntaxdevteam.medstock.core.account.DriveBackupScheduler
 import pl.syntaxdevteam.medstock.core.account.DriveBackupSnapshotRepository
 import pl.syntaxdevteam.medstock.core.account.GoogleAccountProfileClient
 import pl.syntaxdevteam.medstock.core.account.GoogleProfileAuthorizationRequiredException
@@ -35,7 +36,11 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
     private var pendingAuthorizationTarget: PendingAuthorizationTarget? = null
 
     init {
-        publishState(accountStore.getState())
+        val state = accountStore.getState()
+        publishState(state)
+        if (state.isConnected) {
+            refreshGoogleProfile()
+        }
     }
 
     fun connect(email: String) {
@@ -48,6 +53,7 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun disconnect() {
+        DriveBackupScheduler.cancel(getApplication())
         accountStore.disconnect()
         publishState(accountStore.getState(), transientMessageRes = R.string.account_google_disconnected_message)
     }
@@ -62,6 +68,7 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
         if (enabled) {
             createBackupSnapshot()
         } else {
+            DriveBackupScheduler.cancel(getApplication())
             publishState(accountStore.getState(), transientMessageRes = R.string.account_drive_disabled_message)
         }
     }
@@ -78,7 +85,6 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
             val result = runCatching {
                 backupRepository.restoreLatestSnapshot(state.email)
                 reminderScheduler.rescheduleAll()
-                accountStore.markBackupCreated()
                 accountStore.getState()
             }
             withContext(Dispatchers.Main) {
@@ -117,9 +123,41 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
                     onSuccess = {
                         pendingAuthorizationTarget = null
                         pendingDriveAction = null
+                        DriveBackupScheduler.schedule(getApplication())
                         publishState(it, transientMessageRes = R.string.account_drive_snapshot_uploaded_message)
                     },
                     onFailure = { throwable -> handleDriveFailure(throwable, R.string.account_drive_snapshot_failed_message) }
+                )
+            }
+        }
+    }
+
+    fun refreshGoogleProfile() {
+        val state = accountStore.getState()
+        if (!state.isConnected) return
+        pendingDriveAction = PendingDriveAction.REFRESH_PROFILE
+        _uiState.value = buildUiState(state, isBusy = true)
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching { profileClient.fetchProfile(state.email) }
+            val authorizationException = result.exceptionOrNull() as? GoogleProfileAuthorizationRequiredException
+            if (authorizationException?.authorizationIntent != null) {
+                pendingAuthorizationTarget = PendingAuthorizationTarget.GOOGLE_PROFILE
+                withContext(Dispatchers.Main) {
+                    _uiState.value = buildUiState(
+                        state = accountStore.getState(),
+                        transientMessageRes = R.string.account_google_authorization_required_message,
+                        driveAuthorizationIntent = authorizationException.authorizationIntent,
+                    )
+                }
+                return@launch
+            }
+            result.getOrNull()?.avatarUrl?.let { accountStore.setAvatarUrl(state.email, it) }
+            withContext(Dispatchers.Main) {
+                pendingAuthorizationTarget = null
+                pendingDriveAction = null
+                publishState(
+                    accountStore.getState(),
+                    transientMessageRes = if (result.isFailure) R.string.account_google_avatar_failed_message else null,
                 )
             }
         }
@@ -133,10 +171,18 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
         when (pendingAuthorizationTarget) {
             PendingAuthorizationTarget.GOOGLE_PROFILE -> {
                 pendingAuthorizationTarget = null
-                val state = accountStore.getState()
-                _uiState.value = buildUiState(state, isBusy = true)
-                viewModelScope.launch(Dispatchers.IO) {
-                    findBackupAfterConnect(state)
+                if (pendingDriveAction == PendingDriveAction.CONNECT_LOOKUP) {
+                    val state = accountStore.getState()
+                    _uiState.value = buildUiState(state, isBusy = true)
+                    viewModelScope.launch(Dispatchers.IO) {
+                        findBackupAfterConnect(state)
+                    }
+                } else {
+                    pendingDriveAction = null
+                    publishState(
+                        accountStore.getState(),
+                        transientMessageRes = R.string.account_google_avatar_failed_message,
+                    )
                 }
             }
             PendingAuthorizationTarget.GOOGLE_DRIVE, null -> {
@@ -156,6 +202,7 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
             }
             PendingDriveAction.CREATE_BACKUP -> createBackupSnapshot()
             PendingDriveAction.RESTORE_BACKUP -> restoreBackupSnapshot()
+            PendingDriveAction.REFRESH_PROFILE -> refreshGoogleProfile()
             null -> publishState(accountStore.getState())
         }
     }
@@ -300,6 +347,7 @@ private enum class PendingDriveAction {
     CONNECT_LOOKUP,
     CREATE_BACKUP,
     RESTORE_BACKUP,
+    REFRESH_PROFILE,
 }
 
 private enum class PendingAuthorizationTarget {
