@@ -99,6 +99,20 @@ class SettingsUiResourcesTest {
     }
 
     @Test
+    fun `catalog visibility switch disables null state labels and uses palette colors`() {
+        val layout = File("src/main/res/layout/fragment_settings.xml").readText()
+        val designSystem = File("src/main/res/values/design_system.xml").readText()
+        val styleStart = designSystem.indexOf("Widget.MedStock.MaterialSwitch")
+        val styleEnd = designSystem.indexOf("</style>", styleStart)
+        val switchStyle = designSystem.substring(styleStart, styleEnd)
+
+        assertTrue(layout.contains("style=\"@style/Widget.MedStock.MaterialSwitch\""))
+        assertTrue(switchStyle.contains("<item name=\"showText\">false</item>"))
+        assertTrue(switchStyle.contains("@color/med_switch_thumb_tint"))
+        assertTrue(switchStyle.contains("@color/med_switch_track_tint"))
+    }
+
+    @Test
     fun `catalog visibility setting is localized in every supported language`() {
         listOf(
             File("src/main/res/values/strings.xml"),
