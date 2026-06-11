@@ -99,17 +99,32 @@ class SettingsUiResourcesTest {
     }
 
     @Test
-    fun `catalog visibility switch disables null state labels and uses palette colors`() {
+    fun `catalog visibility switch uses the Material Components widget and palette colors`() {
         val layout = File("src/main/res/layout/fragment_settings.xml").readText()
         val designSystem = File("src/main/res/values/design_system.xml").readText()
-        val styleStart = designSystem.indexOf("Widget.MedStock.MaterialSwitch")
+        val styleStart = designSystem.indexOf("Widget.MedStock.Switch")
         val styleEnd = designSystem.indexOf("</style>", styleStart)
         val switchStyle = designSystem.substring(styleStart, styleEnd)
 
-        assertTrue(layout.contains("style=\"@style/Widget.MedStock.MaterialSwitch\""))
+        assertTrue(layout.contains("com.google.android.material.switchmaterial.SwitchMaterial"))
+        assertTrue(layout.contains("style=\"@style/Widget.MedStock.Switch\""))
+        assertTrue(switchStyle.contains("Widget.MaterialComponents.CompoundButton.Switch"))
         assertTrue(switchStyle.contains("<item name=\"showText\">false</item>"))
+        assertTrue(switchStyle.contains("<item name=\"useMaterialThemeColors\">false</item>"))
         assertTrue(switchStyle.contains("@color/med_switch_thumb_tint"))
         assertTrue(switchStyle.contains("@color/med_switch_track_tint"))
+    }
+
+    @Test
+    fun `programmatic settings rendering does not invoke preference listeners`() {
+        val fragment = File(
+            "src/main/java/pl/syntaxdevteam/medstock/ui/settings/SettingsFragment.kt"
+        ).readText()
+
+        assertTrue(fragment.contains("isRenderingUiState = true"))
+        assertTrue(fragment.contains("isRenderingUiState = false"))
+        assertTrue(fragment.contains("if (isRenderingUiState) return@setOnCheckedChangeListener"))
+        assertTrue(fragment.contains("if (!isChecked || isRenderingUiState)"))
     }
 
     @Test

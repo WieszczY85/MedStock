@@ -142,9 +142,9 @@
                     android:text="@string/settings_catalog_view_summary"
                     android:textColor="?attr/medColorTextSecondary" />
 
-                <com.google.android.material.materialswitch.MaterialSwitch
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/settings_show_inactive_pharmacies_switch"
-                    style="@style/Widget.MedStock.MaterialSwitch"
+                    style="@style/Widget.MedStock.Switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_2"

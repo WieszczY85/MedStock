@@ -28,6 +28,7 @@ class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private var infoTapCount = 0
+    private var isRenderingUiState = false
 
     private val exportDatabaseLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("application/octet-stream")
@@ -50,16 +51,22 @@ class SettingsFragment : Fragment() {
         }
 
         settingsViewModel.uiState.observe(viewLifecycleOwner) { state ->
-            renderLocalizedAppInfo(state)
-            setCheckedThemeMode(state.themeMode)
-            setCheckedColorPalette(state.colorPalette)
-            setCheckedLanguageMode(state.languageMode)
-            if (binding.settingsShowInactivePharmaciesSwitch.isChecked != state.showInactivePharmacies) {
-                binding.settingsShowInactivePharmaciesSwitch.isChecked = state.showInactivePharmacies
+            isRenderingUiState = true
+            try {
+                renderLocalizedAppInfo(state)
+                setCheckedThemeMode(state.themeMode)
+                setCheckedColorPalette(state.colorPalette)
+                setCheckedLanguageMode(state.languageMode)
+                if (binding.settingsShowInactivePharmaciesSwitch.isChecked != state.showInactivePharmacies) {
+                    binding.settingsShowInactivePharmaciesSwitch.isChecked = state.showInactivePharmacies
+                }
+            } finally {
+                isRenderingUiState = false
             }
         }
 
         binding.settingsThemeModeGroup.setOnCheckedChangeListener { _, checkedId ->
+            if (isRenderingUiState) return@setOnCheckedChangeListener
             val themeMode = when (checkedId) {
                 R.id.settings_theme_auto_button -> AppThemeMode.AUTO
                 R.id.settings_theme_on_button -> AppThemeMode.ON
@@ -70,6 +77,7 @@ class SettingsFragment : Fragment() {
         }
 
         binding.settingsPaletteGroup.setOnCheckedChangeListener { _, checkedId ->
+            if (isRenderingUiState) return@setOnCheckedChangeListener
             val colorPalette = when (checkedId) {
                 R.id.settings_palette_green_button -> AppColorPalette.GREEN
                 R.id.settings_palette_ocean_button -> AppColorPalette.OCEAN
@@ -85,11 +93,13 @@ class SettingsFragment : Fragment() {
         }
 
         binding.settingsShowInactivePharmaciesSwitch.setOnCheckedChangeListener { _, isChecked ->
-            settingsViewModel.setShowInactivePharmacies(isChecked)
+            if (!isRenderingUiState) {
+                settingsViewModel.setShowInactivePharmacies(isChecked)
+            }
         }
 
         binding.settingsLanguageModeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
+            if (!isChecked || isRenderingUiState) return@addOnButtonCheckedListener
             val languageMode = when (checkedId) {
                 R.id.settings_language_auto_button -> AppLanguageMode.AUTO
                 R.id.settings_language_pl_button -> AppLanguageMode.POLISH

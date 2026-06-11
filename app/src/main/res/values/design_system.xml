@@ -63,8 +63,9 @@
         <item name="shapeAppearance">@style/Shape.MedStock.Rounded.Medium</item>
     </style>
 
-    <style name="Widget.MedStock.MaterialSwitch" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+    <style name="Widget.MedStock.Switch" parent="Widget.MaterialComponents.CompoundButton.Switch">
         <item name="showText">false</item>
+        <item name="useMaterialThemeColors">false</item>
         <item name="thumbTint">@color/med_switch_thumb_tint</item>
         <item name="trackTint">@color/med_switch_track_tint</item>
     </style>
