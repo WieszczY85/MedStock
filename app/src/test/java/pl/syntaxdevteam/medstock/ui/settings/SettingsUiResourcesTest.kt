@@ -123,8 +123,20 @@ class SettingsUiResourcesTest {
 
         assertTrue(fragment.contains("isRenderingUiState = true"))
         assertTrue(fragment.contains("isRenderingUiState = false"))
-        assertTrue(fragment.contains("if (isRenderingUiState) return@setOnCheckedChangeListener"))
-        assertTrue(fragment.contains("if (!isChecked || isRenderingUiState)"))
+        assertTrue(fragment.contains("isViewStateRestored = true"))
+        assertTrue(fragment.contains("if (!canHandlePreferenceChange()) return@setOnCheckedChangeListener"))
+        assertTrue(fragment.contains("if (!isChecked || !canHandlePreferenceChange())"))
+    }
+
+    @Test
+    fun `palette recreation runs after the radio group callback finishes`() {
+        val fragment = File(
+            "src/main/java/pl/syntaxdevteam/medstock/ui/settings/SettingsFragment.kt"
+        ).readText()
+
+        assertTrue(fragment.contains("schedulePaletteRecreation(colorPalette)"))
+        assertTrue(fragment.contains("yield()"))
+        assertTrue(fragment.contains("isPaletteRecreationPending"))
     }
 
     @Test
