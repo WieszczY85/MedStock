@@ -8,11 +8,13 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import java.io.FileInputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import kotlinx.coroutines.withContext
 import pl.syntaxdevteam.medstock.R
 import pl.syntaxdevteam.medstock.core.download.RegistryIngestDatabaseHelper
@@ -29,6 +31,8 @@ class SettingsFragment : Fragment() {
     private val binding get() = _binding!!
     private var infoTapCount = 0
     private var isRenderingUiState = false
+    private var isViewStateRestored = false
+    private var isPaletteRecreationPending = false
 
     private val exportDatabaseLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("application/octet-stream")
@@ -50,23 +54,10 @@ class SettingsFragment : Fragment() {
             View.GONE
         }
 
-        settingsViewModel.uiState.observe(viewLifecycleOwner) { state ->
-            isRenderingUiState = true
-            try {
-                renderLocalizedAppInfo(state)
-                setCheckedThemeMode(state.themeMode)
-                setCheckedColorPalette(state.colorPalette)
-                setCheckedLanguageMode(state.languageMode)
-                if (binding.settingsShowInactivePharmaciesSwitch.isChecked != state.showInactivePharmacies) {
-                    binding.settingsShowInactivePharmaciesSwitch.isChecked = state.showInactivePharmacies
-                }
-            } finally {
-                isRenderingUiState = false
-            }
-        }
+        settingsViewModel.uiState.observe(viewLifecycleOwner, ::renderUiState)
 
         binding.settingsThemeModeGroup.setOnCheckedChangeListener { _, checkedId ->
-            if (isRenderingUiState) return@setOnCheckedChangeListener
+            if (!canHandlePreferenceChange()) return@setOnCheckedChangeListener
             val themeMode = when (checkedId) {
                 R.id.settings_theme_auto_button -> AppThemeMode.AUTO
                 R.id.settings_theme_on_button -> AppThemeMode.ON
@@ -77,7 +68,7 @@ class SettingsFragment : Fragment() {
         }
 
         binding.settingsPaletteGroup.setOnCheckedChangeListener { _, checkedId ->
-            if (isRenderingUiState) return@setOnCheckedChangeListener
+            if (!canHandlePreferenceChange()) return@setOnCheckedChangeListener
             val colorPalette = when (checkedId) {
                 R.id.settings_palette_green_button -> AppColorPalette.GREEN
                 R.id.settings_palette_ocean_button -> AppColorPalette.OCEAN
@@ -88,18 +79,18 @@ class SettingsFragment : Fragment() {
             }
             if (ThemeManager.getColorPalette(requireContext()) != colorPalette) {
                 settingsViewModel.setColorPalette(colorPalette)
-                requireActivity().recreate()
+                schedulePaletteRecreation(colorPalette)
             }
         }
 
         binding.settingsShowInactivePharmaciesSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (!isRenderingUiState) {
+            if (canHandlePreferenceChange()) {
                 settingsViewModel.setShowInactivePharmacies(isChecked)
             }
         }
 
         binding.settingsLanguageModeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked || isRenderingUiState) return@addOnButtonCheckedListener
+            if (!isChecked || !canHandlePreferenceChange()) return@addOnButtonCheckedListener
             val languageMode = when (checkedId) {
                 R.id.settings_language_auto_button -> AppLanguageMode.AUTO
                 R.id.settings_language_pl_button -> AppLanguageMode.POLISH
@@ -175,6 +166,45 @@ class SettingsFragment : Fragment() {
 
     private val resetInfoTapCount = Runnable { infoTapCount = 0 }
 
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        val settingsViewModel = ViewModelProvider(this)[SettingsViewModel::class.java]
+        settingsViewModel.uiState.value?.let(::renderUiState)
+        isViewStateRestored = true
+    }
+
+    private fun renderUiState(state: SettingsUiState) {
+        isRenderingUiState = true
+        try {
+            renderLocalizedAppInfo(state)
+            setCheckedThemeMode(state.themeMode)
+            setCheckedColorPalette(state.colorPalette)
+            setCheckedLanguageMode(state.languageMode)
+            if (binding.settingsShowInactivePharmaciesSwitch.isChecked != state.showInactivePharmacies) {
+                binding.settingsShowInactivePharmaciesSwitch.isChecked = state.showInactivePharmacies
+            }
+        } finally {
+            isRenderingUiState = false
+        }
+    }
+
+    private fun canHandlePreferenceChange(): Boolean = isViewStateRestored && !isRenderingUiState
+
+    private fun schedulePaletteRecreation(colorPalette: AppColorPalette) {
+        if (isPaletteRecreationPending) return
+        isPaletteRecreationPending = true
+        viewLifecycleOwner.lifecycleScope.launch {
+            yield()
+            isPaletteRecreationPending = false
+            if (
+                viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED) &&
+                ThemeManager.getColorPalette(requireContext()) == colorPalette
+            ) {
+                requireActivity().recreate()
+            }
+        }
+    }
+
     private fun setCheckedThemeMode(themeMode: AppThemeMode) {
         val checkedButtonId = when (themeMode) {
             AppThemeMode.AUTO -> R.id.settings_theme_auto_button
@@ -213,6 +243,8 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        isViewStateRestored = false
+        isPaletteRecreationPending = false
         binding.settingsInfoCard.removeCallbacks(resetInfoTapCount)
         super.onDestroyView()
         _binding = null
