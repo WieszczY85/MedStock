@@ -11,10 +11,10 @@ class UserMedicationRepository(context: Context) {
     private val dbHelper = RegistryIngestDatabaseHelper.getInstance(context)
 
     fun getAll(): List<UserMedication> {
-        applyDailyStockDepletion()
+        reconcileStockDepletion()
         val db = dbHelper.readableDatabase
         val query = """
-            SELECT id, name, strength, active_substance, package_size, unit, current_stock, dosage, alert_days
+            SELECT id, name, strength, active_substance, package_size, unit, current_stock, dosage, alert_days, last_stock_update_utc
             FROM user_medication
             ORDER BY updated_at_utc DESC, id DESC
         """.trimIndent()
@@ -31,7 +31,8 @@ class UserMedicationRepository(context: Context) {
                     unit = cursor.getString(5).orEmpty(),
                     currentStock = cursor.getInt(6),
                     dosage = cursor.getString(7).orEmpty(),
-                    alertDays = cursor.getInt(8)
+                    alertDays = cursor.getInt(8),
+                    lastStockUpdateUtc = cursor.getString(9).orEmpty()
                 )
             }
             return medications
@@ -49,6 +50,7 @@ class UserMedicationRepository(context: Context) {
         alertDays: Int
     ): Long {
         val db = dbHelper.writableDatabase
+        val now = currentUtcDateTime()
         val values = ContentValues().apply {
             put("name", name)
             put("strength", strength)
@@ -58,6 +60,8 @@ class UserMedicationRepository(context: Context) {
             put("current_stock", currentStock)
             put("dosage", dosage)
             put("alert_days", alertDays)
+            put("last_stock_update_utc", now)
+            put("updated_at_utc", now)
         }
         return db.insertOrThrow("user_medication", null, values)
     }
@@ -74,6 +78,7 @@ class UserMedicationRepository(context: Context) {
         alertDays: Int
     ): Int {
         val db = dbHelper.writableDatabase
+        val now = currentUtcDateTime()
         val values = ContentValues().apply {
             put("name", name)
             put("strength", strength)
@@ -83,8 +88,8 @@ class UserMedicationRepository(context: Context) {
             put("current_stock", currentStock)
             put("dosage", dosage)
             put("alert_days", alertDays)
-            put("last_stock_update_utc", currentUtcDateTime())
-            put("updated_at_utc", currentUtcDateTime())
+            put("last_stock_update_utc", now)
+            put("updated_at_utc", now)
         }
         return db.update("user_medication", values, "id = ?", arrayOf(id.toString()))
     }
@@ -112,20 +117,22 @@ class UserMedicationRepository(context: Context) {
         return dbHelper.writableDatabase.delete("user_medication", "id = ?", arrayOf(id.toString()))
     }
 
-    private fun applyDailyStockDepletion() {
+    fun reconcileStockDepletion(): Int {
         val db = dbHelper.writableDatabase
+        val now = currentUtcDateTime()
         val query = """
             SELECT id, current_stock, dosage, last_stock_update_utc
             FROM user_medication
         """.trimIndent()
 
+        var updatedRows = 0
         db.rawQuery(query, null).use { cursor ->
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(0)
                 val currentStock = cursor.getInt(1)
                 val dosage = cursor.getString(2).orEmpty()
                 val lastStockUpdateUtc = cursor.getString(3).orEmpty()
-                val daysElapsed = fullDaysSince(lastStockUpdateUtc)
+                val daysElapsed = fullDaysBetween(lastStockUpdateUtc, now)
                 if (daysElapsed <= 0) continue
                 val dosagePerDay = MedicationStockCalculator.parseDailyUsage(dosage)
                 if (dosagePerDay <= 0.0) continue
@@ -133,18 +140,22 @@ class UserMedicationRepository(context: Context) {
                 val updatedStock = (currentStock - depletion).coerceAtLeast(0)
                 val values = ContentValues().apply {
                     put("current_stock", updatedStock)
-                    put("last_stock_update_utc", currentUtcDateTime())
-                    put("updated_at_utc", currentUtcDateTime())
+                    put("last_stock_update_utc", now)
+                    put("updated_at_utc", now)
                 }
-                db.update("user_medication", values, "id = ?", arrayOf(id.toString()))
+                updatedRows += db.update("user_medication", values, "id = ?", arrayOf(id.toString()))
             }
         }
+        return updatedRows
     }
 
-    private fun fullDaysSince(lastStockUpdateUtc: String): Long {
-        if (lastStockUpdateUtc.isBlank()) return 0
+    private fun fullDaysBetween(lastStockUpdateUtc: String, currentUtc: String): Long {
+        if (lastStockUpdateUtc.isBlank() || currentUtc.isBlank()) return 0
         val db = dbHelper.readableDatabase
-        db.rawQuery("SELECT CAST((julianday('now') - julianday(?)) AS INTEGER)", arrayOf(lastStockUpdateUtc)).use { cursor ->
+        db.rawQuery(
+            "SELECT CAST((julianday(?) - julianday(?)) AS INTEGER)",
+            arrayOf(currentUtc, lastStockUpdateUtc)
+        ).use { cursor ->
             if (cursor.moveToFirst()) {
                 return cursor.getLong(0).coerceAtLeast(0)
             }

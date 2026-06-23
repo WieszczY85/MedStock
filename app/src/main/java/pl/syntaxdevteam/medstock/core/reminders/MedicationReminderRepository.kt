@@ -163,7 +163,7 @@ class MedicationReminderRepository(context: Context) {
         val byId = mutableMapOf<Long, UserMedication>()
         dbHelper.readableDatabase.rawQuery(
             """
-            SELECT id, name, strength, active_substance, package_size, unit, current_stock, dosage, alert_days
+            SELECT id, name, strength, active_substance, package_size, unit, current_stock, dosage, alert_days, last_stock_update_utc
             FROM user_medication
             WHERE id IN ($placeholders)
             """.trimIndent(),
@@ -179,7 +179,8 @@ class MedicationReminderRepository(context: Context) {
                     unit = cursor.getString(5).orEmpty(),
                     currentStock = cursor.getInt(6),
                     dosage = cursor.getString(7).orEmpty(),
-                    alertDays = cursor.getInt(8)
+                    alertDays = cursor.getInt(8),
+                    lastStockUpdateUtc = cursor.getString(9).orEmpty()
                 )
                 byId[medication.id] = medication
             }

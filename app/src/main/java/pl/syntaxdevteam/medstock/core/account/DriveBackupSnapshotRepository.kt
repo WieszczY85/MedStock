@@ -14,6 +14,9 @@ import pl.syntaxdevteam.medstock.core.theme.AppThemeMode
 import pl.syntaxdevteam.medstock.core.theme.AppColorPalette
 import pl.syntaxdevteam.medstock.core.theme.ThemeManager
 import java.io.File
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 class DriveBackupSnapshotRepository(context: Context) {
 
@@ -47,6 +50,7 @@ class DriveBackupSnapshotRepository(context: Context) {
                         put("currentStock", medication.currentStock)
                         put("dosage", medication.dosage)
                         put("alertDays", medication.alertDays)
+                        put("lastStockUpdateUtc", medication.lastStockUpdateUtc)
                     })
                 }
             })
@@ -114,8 +118,12 @@ class DriveBackupSnapshotRepository(context: Context) {
             db.delete("user_medication", null, null)
 
             val medications = payload.optJSONArray("medications") ?: JSONArray()
+            val fallbackLastStockUpdateUtc = backupCreatedAtAsDatabaseDateTime(payload)
             for (index in 0 until medications.length()) {
                 val medication = medications.optJSONObject(index) ?: continue
+                val lastStockUpdateUtc = medication.optString("lastStockUpdateUtc")
+                    .takeIf { it.isNotBlank() }
+                    ?: fallbackLastStockUpdateUtc
                 val snapshotId = medication.optLong("id", 0L).takeIf { it > 0L }
                 val restoredId = db.insertOrThrow("user_medication", null, ContentValues().apply {
                     snapshotId?.let { put("id", it) }
@@ -127,6 +135,7 @@ class DriveBackupSnapshotRepository(context: Context) {
                     put("current_stock", medication.optInt("currentStock", 0))
                     put("dosage", medication.optString("dosage"))
                     put("alert_days", medication.optInt("alertDays", 0))
+                    put("last_stock_update_utc", lastStockUpdateUtc)
                 })
                 snapshotId?.let { medicationIdMap[it] = restoredId }
             }
@@ -157,6 +166,7 @@ class DriveBackupSnapshotRepository(context: Context) {
         }
 
         restorePreferences(payload.optJSONObject("preferences"))
+        medicationRepository.reconcileStockDepletion()
         return BackupRestoreResult(
             medicationCount = payload.optJSONArray("medications")?.length() ?: 0,
             reminderCount = payload.optJSONArray("reminders")?.length() ?: 0,
@@ -191,6 +201,11 @@ class DriveBackupSnapshotRepository(context: Context) {
         LocaleManager.setLanguageMode(appContext, languageMode)
     }
 
+    private fun backupCreatedAtAsDatabaseDateTime(payload: JSONObject): String {
+        val createdAtUtc = payload.optLong("createdAtUtc", System.currentTimeMillis())
+        return DATABASE_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(createdAtUtc).atZone(ZoneOffset.UTC))
+    }
+
     private fun snapshotFile(): File = File(File(appContext.filesDir, BACKUP_DIRECTORY), BACKUP_FILE_NAME)
 
     companion object {
@@ -198,6 +213,7 @@ class DriveBackupSnapshotRepository(context: Context) {
         const val BACKUP_DIRECTORY = "drive_backup"
         const val BACKUP_FILE_NAME = "medstock_medications_backup.json"
         private const val DEFAULT_REMINDER_SOUND = "dzwonki"
+        private val DATABASE_DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     }
 }
 

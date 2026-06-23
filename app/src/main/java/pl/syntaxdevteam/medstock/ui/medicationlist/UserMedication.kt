@@ -10,4 +10,5 @@ data class UserMedication(
     val currentStock: Int,
     val dosage: String,
     val alertDays: Int,
+    val lastStockUpdateUtc: String = "",
 )
